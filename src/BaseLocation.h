@@ -6,6 +6,8 @@
 #include <map>
 #include <vector>
 
+using namespace CCUnit;
+
 class CCBot;
 
 class BaseLocation

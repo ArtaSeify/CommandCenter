@@ -5,6 +5,8 @@
 #include "BaseLocation.h"
 #include "Unit.h"
 
+using namespace CCUnit;
+
 class CCBot;
 class UnitInfoManager 
 {

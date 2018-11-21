@@ -2,6 +2,7 @@
 
 #include "Common.h"
 
+using namespace CCUnit;
 
 namespace SquadOrderTypes
 {

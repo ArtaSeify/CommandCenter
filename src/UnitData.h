@@ -5,6 +5,8 @@
 #include "Unit.h"
 #include "UnitType.h"
 
+using namespace CCUnit;
+
 struct UnitInfo
 {
     // we need to store all of this data because if the unit is not visible, we

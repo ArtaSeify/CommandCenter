@@ -5,6 +5,8 @@
 #include "BuildingManager.h"
 #include "BuildOrderQueue.h"
 
+using namespace CCUnit;
+
 class CCBot;
 
 class ProductionManager
@@ -14,15 +16,15 @@ class ProductionManager
     BuildingManager m_buildingManager;
     BuildOrderQueue m_queue;
 
-    Unit    getClosestUnitToPosition(const std::vector<Unit> & units, CCPosition closestTo);
-    bool    meetsReservedResources(const MetaType & type);
-    bool    canMakeNow(const Unit & producer, const MetaType & type);
-    bool    detectBuildOrderDeadlock();
-    void    setBuildOrder(const BuildOrder & buildOrder);
-    void    create(const Unit & producer, BuildOrderItem & item);
-    void    manageBuildOrderQueue();
-    int     getFreeMinerals();
-    int     getFreeGas();
+    CCUnit::Unit    getClosestUnitToPosition(const std::vector<CCUnit::Unit> & units, CCPosition closestTo);
+    bool            meetsReservedResources(const MetaType & type);
+    bool            canMakeNow(const CCUnit::Unit & producer, const MetaType & type);
+    bool            detectBuildOrderDeadlock();
+    void            setBuildOrder(const BuildOrder & buildOrder);
+    void            create(const CCUnit::Unit & producer, BuildOrderItem & item);
+    void            manageBuildOrderQueue();
+    int             getFreeMinerals();
+    int             getFreeGas();
 
     void    fixBuildOrderDeadlock();
 
@@ -32,8 +34,8 @@ public:
 
     void    onStart();
     void    onFrame();
-    void    onUnitDestroy(const Unit & unit);
+    void    onUnitDestroy(const CCUnit::Unit & unit);
     void    drawProductionInformation();
 
-    Unit getProducer(const MetaType & type, CCPosition closestTo = CCPosition(0, 0));
+    CCUnit::Unit getProducer(const MetaType & type, CCPosition closestTo = CCPosition(0, 0));
 };

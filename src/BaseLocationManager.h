@@ -2,6 +2,8 @@
 
 #include "BaseLocation.h"
 
+using namespace CCUnit;
+
 class CCBot;
 
 class BaseLocationManager

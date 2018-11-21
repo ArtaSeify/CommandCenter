@@ -3,8 +3,9 @@
 #include "Common.h"
 #include <map>
 
-class CCBot;
+using namespace CCUnit;
 
+class CCBot;
 
 class DistanceMap 
 {

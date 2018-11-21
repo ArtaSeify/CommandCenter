@@ -5,6 +5,8 @@
 #include "RangedManager.h"
 #include "SquadOrder.h"
 
+using namespace CCUnit;
+
 class CCBot;
 
 class Squad

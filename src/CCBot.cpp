@@ -1,6 +1,8 @@
 #include "CCBot.h"
 #include "Util.h"
 
+using namespace CCUnit;
+
 CCBot::CCBot()
     : m_map(*this)
     , m_bases(*this)

@@ -1,6 +1,8 @@
 #include "BuildOrderQueue.h"
 #include "CCBot.h"
 
+using namespace CCUnit;
+
 BuildOrderQueue::BuildOrderQueue(CCBot & bot)
     : m_bot(bot)
     , m_highestPriority(0)

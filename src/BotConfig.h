@@ -2,6 +2,8 @@
 
 #include "Common.h"
 
+using namespace CCUnit;
+
 class BotConfig
 {
 

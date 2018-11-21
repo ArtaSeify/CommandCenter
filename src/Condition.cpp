@@ -1,6 +1,8 @@
 #include "Condition.h"
 #include "CCBot.h"
 
+using namespace CCUnit;
+
 Condition::Condition()
     : m_bot     (nullptr)
     , m_lhs     (nullptr)

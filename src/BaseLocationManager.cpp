@@ -3,6 +3,8 @@
 
 #include "CCBot.h"
 
+using namespace CCUnit;
+
 BaseLocationManager::BaseLocationManager(CCBot & bot)
     : m_bot(bot)
 {

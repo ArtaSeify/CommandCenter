@@ -2,6 +2,8 @@
 
 #include "WorkerData.h"
 
+using namespace CCUnit;
+
 class Building;
 class CCBot;
 

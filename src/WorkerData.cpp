@@ -4,6 +4,8 @@
 #include <iostream>
 #include <sstream>
 
+using namespace CCUnit;
+
 WorkerData::WorkerData(CCBot & bot)
     : m_bot(bot)
 {

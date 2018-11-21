@@ -1,6 +1,8 @@
 #include "UnitData.h"
 #include "Util.h"
 
+using namespace CCUnit;
+
 UnitData::UnitData()
     : m_mineralsLost(0)
     , m_gasLost(0)

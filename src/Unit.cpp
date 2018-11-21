@@ -1,7 +1,9 @@
 #include "Unit.h"
 #include "CCBot.h"
 
-Unit::Unit()
+using namespace CCUnit;
+
+CCUnit::Unit::Unit()
     : m_bot(nullptr)
     , m_unit(nullptr)
     , m_unitID(0)
@@ -10,7 +12,7 @@ Unit::Unit()
 }
 
 #ifdef SC2API
-Unit::Unit(const sc2::Unit * unit, CCBot & bot)
+CCUnit::Unit::Unit(const sc2::Unit * unit, CCBot & bot)
     : m_bot(&bot)
     , m_unit(unit)
     , m_unitID(unit->tag)

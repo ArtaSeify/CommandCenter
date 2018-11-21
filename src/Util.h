@@ -3,8 +3,10 @@
 #include "Common.h"
 #include "UnitType.h"
 
+using namespace CCUnit;
+
 class CCBot;
-class Unit;
+class CCUnit::Unit;
 
 namespace Util
 {

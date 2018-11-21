@@ -3,6 +3,8 @@
 #include "Common.h"
 #include "MicroManager.h"
 
+using namespace CCUnit;
+
 class CCBot;
 
 class MeleeManager: public MicroManager

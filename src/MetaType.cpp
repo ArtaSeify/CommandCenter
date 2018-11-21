@@ -2,6 +2,8 @@
 #include "Util.h"
 #include "CCBot.h"
 
+using namespace CCUnit;
+
 MetaType::MetaType()
     : m_bot         (nullptr)
     , m_type        (MetaTypes::None)

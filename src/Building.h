@@ -4,6 +4,8 @@
 #include "Unit.h"
 #include "UnitType.h"
 
+using namespace CCUnit;
+
 namespace BuildingStatus
 {
     enum { Unassigned = 0, Assigned = 1, UnderConstruction = 2, Size = 3 };

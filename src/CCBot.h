@@ -14,6 +14,8 @@
 #include "MetaType.h"
 #include "Unit.h"
 
+using namespace CCUnit;
+
 #ifdef SC2API
 class CCBot : public sc2::Agent 
 #else

@@ -4,6 +4,8 @@
 #include "SquadOrder.h"
 #include "Unit.h"
 
+using namespace CCUnit;
+
 class CCBot;
 
 class MicroManager

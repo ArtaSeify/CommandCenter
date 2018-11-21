@@ -6,6 +6,8 @@
 #include "ScoutManager.h"
 #include "CombatCommander.h"
 
+using namespace CCUnit;
+
 class CCBot;
 
 class GameCommander

@@ -3,6 +3,8 @@
 #include "Common.h"
 #include "BuildingData.h"
 
+using namespace CCUnit;
+
 class CCBot;
 class BaseLocation;
 

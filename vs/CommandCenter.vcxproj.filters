@@ -16,6 +16,12 @@
     <Filter Include="micro">
       <UniqueIdentifier>{94f3296f-532c-4408-b055-c833389fe7f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="macro\Build Order">
+      <UniqueIdentifier>{8376c43e-19e6-4ece-9492-e93c367dc0dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="macro\BOSS">
+      <UniqueIdentifier>{c31792f2-19c8-4037-8d0f-0c6fc423b215}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\BotAssert.cpp">
@@ -52,12 +58,6 @@
       <Filter>macro</Filter>
     </ClCompile>
     <ClCompile Include="..\src\BuildingPlacer.cpp">
-      <Filter>macro</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\BuildOrder.cpp">
-      <Filter>macro</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\BuildOrderQueue.cpp">
       <Filter>macro</Filter>
     </ClCompile>
     <ClCompile Include="..\src\MetaType.cpp">
@@ -120,6 +120,15 @@
     <ClCompile Include="..\src\Condition.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\BuildOrder.cpp">
+      <Filter>macro\Build Order</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\BuildOrderQueue.cpp">
+      <Filter>macro\Build Order</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\BOSSManager.cpp">
+      <Filter>macro\BOSS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\BotAssert.h">
@@ -159,12 +168,6 @@
       <Filter>macro</Filter>
     </ClInclude>
     <ClInclude Include="..\src\BuildingPlacer.h">
-      <Filter>macro</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\BuildOrder.h">
-      <Filter>macro</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\BuildOrderQueue.h">
       <Filter>macro</Filter>
     </ClInclude>
     <ClInclude Include="..\src\MetaType.h">
@@ -228,6 +231,15 @@
     </ClInclude>
     <ClInclude Include="..\src\Condition.h">
       <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\BuildOrder.h">
+      <Filter>macro\Build Order</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\BuildOrderQueue.h">
+      <Filter>macro\Build Order</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\BOSSManager.h">
+      <Filter>macro\BOSS</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

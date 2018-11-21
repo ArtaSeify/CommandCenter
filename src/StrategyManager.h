@@ -4,6 +4,8 @@
 #include "BuildOrder.h"
 #include "Condition.h"
 
+using namespace CCUnit;
+
 typedef std::pair<UnitType, size_t> UnitPair;
 typedef std::vector<UnitPair>       UnitPairVector;
 

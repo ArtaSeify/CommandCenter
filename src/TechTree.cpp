@@ -4,6 +4,8 @@
 #include "MetaType.h"
 #include "Timer.hpp"
 
+using namespace CCUnit;
+
 TechTree::TechTree(CCBot & bot)
     : m_bot(bot)
 {

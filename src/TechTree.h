@@ -3,6 +3,8 @@
 #include "Common.h"
 #include "UnitType.h"
 
+using namespace CCUnit;
+
 class CCBot;
 class MetaType;
 

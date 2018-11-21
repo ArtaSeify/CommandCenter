@@ -3,6 +3,8 @@
 #include "Common.h"
 #include "Building.h"
 
+using namespace CCUnit;
+
 class BuildingData
 {
     std::vector<Building>                   _buildings;

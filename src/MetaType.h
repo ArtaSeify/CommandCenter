@@ -3,6 +3,8 @@
 #include "Common.h"
 #include "UnitType.h"
 
+using namespace CCUnit;
+
 namespace MetaTypes
 {
     enum { Unit, Upgrade, Buff, Tech, Ability, None };

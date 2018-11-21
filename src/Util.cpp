@@ -2,6 +2,8 @@
 #include "CCBot.h"
 #include <iostream>
 
+using namespace CCUnit;
+
 std::string Util::GetStringFromRace(const CCRace & race)
 {
 #ifdef SC2API

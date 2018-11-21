@@ -2,8 +2,10 @@
 
 #include "Common.h"
 #include "UnitType.h"
-
 class CCBot;
+
+namespace CCUnit
+{
 
 class Unit
 {
@@ -57,15 +59,17 @@ public:
     bool isTraining() const;
     bool isConstructing(const UnitType & type) const;
 
-    void stop           () const;
-    void attackUnit     (const Unit & target) const;
-    void attackMove     (const CCPosition & targetPosition) const;
-    void move           (const CCPosition & targetPosition) const;
-    void move           (const CCTilePosition & targetTilePosition) const;
-    void rightClick     (const Unit & target) const;
-    void repair         (const Unit & target) const;
-    void build          (const UnitType & buildingType, CCTilePosition pos) const;
-    void buildTarget    (const UnitType & buildingType, const Unit & target) const;
-    void train          (const UnitType & buildingType) const;
-    void morph          (const UnitType & type) const;
+    void stop() const;
+    void attackUnit(const Unit & target) const;
+    void attackMove(const CCPosition & targetPosition) const;
+    void move(const CCPosition & targetPosition) const;
+    void move(const CCTilePosition & targetTilePosition) const;
+    void rightClick(const Unit & target) const;
+    void repair(const Unit & target) const;
+    void build(const UnitType & buildingType, CCTilePosition pos) const;
+    void buildTarget(const UnitType & buildingType, const Unit & target) const;
+    void train(const UnitType & buildingType) const;
+    void morph(const UnitType & type) const;
 };
+
+}

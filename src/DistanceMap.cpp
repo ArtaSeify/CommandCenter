@@ -2,6 +2,8 @@
 #include "CCBot.h"
 #include "Util.h"
 
+using namespace CCUnit;
+
 const size_t LegalActions = 4;
 const int actionX[LegalActions] = {1, -1, 0, 0};
 const int actionY[LegalActions] = {0, 0, 1, -1};

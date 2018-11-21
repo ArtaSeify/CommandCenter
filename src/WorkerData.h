@@ -2,6 +2,8 @@
 #include "Common.h"
 #include "Unit.h"
 
+using namespace CCUnit;
+
 class CCBot;
 
 namespace WorkerJobs

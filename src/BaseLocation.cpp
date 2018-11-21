@@ -4,6 +4,8 @@
 #include <sstream>
 #include <iostream>
 
+using namespace CCUnit;
+
 const int NearBaseLocationTileDistance = 20;
 
 BaseLocation::BaseLocation(CCBot & bot, int baseID, const std::vector<Unit> & resources)

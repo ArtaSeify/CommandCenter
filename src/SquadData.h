@@ -3,6 +3,8 @@
 #include "Common.h"
 #include "Squad.h"
 
+using namespace CCUnit;
+
 class CCBot;
 
 class SquadData

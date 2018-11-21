@@ -2,6 +2,8 @@
 #include "CCBot.h"
 #include "Util.h"
 
+using namespace CCUnit;
+
 SquadData::SquadData(CCBot & bot)
     : m_bot(bot)
 {

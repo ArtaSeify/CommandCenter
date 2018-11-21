@@ -4,6 +4,8 @@
 #include "DistanceMap.h"
 #include "UnitType.h"
 
+using namespace CCUnit;
+
 class CCBot;
 
 class MapTools

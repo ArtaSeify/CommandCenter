@@ -4,6 +4,8 @@
 #include "Squad.h"
 #include "SquadData.h"
 
+using namespace CCUnit;
+
 class CCBot;
 
 class CombatCommander

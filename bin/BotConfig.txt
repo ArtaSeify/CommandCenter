@@ -16,8 +16,8 @@
     
     "SC2API" :
     {
-        "BotRace"                   : "Terran",
-        "EnemyDifficulty"           : 2,
+        "BotRace"                   : "Protoss",
+        "EnemyDifficulty"           : 1,
         "EnemyRace"                 : "Random",
         "MapFile"                   : "InterloperLE.SC2Map",
         "StepSize"                  : 1

@@ -3,6 +3,8 @@
 #include "Common.h"
 #include "BuildingPlacer.h"
 
+using namespace CCUnit;
+
 class CCBot;
 
 class BuildingManager
