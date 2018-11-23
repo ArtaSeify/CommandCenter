@@ -2,7 +2,7 @@
 #include "Util.h"
 #include "CCBot.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 RangedManager::RangedManager(CCBot & bot)
     : MicroManager(bot)

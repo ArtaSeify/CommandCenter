@@ -4,7 +4,7 @@
 #include "Util.h"
 #include "MetaType.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 Strategy::Strategy()
 {

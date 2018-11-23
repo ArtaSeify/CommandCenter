@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-using namespace CCUnit;
+using namespace CC;
 
 UnitInfoManager::UnitInfoManager(CCBot & bot)
     : m_bot(bot)

@@ -3,7 +3,7 @@
 #include "Util.h"
 #include "Building.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 WorkerManager::WorkerManager(CCBot & bot)
     : m_bot         (bot)
@@ -53,7 +53,7 @@ void WorkerManager::handleGasWorkers()
             int numAssigned = m_workerData.getNumAssignedWorkers(unit);
 
             // if it's less than we want it to be, fill 'er up
-            for (int i=0; i<(3-numAssigned); ++i)
+            for (int i=0; i<(m_bot.Config().WorkersPerRefinery-numAssigned); ++i)
             {
                 auto gasWorker = getGasWorker(unit);
                 if (gasWorker.isValid())
@@ -72,7 +72,6 @@ void WorkerManager::handleIdleWorkers()
     {
         if (!worker.isValid()) { continue; }
 
-        bool isIdle = worker.isIdle();
         if (worker.isIdle() && 
             (m_workerData.getWorkerJob(worker) != WorkerJobs::Build) && 
             (m_workerData.getWorkerJob(worker) != WorkerJobs::Move) &&
@@ -274,5 +273,9 @@ int WorkerManager::getNumMineralWorkers()
 int WorkerManager::getNumGasWorkers()
 {
     return m_workerData.getWorkerJobCount(WorkerJobs::Gas);
+}
 
+int WorkerManager::getNumBuilderWorkers()
+{
+    return m_workerData.getWorkerJobCount(WorkerJobs::Build);
 }

@@ -2,7 +2,7 @@
 #include "Util.h"
 #include "CCBot.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 MeleeManager::MeleeManager(CCBot & bot)
     : MicroManager(bot)

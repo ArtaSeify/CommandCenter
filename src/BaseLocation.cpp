@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iostream>
 
-using namespace CCUnit;
+using namespace CC;
 
 const int NearBaseLocationTileDistance = 20;
 

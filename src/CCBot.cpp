@@ -1,7 +1,7 @@
 #include "CCBot.h"
 #include "Util.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 CCBot::CCBot()
     : m_map(*this)
@@ -169,6 +169,11 @@ const TypeData & CCBot::Data(const CCUpgrade & type) const
 const TypeData & CCBot::Data(const MetaType & type) const
 {
     return m_techTree.getData(type);
+}
+
+const UnitType & CCBot::Data(const sc2::AbilityID & ability) const
+{
+    return m_techTree.getData(ability);
 }
 
 WorkerManager & CCBot::Workers()

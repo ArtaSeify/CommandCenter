@@ -2,11 +2,13 @@
 #include "JSONTools.h"
 #include <iostream>
 
+using namespace CC;
+
 BotConfig::BotConfig()
 {
     ConfigFileFound                     = true;
     ConfigFileParsed                    = true;
-    ConfigFileLocation                  = "BotConfig.txt";
+    ConfigFileLocation                  = "../bin/BotConfig.txt";
     BotName                             = "UAlbertaBot";
     Authors                             = "Dave Churchill";
     PrintInfoOnStart                    = false;

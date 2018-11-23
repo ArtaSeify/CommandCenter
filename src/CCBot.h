@@ -14,64 +14,66 @@
 #include "MetaType.h"
 #include "Unit.h"
 
-using namespace CCUnit;
-
-#ifdef SC2API
-class CCBot : public sc2::Agent 
-#else
-class CCBot
-#endif
+namespace CC
 {
-    MapTools                m_map;
-    BaseLocationManager     m_bases;
-    UnitInfoManager         m_unitInfo;
-    WorkerManager           m_workers;
-    StrategyManager         m_strategy;
-    BotConfig               m_config;
-    TechTree                m_techTree;
-    GameCommander           m_gameCommander;
-
-    std::vector<Unit>       m_allUnits;
-    std::vector<CCPosition> m_baseLocations;
-
-    void setUnits();
-
 #ifdef SC2API
-    void OnError(const std::vector<sc2::ClientError> & client_errors, 
-                 const std::vector<std::string> & protocol_errors = {}) override;
-#endif
-
-public:
-
-    CCBot();
-
-#ifdef SC2API
-    void OnGameStart() override;
-    void OnStep() override;
+    class CCBot : public sc2::Agent
 #else
-    void OnGameStart();
-    void OnStep();
+    class CCBot
+#endif
+    {
+        MapTools                m_map;
+        BaseLocationManager     m_bases;
+        UnitInfoManager         m_unitInfo;
+        WorkerManager           m_workers;
+        StrategyManager         m_strategy;
+        BotConfig               m_config;
+        TechTree                m_techTree;
+        GameCommander           m_gameCommander;
+
+        std::vector<Unit>       m_allUnits;
+        std::vector<CCPosition> m_baseLocations;
+
+        void setUnits();
+
+#ifdef SC2API
+        void OnError(const std::vector<sc2::ClientError> & client_errors,
+            const std::vector<std::string> & protocol_errors = {}) override;
 #endif
 
-          BotConfig & Config();
-          WorkerManager & Workers();
-    const BaseLocationManager & Bases() const;
-    const MapTools & Map() const;
-    const UnitInfoManager & UnitInfo() const;
-    const StrategyManager & Strategy() const;
-    const TypeData & Data(const UnitType & type) const;
-    const TypeData & Data(const CCUpgrade & type) const;
-    const TypeData & Data(const MetaType & type) const;
-    const TypeData & Data(const Unit & unit) const;
-    CCRace GetPlayerRace(int player) const;
-    CCPosition GetStartLocation() const;
+    public:
 
-    int GetCurrentFrame() const;
-    int GetMinerals() const;
-    int GetCurrentSupply() const;
-    int GetMaxSupply() const;
-    int GetGas() const;
-    Unit GetUnit(const CCUnitID & tag) const;
-    const std::vector<Unit> & GetUnits() const;
-    const std::vector<CCPosition> & GetStartLocations() const;
-};
+        CCBot();
+
+#ifdef SC2API
+        void OnGameStart() override;
+        void OnStep() override;
+#else
+        void OnGameStart();
+        void OnStep();
+#endif
+
+        BotConfig & Config();
+        WorkerManager & Workers();
+        const BaseLocationManager & Bases() const;
+        const MapTools & Map() const;
+        const UnitInfoManager & UnitInfo() const;
+        const StrategyManager & Strategy() const;
+        const TypeData & Data(const UnitType & type) const;
+        const TypeData & Data(const CCUpgrade & type) const;
+        const TypeData & Data(const MetaType & type) const;
+        const TypeData & Data(const Unit & unit) const;
+        const UnitType & Data(const sc2::AbilityID & ability) const;
+        CCRace GetPlayerRace(int player) const;
+        CCPosition GetStartLocation() const;
+
+        int GetCurrentFrame() const;
+        int GetMinerals() const;
+        int GetCurrentSupply() const;
+        int GetMaxSupply() const;
+        int GetGas() const;
+        Unit GetUnit(const CCUnitID & tag) const;
+        const std::vector<Unit> & GetUnits() const;
+        const std::vector<CCPosition> & GetStartLocations() const;
+    };
+}

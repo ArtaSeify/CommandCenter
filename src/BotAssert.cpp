@@ -1,41 +1,40 @@
 #include "BotAssert.h"
 #include <iostream>
 
-namespace Assert
+using namespace CC;
+
+std::string Assert::lastErrorMessage;
+
+const std::string Assert::CurrentDateTime()
 {
-    std::string lastErrorMessage;
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+    return ss.str();
+}
 
-    const std::string CurrentDateTime() 
+void Assert::ReportFailure(const char * condition, const char * file, int line, const char * msg, ...)
+{
+    char messageBuffer[1024] = "";
+    if (msg != nullptr)
     {
-        auto t = std::time(nullptr);
-        auto tm = *std::localtime(&t);
-        std::stringstream ss;
-        ss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
-        return ss.str();
+        va_list args;
+        va_start(args, msg);
+        vsnprintf(messageBuffer, 1024, msg, args);
+        va_end(args);
     }
 
-    void ReportFailure(const char * condition, const char * file, int line, const char * msg, ...)
-    {
-        char messageBuffer[1024] = "";
-        if (msg != nullptr)
-        {
-            va_list args;
-            va_start(args, msg);
-            vsnprintf(messageBuffer, 1024, msg, args);
-            va_end(args);
-        }
-
-        std::stringstream ss;
-        ss                                              << std::endl;
-        ss << "!Assert:   " << condition                << std::endl;
-        ss << "File:      " << file                     << std::endl;
-        ss << "Message:   " << messageBuffer            << std::endl;
-        ss << "Line:      " << line                     << std::endl;
-        ss << "Time:      " << CurrentDateTime()        << std::endl;
+    std::stringstream ss;
+    ss                                              << std::endl;
+    ss << "!Assert:   " << condition                << std::endl;
+    ss << "File:      " << file                     << std::endl;
+    ss << "Message:   " << messageBuffer            << std::endl;
+    ss << "Line:      " << line                     << std::endl;
+    ss << "Time:      " << CurrentDateTime()        << std::endl;
         
-        lastErrorMessage = messageBuffer;
+    lastErrorMessage = messageBuffer;
 
-        std::cerr << ss.str();
-    }
+    std::cerr << ss.str();
 }
 

@@ -1,5 +1,7 @@
 #include "BuildOrder.h"
 
+using namespace CC;
+
 BuildOrder::BuildOrder()
 {
 

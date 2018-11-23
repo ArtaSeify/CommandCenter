@@ -5,37 +5,38 @@
 #include "BuildingManager.h"
 #include "BuildOrderQueue.h"
 
-using namespace CCUnit;
-
-class CCBot;
-
-class ProductionManager
+namespace CC
 {
-    CCBot &       m_bot;
+    class CCBot;
 
-    BuildingManager m_buildingManager;
-    BuildOrderQueue m_queue;
+    class ProductionManager
+    {
+        CCBot &       m_bot;
 
-    CCUnit::Unit    getClosestUnitToPosition(const std::vector<CCUnit::Unit> & units, CCPosition closestTo);
-    bool            meetsReservedResources(const MetaType & type);
-    bool            canMakeNow(const CCUnit::Unit & producer, const MetaType & type);
-    bool            detectBuildOrderDeadlock();
-    void            setBuildOrder(const BuildOrder & buildOrder);
-    void            create(const CCUnit::Unit & producer, BuildOrderItem & item);
-    void            manageBuildOrderQueue();
-    int             getFreeMinerals();
-    int             getFreeGas();
+        BuildingManager m_buildingManager;
+        BuildOrderQueue m_queue;
 
-    void    fixBuildOrderDeadlock();
+        Unit    getClosestUnitToPosition(const std::vector<Unit> & units, CCPosition closestTo);
+        bool    meetsReservedResources(const MetaType & type);
+        bool    canMakeNow(const Unit & producer, const MetaType & type);
+        bool    detectBuildOrderDeadlock();
+        void    setBuildOrder(const BuildOrder & buildOrder);
+        void    create(const Unit & producer, BuildOrderItem & item);
+        void    manageBuildOrderQueue();
+        int     getFreeMinerals();
+        int     getFreeGas();
 
-public:
+        void    fixBuildOrderDeadlock();
 
-    ProductionManager(CCBot & bot);
+    public:
 
-    void    onStart();
-    void    onFrame();
-    void    onUnitDestroy(const CCUnit::Unit & unit);
-    void    drawProductionInformation();
+        ProductionManager(CCBot & bot);
 
-    CCUnit::Unit getProducer(const MetaType & type, CCPosition closestTo = CCPosition(0, 0));
-};
+        void    onStart();
+        void    onFrame();
+        void    onUnitDestroy(const Unit & unit);
+        void    drawProductionInformation();
+
+        Unit getProducer(const MetaType & type, CCPosition closestTo = CCPosition(0, 0));
+    };
+}

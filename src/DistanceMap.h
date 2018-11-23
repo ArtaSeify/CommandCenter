@@ -3,33 +3,34 @@
 #include "Common.h"
 #include <map>
 
-using namespace CCUnit;
-
-class CCBot;
-
-class DistanceMap 
+namespace CC
 {
-    int m_width;
-    int m_height;
-    CCTilePosition m_startTile;
+    class CCBot;
 
-    // 2D matrix storing distances from the start tile
-    std::vector<std::vector<int>> m_dist;
+    class DistanceMap
+    {
+        int m_width;
+        int m_height;
+        CCTilePosition m_startTile;
 
-    std::vector<CCTilePosition> m_sortedTiles;
-    
-public:
-    
-    DistanceMap();
-    void computeDistanceMap(CCBot & m_bot, const CCTilePosition & startTile);
+        // 2D matrix storing distances from the start tile
+        std::vector<std::vector<int>> m_dist;
 
-    int getDistance(int tileX, int tileY) const;
-    int getDistance(const CCTilePosition & pos) const;
-    int getDistance(const CCPosition & pos) const;
+        std::vector<CCTilePosition> m_sortedTiles;
 
-    // given a position, get the position we should move to to minimize distance
-    const std::vector<CCTilePosition> & getSortedTiles() const;
-    const CCTilePosition & getStartTile() const;
+    public:
 
-    void draw(CCBot & bot) const;
-};
+        DistanceMap();
+        void computeDistanceMap(CCBot & m_bot, const CCTilePosition & startTile);
+
+        int getDistance(int tileX, int tileY) const;
+        int getDistance(const CCTilePosition & pos) const;
+        int getDistance(const CCPosition & pos) const;
+
+        // given a position, get the position we should move to to minimize distance
+        const std::vector<CCTilePosition> & getSortedTiles() const;
+        const CCTilePosition & getStartTile() const;
+
+        void draw(CCBot & bot) const;
+    };
+}

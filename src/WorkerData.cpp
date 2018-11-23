@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-using namespace CCUnit;
+using namespace CC;
 
 WorkerData::WorkerData(CCBot & bot)
     : m_bot(bot)

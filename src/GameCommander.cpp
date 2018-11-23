@@ -2,6 +2,8 @@
 #include "CCBot.h"
 #include "Util.h"
 
+using namespace CC;
+
 GameCommander::GameCommander(CCBot & bot)
     : m_bot                 (bot)
     , m_productionManager   (bot)

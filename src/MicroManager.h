@@ -4,30 +4,31 @@
 #include "SquadOrder.h"
 #include "Unit.h"
 
-using namespace CCUnit;
-
-class CCBot;
-
-class MicroManager
+namespace CC
 {
-    std::vector<Unit> m_units;
+    class CCBot;
 
-protected:
+    class MicroManager
+    {
+        std::vector<Unit> m_units;
 
-    CCBot & m_bot;
-    SquadOrder order;
+    protected:
 
-    virtual void executeMicro(const std::vector<Unit> & targets) = 0;
-    void trainSubUnits(const Unit & unit) const;
+        CCBot & m_bot;
+        SquadOrder order;
 
-public:
+        virtual void executeMicro(const std::vector<Unit> & targets) = 0;
+        void trainSubUnits(const Unit & unit) const;
 
-    MicroManager(CCBot & bot);
+    public:
 
-    const std::vector<Unit> & getUnits() const;
+        MicroManager(CCBot & bot);
 
-    void setUnits(const std::vector<Unit> & u);
-    void execute(const SquadOrder & order);
-    void regroup(const CCPosition & regroupPosition) const;
+        const std::vector<Unit> & getUnits() const;
 
-};
+        void setUnits(const std::vector<Unit> & u);
+        void execute(const SquadOrder & order);
+        void regroup(const CCPosition & regroupPosition) const;
+
+    };
+}

@@ -4,7 +4,7 @@
 #include "MetaType.h"
 #include "Timer.hpp"
 
-using namespace CCUnit;
+using namespace CC;
 
 TechTree::TechTree(CCBot & bot)
     : m_bot(bot)
@@ -349,6 +349,17 @@ const TypeData & TechTree::getData(const MetaType & type) const
     BOT_ASSERT(false, "Can't getData this type: %s", type.getName().c_str());
 
     return m_unitTypeData.begin()->second;
+}
+
+const UnitType & TechTree::getData(const sc2::AbilityID & ability) const
+{
+    for (auto & test : m_unitTypeData)
+    {
+        if (test.second.buildAbility == ability)
+        {
+            return test.first;
+        }
+    }
 }
 
 void TechTree::outputJSON(const std::string & filename) const

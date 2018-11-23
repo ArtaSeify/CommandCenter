@@ -3,37 +3,38 @@
 #include "Common.h"
 #include "Squad.h"
 
-using namespace CCUnit;
-
-class CCBot;
-
-class SquadData
+namespace CC
 {
-    CCBot & m_bot;
-    std::map<std::string, Squad> m_squads;
+    class CCBot;
 
-    void    updateAllSquads();
-    void    verifySquadUniqueMembership();
+    class SquadData
+    {
+        CCBot & m_bot;
+        std::map<std::string, Squad> m_squads;
 
-public:
+        void    updateAllSquads();
+        void    verifySquadUniqueMembership();
 
-    SquadData(CCBot & bot);
+    public:
 
-    void            onFrame();
-    void            clearSquadData();
+        SquadData(CCBot & bot);
 
-    bool            canAssignUnitToSquad(const Unit & unit, const Squad & squad) const;
-    void            assignUnitToSquad(const Unit & unit, Squad & squad);
-    void            addSquad(const std::string & squadName, const Squad & squad);
-    void            removeSquad(const std::string & squadName);
-    void            drawSquadInformation();
+        void            onFrame();
+        void            clearSquadData();
+
+        bool            canAssignUnitToSquad(const Unit & unit, const Squad & squad) const;
+        void            assignUnitToSquad(const Unit & unit, Squad & squad);
+        void            addSquad(const std::string & squadName, const Squad & squad);
+        void            removeSquad(const std::string & squadName);
+        void            drawSquadInformation();
 
 
-    bool            squadExists(const std::string & squadName);
-    bool            unitIsInSquad(const Unit & unit) const;
-    const Squad *   getUnitSquad(const Unit & unit) const;
-    Squad *         getUnitSquad(const Unit & unit);
+        bool            squadExists(const std::string & squadName);
+        bool            unitIsInSquad(const Unit & unit) const;
+        const Squad *   getUnitSquad(const Unit & unit) const;
+        Squad *         getUnitSquad(const Unit & unit);
 
-    Squad &         getSquad(const std::string & squadName);
-    const std::map<std::string, Squad> & getSquads() const;
-};
+        Squad &         getSquad(const std::string & squadName);
+        const std::map<std::string, Squad> & getSquads() const;
+    };
+}

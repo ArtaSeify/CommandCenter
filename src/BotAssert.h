@@ -25,14 +25,16 @@
             } \
         } while(0)
 #else
-    #define BOT_ASSERT(cond, msg, ...) 
+#define BOT_ASSERT(cond, msg, ...) 
 #endif
-
-namespace Assert
+namespace CC
 {
-    extern std::string lastErrorMessage;
+    namespace Assert
+    {
+        extern std::string lastErrorMessage;
 
-    const std::string CurrentDateTime();
+        const std::string CurrentDateTime();
 
-    void ReportFailure(const char * condition, const char * file, int line, const char * msg, ...);
+        void ReportFailure(const char * condition, const char * file, int line, const char * msg, ...);
+    }
 }

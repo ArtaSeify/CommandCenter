@@ -3,20 +3,21 @@
 #include "Common.h"
 #include "Building.h"
 
-using namespace CCUnit;
-
-class BuildingData
+namespace CC
 {
-    std::vector<Building>                   _buildings;
+    class BuildingData
+    {
+        std::vector<Building>                   _buildings;
 
-public:
+    public:
 
-    BuildingData();
+        BuildingData();
 
-    std::vector<Building> & getBuildings();
+        std::vector<Building> & getBuildings();
 
-    void addBuilding(const Building & b);
-    void removeBuilding(const Building & b);
-    void removeBuildings(const std::vector<Building> & buildings);
-    bool isBeingBuilt(UnitType type);
-};
+        void addBuilding(const Building & b);
+        void removeBuilding(const Building & b);
+        void removeBuildings(const std::vector<Building> & buildings);
+        bool isBeingBuilt(UnitType type);
+    };
+}

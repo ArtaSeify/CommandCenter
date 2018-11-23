@@ -3,7 +3,7 @@
 #include "CCBot.h"
 #include "Util.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 BuildingManager::BuildingManager(CCBot & bot)
     : m_bot(bot)

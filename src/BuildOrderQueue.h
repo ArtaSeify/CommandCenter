@@ -3,49 +3,52 @@
 #include "Common.h"
 #include "MetaType.h"
 
-class CCBot;
-
-struct BuildOrderItem
+namespace CC
 {
-    MetaType       type;		// the thing we want to 'build'
-    int             priority;	// the priority at which to place it in the queue
-    bool            blocking;	// whether or not we block further items
+    class CCBot;
 
-    BuildOrderItem(const MetaType & t, int p, bool b);
-    bool operator<(const BuildOrderItem & x) const;
-};
+    struct BuildOrderItem
+    {
+        MetaType       type;		// the thing we want to 'build'
+        int             priority;	// the priority at which to place it in the queue
+        bool            blocking;	// whether or not we block further items
 
-class BuildOrderQueue
-{
-    CCBot & m_bot;
-    std::deque<BuildOrderItem> m_queue;
+        BuildOrderItem(const MetaType & t, int p, bool b);
+        bool operator<(const BuildOrderItem & x) const;
+    };
 
-    int m_lowestPriority;
-    int m_highestPriority;
-    int m_defaultPrioritySpacing;
-    int m_numSkippedItems;
+    class BuildOrderQueue
+    {
+        CCBot & m_bot;
+        std::deque<BuildOrderItem> m_queue;
 
-public:
+        int m_lowestPriority;
+        int m_highestPriority;
+        int m_defaultPrioritySpacing;
+        int m_numSkippedItems;
 
-    BuildOrderQueue(CCBot & bot);
+    public:
 
-    void clearAll();											// clears the entire build order queue
-    void skipItem();											// increments skippedItems
-    void queueAsHighestPriority(const MetaType & type, bool blocking);		// queues something at the highest priority
-    void queueAsLowestPriority(const MetaType & type, bool blocking);		// queues something at the lowest priority
-    void queueItem(const BuildOrderItem & b);			// queues something with a given priority
-    void removeHighestPriorityItem();								// removes the highest priority item
-    void removeCurrentHighestPriorityItem();
+        BuildOrderQueue(CCBot & bot);
 
-    size_t size();													// returns the size of the queue
+        void clearAll();											// clears the entire build order queue
+        void skipItem();											// increments skippedItems
+        void queueAsHighestPriority(const MetaType & type, bool blocking);		// queues something at the highest priority
+        void queueAsLowestPriority(const MetaType & type, bool blocking);		// queues something at the lowest priority
+        void queueItem(const BuildOrderItem & b);			// queues something with a given priority
+        void removeHighestPriorityItem();								// removes the highest priority item
+        void removeCurrentHighestPriorityItem();
 
-    bool isEmpty();
-    BuildOrderItem & getHighestPriorityItem();	// returns the highest priority item
-    BuildOrderItem & getNextHighestPriorityItem();	// returns the highest priority item
+        size_t size();													// returns the size of the queue
 
-    bool canSkipItem();
-    std::string getQueueInformation() const;
+        bool isEmpty();
+        BuildOrderItem & getHighestPriorityItem();	// returns the highest priority item
+        BuildOrderItem & getNextHighestPriorityItem();	// returns the highest priority item
 
-    // overload the bracket operator for ease of use
-    BuildOrderItem operator [] (int i);
-};
+        bool canSkipItem();
+        std::string getQueueInformation() const;
+
+        // overload the bracket operator for ease of use
+        BuildOrderItem operator [] (int i);
+    };
+}

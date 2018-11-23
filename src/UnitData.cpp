@@ -1,7 +1,7 @@
 #include "UnitData.h"
 #include "Util.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 UnitData::UnitData()
     : m_mineralsLost(0)

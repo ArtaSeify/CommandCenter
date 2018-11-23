@@ -5,58 +5,59 @@
 #include "RangedManager.h"
 #include "SquadOrder.h"
 
-using namespace CCUnit;
-
-class CCBot;
-
-class Squad
+namespace CC
 {
-    CCBot &             m_bot;
+    class CCBot;
 
-    std::string         m_name;
-    std::set<Unit> m_units;
-    std::string         m_regroupStatus;
-    int                 m_lastRetreatSwitch;
-    bool                m_lastRetreatSwitchVal;
-    size_t              m_priority;
+    class Squad
+    {
+        CCBot &             m_bot;
 
-    SquadOrder          m_order;
-    MeleeManager        m_meleeManager;
-    RangedManager       m_rangedManager;
+        std::string         m_name;
+        std::set<Unit> m_units;
+        std::string         m_regroupStatus;
+        int                 m_lastRetreatSwitch;
+        bool                m_lastRetreatSwitchVal;
+        size_t              m_priority;
 
-    std::map<Unit, bool> m_nearEnemy;
+        SquadOrder          m_order;
+        MeleeManager        m_meleeManager;
+        RangedManager       m_rangedManager;
 
-    Unit unitClosestToEnemy() const;
+        std::map<Unit, bool> m_nearEnemy;
 
-    void updateUnits();
-    void addUnitsToMicroManagers();
-    void setNearEnemyUnits();
-    void setAllUnits();
+        Unit unitClosestToEnemy() const;
 
-    bool isUnitNearEnemy(const Unit & unit) const;
-    bool needsToRegroup() const;
-    int  squadUnitsNear(const CCPosition & pos) const;
+        void updateUnits();
+        void addUnitsToMicroManagers();
+        void setNearEnemyUnits();
+        void setAllUnits();
 
-public:
+        bool isUnitNearEnemy(const Unit & unit) const;
+        bool needsToRegroup() const;
+        int  squadUnitsNear(const CCPosition & pos) const;
 
-    Squad(const std::string & name, const SquadOrder & order, size_t priority, CCBot & bot);
-    Squad(CCBot & bot);
+    public:
 
-    void onFrame();
-    void setSquadOrder(const SquadOrder & so);
-    void addUnit(const Unit & unit);
-    void removeUnit(const Unit & unit);
-    void clear();
+        Squad(const std::string & name, const SquadOrder & order, size_t priority, CCBot & bot);
+        Squad(CCBot & bot);
 
-    bool containsUnit(const Unit & unit) const;
-    bool isEmpty() const;
-    size_t getPriority() const;
-    void setPriority(const size_t & priority);
-    const std::string & getName() const;
+        void onFrame();
+        void setSquadOrder(const SquadOrder & so);
+        void addUnit(const Unit & unit);
+        void removeUnit(const Unit & unit);
+        void clear();
 
-    CCPosition calcCenter() const;
-    CCPosition calcRegroupPosition() const;
+        bool containsUnit(const Unit & unit) const;
+        bool isEmpty() const;
+        size_t getPriority() const;
+        void setPriority(const size_t & priority);
+        const std::string & getName() const;
 
-    const std::set<Unit> & getUnits() const;
-    const SquadOrder & getSquadOrder() const;
-};
+        CCPosition calcCenter() const;
+        CCPosition calcRegroupPosition() const;
+
+        const std::set<Unit> & getUnits() const;
+        const SquadOrder & getSquadOrder() const;
+    };
+}

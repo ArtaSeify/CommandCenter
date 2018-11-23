@@ -1,7 +1,7 @@
 #include "BuildOrderQueue.h"
 #include "CCBot.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 BuildOrderQueue::BuildOrderQueue(CCBot & bot)
     : m_bot(bot)

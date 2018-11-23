@@ -9,6 +9,10 @@ cmake_install.cmake
 vs/.vs/
 vs/commandcenter
 
+vs/Debug
+vs/Release
+vs/x64
+
 bin/CommandCenter
 bin/*.exe
 bin/*.ilk

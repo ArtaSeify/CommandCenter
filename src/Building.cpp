@@ -1,6 +1,6 @@
 #include "Building.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 Building::Building() 
     : desiredPosition   (0,0)

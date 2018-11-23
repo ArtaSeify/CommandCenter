@@ -1,7 +1,7 @@
 #include "UnitType.h"
 #include "CCBot.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 UnitType::UnitType()
     : m_bot(nullptr)

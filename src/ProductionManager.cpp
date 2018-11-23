@@ -2,7 +2,7 @@
 #include "Util.h"
 #include "CCBot.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 ProductionManager::ProductionManager(CCBot & bot)
     : m_bot             (bot)

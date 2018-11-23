@@ -1,6 +1,6 @@
 #include "BuildingData.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 BuildingData::BuildingData()
 {

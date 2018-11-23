@@ -8,6 +8,8 @@
 #include "sc2utils/sc2_manage_process.h"
 #include "sc2api/sc2_api.h"
 
+using namespace CC;
+
 int main(int argc, char* argv[]) 
 {
     sc2::Coordinator coordinator;
@@ -16,8 +18,11 @@ int main(int argc, char* argv[])
         std::cout << "Unable to find or parse settings." << std::endl;
         return 1;
     }
+
+    // Add the custom bot, it will control the players.
+    CCBot bot;
     
-    std::string config = JSONTools::ReadFile("BotConfig.txt");
+    std::string config = JSONTools::ReadFile(bot.Config().ConfigFileLocation);
     if (config.length() == 0)
     {
         std::cerr << "Config file could not be found, and is required for starting the bot\n";
@@ -25,7 +30,7 @@ int main(int argc, char* argv[])
         exit(-1);
     }
 
-    std::ifstream file("BotConfig.txt");
+    std::ifstream file(bot.Config().ConfigFileLocation);
     json j;
     file >> j;
 
@@ -57,10 +62,6 @@ int main(int argc, char* argv[])
         std::cerr << "Please read the instructions and try again\n";
         exit(-1);
     }
-
-    // Add the custom bot, it will control the players.
-    CCBot bot;
-
     
     // WARNING: Bot logic has not been thorougly tested on step sizes > 1
     //          Setting this = N means the bot's onFrame gets called once every N frames

@@ -2,7 +2,7 @@
 #include "CCBot.h"
 #include <iostream>
 
-using namespace CCUnit;
+using namespace CC;
 
 std::string Util::GetStringFromRace(const CCRace & race)
 {

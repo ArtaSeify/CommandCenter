@@ -4,7 +4,7 @@
 #include "Building.h"
 #include "Util.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 BuildingPlacer::BuildingPlacer(CCBot & bot)
     : m_bot(bot)

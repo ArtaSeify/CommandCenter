@@ -3,19 +3,20 @@
 #include "Common.h"
 #include "MicroManager.h"
 
-using namespace CCUnit;
-
-class CCBot;
-
-class MeleeManager: public MicroManager
+namespace CC
 {
+    class CCBot;
 
-public:
+    class MeleeManager : public MicroManager
+    {
 
-    MeleeManager(CCBot & bot);
-    void    executeMicro(const std::vector<Unit> & targets);
-    void    assignTargets(const std::vector<Unit> & targets);
-    int     getAttackPriority(Unit attacker, const Unit & unit);
-    Unit    getTarget(Unit meleeUnit, const std::vector<Unit> & targets);
-    bool    meleeUnitShouldRetreat(Unit meleeUnit, const std::vector<Unit> & targets);
-};
+    public:
+
+        MeleeManager(CCBot & bot);
+        void    executeMicro(const std::vector<Unit> & targets);
+        void    assignTargets(const std::vector<Unit> & targets);
+        int     getAttackPriority(Unit attacker, const Unit & unit);
+        Unit    getTarget(Unit meleeUnit, const std::vector<Unit> & targets);
+        bool    meleeUnitShouldRetreat(Unit meleeUnit, const std::vector<Unit> & targets);
+    };
+}

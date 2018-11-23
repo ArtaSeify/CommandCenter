@@ -14,7 +14,7 @@
 using json = nlohmann::json;
 
 #ifdef SC2API
-    #include "sc2api/sc2_api.h"
+#include "sc2api/sc2_api.h"
     typedef sc2::Point2D        CCPosition;
     typedef sc2::Point2DI       CCTilePosition;
     typedef sc2::Color          CCColor;
@@ -23,9 +23,9 @@ using json = nlohmann::json;
     typedef sc2::Race           CCRace;
     typedef float               CCHealth;
     typedef float               CCPositionType;
-    
+
 #else
-    #include "BWAPI.h"
+#include "BWAPI.h"
     typedef BWAPI::Position     CCPosition;
     typedef BWAPI::TilePosition CCTilePosition;
     typedef BWAPI::Color        CCColor;
@@ -35,9 +35,9 @@ using json = nlohmann::json;
     typedef int                 CCHealth;
     typedef int                 CCPositionType;
 #endif
-    
+
 typedef size_t CCPlayer;
 namespace Players
 {
-    enum {Self = 0u, Enemy = 1u, Neutral = 2u, Size = 3u, None = 4u};
+    enum { Self = 0u, Enemy = 1u, Neutral = 2u, Size = 3u, None = 4u };
 }

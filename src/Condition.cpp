@@ -1,7 +1,7 @@
 #include "Condition.h"
 #include "CCBot.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 Condition::Condition()
     : m_bot     (nullptr)

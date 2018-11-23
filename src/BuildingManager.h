@@ -3,47 +3,48 @@
 #include "Common.h"
 #include "BuildingPlacer.h"
 
-using namespace CCUnit;
-
-class CCBot;
-
-class BuildingManager
+namespace CC
 {
-    CCBot &   m_bot;
+    class CCBot;
 
-    BuildingPlacer  m_buildingPlacer;
-    std::vector<Building> m_buildings;
+    class BuildingManager
+    {
+        CCBot &   m_bot;
 
-    bool            m_debugMode;
-    int             m_reservedMinerals;				// minerals reserved for planned buildings
-    int             m_reservedGas;					// gas reserved for planned buildings
+        BuildingPlacer  m_buildingPlacer;
+        std::vector<Building> m_buildings;
 
-    bool            isBuildingPositionExplored(const Building & b) const;
-    void            removeBuildings(const std::vector<Building> & toRemove);
+        bool            m_debugMode;
+        int             m_reservedMinerals;				// minerals reserved for planned buildings
+        int             m_reservedGas;					// gas reserved for planned buildings
 
-    void            validateWorkersAndBuildings();		    // STEP 1
-    void            assignWorkersToUnassignedBuildings();	// STEP 2
-    void            constructAssignedBuildings();			// STEP 3
-    void            checkForStartedConstruction();			// STEP 4
-    void            checkForDeadTerranBuilders();			// STEP 5
-    void            checkForCompletedBuildings();			// STEP 6
+        bool            isBuildingPositionExplored(const Building & b) const;
+        void            removeBuildings(const std::vector<Building> & toRemove);
 
-    char            getBuildingWorkerCode(const Building & b) const;
+        void            validateWorkersAndBuildings();		    // STEP 1
+        void            assignWorkersToUnassignedBuildings();	// STEP 2
+        void            constructAssignedBuildings();			// STEP 3
+        void            checkForStartedConstruction();			// STEP 4
+        void            checkForDeadTerranBuilders();			// STEP 5
+        void            checkForCompletedBuildings();			// STEP 6
 
-public:
+        char            getBuildingWorkerCode(const Building & b) const;
 
-    BuildingManager(CCBot & bot);
+    public:
 
-    void                onStart();
-    void                onFrame();
-    void                addBuildingTask(const UnitType & type, const CCTilePosition & desiredPosition);
-    void                drawBuildingInformation();
-    CCTilePosition      getBuildingLocation(const Building & b);
+        BuildingManager(CCBot & bot);
 
-    int                 getReservedMinerals();
-    int                 getReservedGas();
+        void                onStart();
+        void                onFrame();
+        void                addBuildingTask(const UnitType & type, const CCTilePosition & desiredPosition);
+        void                drawBuildingInformation();
+        CCTilePosition      getBuildingLocation(const Building & b);
 
-    bool                isBeingBuilt(UnitType type);
+        int                 getReservedMinerals();
+        int                 getReservedGas();
 
-    std::vector<UnitType> buildingsQueued() const;
-};
+        bool                isBeingBuilt(UnitType type);
+
+        std::vector<UnitType> buildingsQueued() const;
+    };
+}

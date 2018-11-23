@@ -4,41 +4,41 @@
 #include "Squad.h"
 #include "SquadData.h"
 
-using namespace CCUnit;
-
-class CCBot;
-
-class CombatCommander
+namespace CC
 {
-    CCBot &         m_bot;
+    class CCBot;
 
-    SquadData       m_squadData;
-    std::vector<Unit>  m_combatUnits;
-    bool            m_initialized;
-    bool            m_attackStarted;
+    class CombatCommander
+    {
+        CCBot &         m_bot;
 
-    void            updateScoutDefenseSquad();
-    void            updateDefenseSquads();
-    void            updateAttackSquads();
-    void            updateIdleSquad();
-    bool            isSquadUpdateFrame();
+        SquadData       m_squadData;
+        std::vector<Unit>  m_combatUnits;
+        bool            m_initialized;
+        bool            m_attackStarted;
 
-    Unit            findClosestDefender(const Squad & defenseSquad, const CCPosition & pos);
-    Unit            findClosestWorkerTo(std::vector<Unit> & unitsToAssign, const CCPosition & target);
+        void            updateScoutDefenseSquad();
+        void            updateDefenseSquads();
+        void            updateAttackSquads();
+        void            updateIdleSquad();
+        bool            isSquadUpdateFrame();
 
-    CCPosition      getMainAttackLocation();
+        Unit            findClosestDefender(const Squad & defenseSquad, const CCPosition & pos);
+        Unit            findClosestWorkerTo(std::vector<Unit> & unitsToAssign, const CCPosition & target);
 
-    void            updateDefenseSquadUnits(Squad & defenseSquad, const size_t & flyingDefendersNeeded, const size_t & groundDefendersNeeded);
-    bool            shouldWeStartAttacking();
+        CCPosition      getMainAttackLocation();
 
-public:
+        void            updateDefenseSquadUnits(Squad & defenseSquad, const size_t & flyingDefendersNeeded, const size_t & groundDefendersNeeded);
+        bool            shouldWeStartAttacking();
 
-    CombatCommander(CCBot & bot);
+    public:
+
+        CombatCommander(CCBot & bot);
 
 
-    void onStart();
-    void onFrame(const std::vector<Unit> & combatUnits);
+        void onStart();
+        void onFrame(const std::vector<Unit> & combatUnits);
 
-    void drawSquadInformation();
-};
-
+        void drawSquadInformation();
+    };
+}

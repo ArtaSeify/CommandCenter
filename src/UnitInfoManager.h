@@ -5,40 +5,41 @@
 #include "BaseLocation.h"
 #include "Unit.h"
 
-using namespace CCUnit;
-
-class CCBot;
-class UnitInfoManager 
+namespace CC
 {
-    CCBot &           m_bot;
+    class CCBot;
+    class UnitInfoManager
+    {
+        CCBot &           m_bot;
 
-    std::map<CCPlayer, UnitData> m_unitData; 
-    std::map<CCPlayer, std::vector<Unit>> m_units;
+        std::map<CCPlayer, UnitData> m_unitData;
+        std::map<CCPlayer, std::vector<Unit>> m_units;
 
-    void                    updateUnit(const Unit & unit);
-    void                    updateUnitInfo();
-    bool                    isValidUnit(const Unit & unit);
-    
-    const UnitData &        getUnitData(CCPlayer player) const;
+        void                    updateUnit(const Unit & unit);
+        void                    updateUnitInfo();
+        bool                    isValidUnit(const Unit & unit);
 
-    void drawSelectedUnitDebugInfo();
+        const UnitData &        getUnitData(CCPlayer player) const;
 
-public:
+        void drawSelectedUnitDebugInfo();
 
-    UnitInfoManager(CCBot & bot);
+    public:
 
-    void                    onFrame();
-    void                    onStart();
+        UnitInfoManager(CCBot & bot);
 
-    const std::vector<Unit> & getUnits(CCPlayer player) const;
+        void                    onFrame();
+        void                    onStart();
 
-    size_t                  getUnitTypeCount(CCPlayer player, UnitType type, bool completed = true) const;
+        const std::vector<Unit> & getUnits(CCPlayer player) const;
 
-    void                    getNearbyForce(std::vector<UnitInfo> & unitInfo, CCPosition p, int player, float radius) const;
+        size_t                  getUnitTypeCount(CCPlayer player, UnitType type, bool completed = true) const;
 
-    const std::map<Unit, UnitInfo> & getUnitInfoMap(CCPlayer player) const;
+        void                    getNearbyForce(std::vector<UnitInfo> & unitInfo, CCPosition p, int player, float radius) const;
 
-    //bool                  enemyHasCloakedUnits() const;
-    void                    drawUnitInformation(float x, float y) const;
+        const std::map<Unit, UnitInfo> & getUnitInfoMap(CCPlayer player) const;
 
-};
+        //bool                  enemyHasCloakedUnits() const;
+        void                    drawUnitInformation(float x, float y) const;
+
+    };
+}

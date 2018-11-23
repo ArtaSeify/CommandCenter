@@ -2,7 +2,7 @@
 #include "CCBot.h"
 #include "Util.h"
 
-using namespace CCUnit;
+using namespace CC;
 
 ScoutManager::ScoutManager(CCBot & bot)
     : m_bot             (bot)

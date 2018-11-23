@@ -6,45 +6,46 @@
 #include "ScoutManager.h"
 #include "CombatCommander.h"
 
-using namespace CCUnit;
-
-class CCBot;
-
-class GameCommander
+namespace CC
 {
-    CCBot &                 m_bot;
-    Timer                   m_timer;
+    class CCBot;
 
-    ProductionManager       m_productionManager;
-    ScoutManager            m_scoutManager;
-    CombatCommander         m_combatCommander;
+    class GameCommander
+    {
+        CCBot &                 m_bot;
+        Timer                   m_timer;
 
-    std::vector<Unit>    m_validUnits;
-    std::vector<Unit>    m_combatUnits;
-    std::vector<Unit>    m_scoutUnits;
+        ProductionManager       m_productionManager;
+        ScoutManager            m_scoutManager;
+        CombatCommander         m_combatCommander;
 
-    bool                    m_initialScoutSet;
+        std::vector<Unit>    m_validUnits;
+        std::vector<Unit>    m_combatUnits;
+        std::vector<Unit>    m_scoutUnits;
 
-    void assignUnit(const Unit & unit, std::vector<Unit> & units);
-    bool isAssigned(const Unit & unit) const;
+        bool                    m_initialScoutSet;
 
-public:
+        void assignUnit(const Unit & unit, std::vector<Unit> & units);
+        bool isAssigned(const Unit & unit) const;
 
-    GameCommander(CCBot & bot);
+    public:
 
-    void onStart();
-    void onFrame();
+        GameCommander(CCBot & bot);
 
-    void handleUnitAssignments();
-    void setValidUnits();
-    void setScoutUnits();
-    void setCombatUnits();
+        void onStart();
+        void onFrame();
 
-    void drawDebugInterface();
-    void drawGameInformation(int x, int y);
+        void handleUnitAssignments();
+        void setValidUnits();
+        void setScoutUnits();
+        void setCombatUnits();
 
-    bool shouldSendInitialScout();
+        void drawDebugInterface();
+        void drawGameInformation(int x, int y);
 
-    void onUnitCreate(const Unit & unit);
-    void onUnitDestroy(const Unit & unit);
-};
+        bool shouldSendInitialScout();
+
+        void onUnitCreate(const Unit & unit);
+        void onUnitDestroy(const Unit & unit);
+    };
+}

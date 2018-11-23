@@ -1,5 +1,7 @@
 #include "SquadOrder.h"
 
+using namespace CC;
+
 SquadOrder::SquadOrder()
     : m_type    (SquadOrderTypes::None)
     , m_radius  (0)
