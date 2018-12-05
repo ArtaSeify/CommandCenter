@@ -4,6 +4,7 @@
 #include "BuildOrder.h"
 #include "BuildingManager.h"
 #include "BuildOrderQueue.h"
+#include "BOSSManager.h"
 
 namespace CC
 {
@@ -15,6 +16,7 @@ namespace CC
 
         BuildingManager m_buildingManager;
         BuildOrderQueue m_queue;
+        BOSSManager     m_BOSSManager;
 
         Unit    getClosestUnitToPosition(const std::vector<Unit> & units, CCPosition closestTo);
         bool    meetsReservedResources(const MetaType & type);
@@ -27,6 +29,10 @@ namespace CC
         int     getFreeGas();
 
         void    fixBuildOrderDeadlock();
+
+        void    searchBuildOrder();
+        void    searchFinished();
+        void    addToBuildOrder(const BOSS::BuildOrderAbilities & BOSSBuildOrder);
 
     public:
 

@@ -353,13 +353,17 @@ const TypeData & TechTree::getData(const MetaType & type) const
 
 const UnitType & TechTree::getData(const sc2::AbilityID & ability) const
 {
-    for (auto & test : m_unitTypeData)
+    for (auto & unitType : m_unitTypeData)
     {
-        if (test.second.buildAbility == ability)
+        if (unitType.second.buildAbility == ability)
         {
-            return test.first;
+            return unitType.first;
         }
     }
+
+    return UnitType();
+
+    //BOT_ASSERT(false, "Can't getData this ability: %s", sc2::AbilityTypeToName(ability));
 }
 
 void TechTree::outputJSON(const std::string & filename) const

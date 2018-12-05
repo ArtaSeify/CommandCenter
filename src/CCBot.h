@@ -65,6 +65,7 @@ namespace CC
         const TypeData & Data(const Unit & unit) const;
         const UnitType & Data(const sc2::AbilityID & ability) const;
         CCRace GetPlayerRace(int player) const;
+        std::string GetPlayerRaceName(int player) const;
         CCPosition GetStartLocation() const;
 
         int GetCurrentFrame() const;
@@ -74,6 +75,7 @@ namespace CC
         int GetGas() const;
         Unit GetUnit(const CCUnitID & tag) const;
         const std::vector<Unit> & GetUnits() const;
+        const std::string & getName(sc2::UnitTypeID type) const;
         const std::vector<CCPosition> & GetStartLocations() const;
     };
 }

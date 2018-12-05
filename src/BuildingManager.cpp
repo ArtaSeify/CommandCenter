@@ -98,7 +98,7 @@ void BuildingManager::assignWorkersToUnassignedBuildings()
 
         BOT_ASSERT(!b.builderUnit.isValid(), "Error: Tried to assign a builder to a building that already had one ");
 
-        if (m_debugMode) { printf("Assigning Worker To: %s", b.type.getName().c_str()); }
+        if (m_debugMode) { printf("Assigning Worker To: %s", b.type.getName().c_str()); std::cout << std::endl; }
 
         // grab a worker unit from WorkerManager which is closest to this final position
         CCTilePosition testLocation = getBuildingLocation(b);
@@ -426,6 +426,7 @@ CCTilePosition BuildingManager::getBuildingLocation(const Building & b)
         size_t numPylons = m_bot.UnitInfo().getUnitTypeCount(Players::Self, Util::GetSupplyProvider(m_bot.GetPlayerRace(Players::Self), m_bot), true);
         if (numPylons == 0 && !b.type.isSupplyProvider())
         {
+            BOT_ASSERT(false, "Can't create a Protoss building without any Pylons.");
             return CCTilePosition(0, 0);
         }
     }

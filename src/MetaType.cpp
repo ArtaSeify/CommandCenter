@@ -10,6 +10,7 @@ MetaType::MetaType()
     , m_name        ("MetaType")
     , m_unitType    ()
     , m_upgrade     ()
+    , m_ability     ()
 {
 }
 
@@ -33,6 +34,18 @@ MetaType::MetaType(const std::string & name, CCBot & bot)
         {
             m_upgrade = data.upgrade_id;
             m_type = MetaTypes::Upgrade;
+            return;
+        }
+    }
+
+    // ability actions. Needed for actions such as Chrono Boost,
+    // MULE drop, etc.
+    for (auto & ability : bot.Observation()->GetAbilityData())
+    {
+        if (name == ability.link_name)
+        {
+            m_ability.first = ability.ability_id;
+            m_type = MetaTypes::Ability;
             return;
         }
     }
@@ -125,6 +138,22 @@ MetaType::MetaType(const CCUpgrade & upgradeType, CCBot & bot)
 #else
     m_race          = upgradeType.getRace();
     m_name          = upgradeType.getName();
+#endif
+}
+
+MetaType::MetaType(const CCAbility & abilityType, int target, CCBot & bot)
+{
+    m_bot = &bot;
+    m_type = MetaTypes::Ability;
+    m_ability.first = abilityType;
+    m_ability.second = target;
+
+#ifdef SC2API
+    m_race = m_bot->GetPlayerRace(Players::Self);
+    m_name = sc2::AbilityTypeToName(abilityType);
+#else
+    m_race = upgradeType.getRace();
+    m_name = upgradeType.getName();
 #endif
 }
 

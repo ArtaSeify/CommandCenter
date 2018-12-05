@@ -65,7 +65,7 @@ bool UnitType::isValid() const
 std::string UnitType::getName() const
 {
 #ifdef SC2API
-    return sc2::UnitTypeToName(m_type);
+    return m_bot->getName(m_type);
 #else
     return m_type.getName();
 #endif

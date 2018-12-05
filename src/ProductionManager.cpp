@@ -8,6 +8,7 @@ ProductionManager::ProductionManager(CCBot & bot)
     : m_bot             (bot)
     , m_buildingManager (bot)
     , m_queue           (bot)
+    , m_BOSSManager     (bot)
 {
 
 }
@@ -22,15 +23,15 @@ void ProductionManager::setBuildOrder(const BuildOrder & buildOrder)
     }
 }
 
-
 void ProductionManager::onStart()
 {
     m_buildingManager.onStart();
-    setBuildOrder(m_bot.Strategy().getOpeningBookBuildOrder());
+    //setBuildOrder(m_bot.Strategy().getOpeningBookBuildOrder());
 }
 
 void ProductionManager::onFrame()
 {
+    searchBuildOrder();
     fixBuildOrderDeadlock();
     manageBuildOrderQueue();
 
@@ -46,6 +47,82 @@ void ProductionManager::onFrame()
 void ProductionManager::onUnitDestroy(const Unit & unit)
 {
     // TODO: might have to re-do build order if a vital unit died
+}
+
+void ProductionManager::searchBuildOrder()
+{
+    // currently searching for a build order
+    if (m_BOSSManager.searchInProgress())
+    {
+        // if the current queue is empty, stop the search so we have stuff to build
+        if (m_queue.isEmpty())
+        {
+            m_BOSSManager.finishSearch();
+        }
+        return;
+    }
+
+    if (m_BOSSManager.isSearchFinished())
+    {
+        searchFinished();
+    }
+
+    const int framesToSearch = 5000;
+
+    if (!m_BOSSManager.canSearchAgain(framesToSearch))
+    {
+        return;
+    }
+    // actions to search over
+    std::vector<std::string> relevantActionsNames = { "Probe", "Pylon", "Nexus", "Assimilator", "Gateway",
+                                                    "CyberneticsCore", "Stalker", "Zealot", "ChronoBoost" };
+    BOSS::ActionSetAbilities relevantActions;
+    for (std::string & actionName : relevantActionsNames)
+    {
+        relevantActions.add(BOSS::ActionTypes::GetActionType(actionName));
+    }
+
+    // how many times we are allowed to do an action. if no limit is given, then we can do it
+    // as many times as we want
+    std::vector<std::pair<BOSS::ActionType, int>> maxActions;
+    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Nexus"), 1);
+    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Gateway"), 4);
+    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("CyberneticsCore"), 1);
+    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Pylon"), m_BOSSManager.numSupplyProviders() + 4);
+
+    // the opening build order to follow inside the search
+    BOSS::BuildOrderAbilities openingBuildOrder;
+
+    m_BOSSManager.setParameters(framesToSearch, 4000000, true, maxActions, openingBuildOrder, relevantActions);
+
+    m_BOSSManager.startSearch();
+}
+
+void ProductionManager::searchFinished()
+{
+    auto & BOSSBuildOrder = m_BOSSManager.getBuildOrder();
+    m_BOSSManager.gotData();
+
+    addToBuildOrder(BOSSBuildOrder);   
+}
+
+void ProductionManager::addToBuildOrder(const BOSS::BuildOrderAbilities & BOSSBuildOrder)
+{
+    for (auto & actionTargetPair : BOSSBuildOrder)
+    {
+        auto & actionType = actionTargetPair.first;
+        auto & target = actionTargetPair.second;
+
+        // TODO: ABILITIES LIKE CHRONOBOOST
+        if (actionType.isAbility())
+        {
+            continue;
+        }
+
+        MetaType action(actionType.getName(), m_bot);
+        m_queue.queueAsLowestPriority(action, true);
+        //newBuildOrder.add(action);
+    }
 }
 
 void ProductionManager::manageBuildOrderQueue()

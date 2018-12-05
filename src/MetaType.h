@@ -10,6 +10,8 @@ namespace CC
         enum { Unit, Upgrade, Buff, Tech, Ability, None };
     }
 
+    using AbilityType = std::pair<CCAbility, int>;
+
     class CCBot;
     class MetaType
     {
@@ -19,6 +21,7 @@ namespace CC
         CCRace          m_race;
         UnitType        m_unitType;
         CCUpgrade       m_upgrade;
+        AbilityType     m_ability;
 
 #ifndef SC2API
         BWAPI::TechType m_tech;
@@ -30,6 +33,7 @@ namespace CC
         MetaType(const std::string & name, CCBot & bot);
         MetaType(const UnitType & unitType, CCBot & bot);
         MetaType(const CCUpgrade & upgradeType, CCBot & bot);
+        MetaType(const CCAbility & abilityType, int target, CCBot & bot);
 
         bool    isUnit()        const;
         bool    isUpgrade()     const;

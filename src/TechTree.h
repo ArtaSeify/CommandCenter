@@ -52,5 +52,6 @@ namespace CC
         const TypeData & getData(const MetaType & type) const;
         
         const UnitType & getData(const sc2::AbilityID & ability) const;
+        bool abilityMakesUnit() const;
     };
 }

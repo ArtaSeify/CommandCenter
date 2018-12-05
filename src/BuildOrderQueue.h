@@ -9,7 +9,7 @@ namespace CC
 
     struct BuildOrderItem
     {
-        MetaType       type;		// the thing we want to 'build'
+        MetaType        type;		// the thing we want to 'build'
         int             priority;	// the priority at which to place it in the queue
         bool            blocking;	// whether or not we block further items
 

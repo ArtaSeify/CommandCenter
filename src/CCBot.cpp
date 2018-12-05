@@ -117,6 +117,31 @@ CCRace CCBot::GetPlayerRace(int player) const
 #endif
 }
 
+std::string CCBot::GetPlayerRaceName(int player) const
+{
+#ifdef SC2API
+    int race_num = GetPlayerRace(player);
+
+    if (race_num == sc2::Race::Protoss)
+    {
+        return "Protoss";
+    }
+    if (race_num == sc2::Race::Terran)
+    {
+        return "Terran";
+    }
+    if (race_num == sc2::Race::Zerg)
+    {
+        return "Zerg";
+    }
+
+    BOT_ASSERT(false, "Can't get name of invalid race");
+    return "Random";
+#else
+    return "";
+#endif
+}
+
 BotConfig & CCBot::Config()
 {
      return m_config;
@@ -229,6 +254,15 @@ Unit CCBot::GetUnit(const CCUnitID & tag) const
 const std::vector<Unit> & CCBot::GetUnits() const
 {
     return m_allUnits;
+}
+
+const std::string & CCBot::getName(sc2::UnitTypeID type) const
+{
+#ifdef SC2API
+    return Observation()->GetUnitTypeData()[type].name;
+#else
+    return "";
+#endif
 }
 
 CCPosition CCBot::GetStartLocation() const
