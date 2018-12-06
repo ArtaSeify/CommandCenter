@@ -7,8 +7,8 @@ cmake_install.cmake
 # IDEs
 .vscode/
 vs/.vs/
-vs/commandcenter
 
+vs/CommandCenter
 vs/Debug
 vs/Release
 vs/x64
@@ -18,7 +18,7 @@ bin/*.exe
 bin/*.ilk
 bin/TechTree.json
 bin/*.lib
-bin/BOSS.lib
+bin/*.bsc
 
 *.tlog
 *.obj
