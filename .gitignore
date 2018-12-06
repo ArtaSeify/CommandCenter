@@ -18,3 +18,9 @@ bin/TechTree.json
 vs/RelWithDebInfo/CommandCenter.log
 *.log
 *.pdb
+/vs/Debug
+/vs/Release/BOSS
+/vs/x64/Debug
+/bin/BOSS_d.lib
+/bin/BOSS.lib
+/bin/BOSS.bsc
