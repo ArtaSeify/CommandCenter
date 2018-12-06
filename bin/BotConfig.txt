@@ -113,7 +113,7 @@
             "Protoss_BOSS"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : [ ],
+                "OpeningBuildOrder" : [ "Pylon", "Gateway", "Gateway", "Gateway", "Gateway", "Gateway"],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
                 "AttackCondition"   : [ ["Self", "Stalker"], ">=", [ 4 ] ]
             },

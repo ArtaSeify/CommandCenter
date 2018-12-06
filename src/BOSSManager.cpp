@@ -79,11 +79,11 @@ void BOSSManager::setCurrentGameState()
 {
     setCurrentUnits(m_bot.UnitInfo().getUnits(Players::Self));
     BOSS::GameState state(m_currentUnits, BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Self)),
-                        m_bot.GetMinerals(), m_bot.GetGas(), 
-                        m_bot.GetCurrentSupply(), m_bot.GetMaxSupply(),
-                        m_bot.Workers().getNumMineralWorkers(), m_bot.Workers().getNumGasWorkers(),
-                        m_bot.Workers().getNumBuilderWorkers(), m_bot.GetCurrentFrame(),
-                        m_bot.Workers().getNumRefineries(), m_bot.Workers().getNumDepots());
+                        BOSS::FracType(m_bot.GetMinerals()), BOSS::FracType(m_bot.GetGas()),
+                        BOSS::NumUnits(m_bot.GetCurrentSupply()), BOSS::NumUnits(m_bot.GetMaxSupply()),
+                        BOSS::NumUnits(m_bot.Workers().getNumMineralWorkers()), BOSS::NumUnits(m_bot.Workers().getNumGasWorkers()),
+                        BOSS::NumUnits(m_bot.Workers().getNumBuilderWorkers()), BOSS::TimeType(m_bot.GetCurrentFrame()),
+                        BOSS::NumUnits(m_bot.Workers().getNumRefineries()), BOSS::NumUnits(m_bot.Workers().getNumDepots()));
 
     m_currentGameState = state;
 }
@@ -140,7 +140,7 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
         std::string sc2TypeName = it->getType().getName();
         // data required to create BOSS unit
         BOSS::ActionType type = BOSS::ActionTypes::GetActionType(sc2TypeName);
-        BOSS::NumUnits id = it - unitsFinished.begin();
+        BOSS::NumUnits id = BOSS::NumUnits(it - unitsFinished.begin());
         BOSS::NumUnits builderID = -1;
 
         m_currentUnits.push_back(BOSS::Unit(type, id, builderID, 0));
@@ -152,7 +152,7 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
     {
         std::string sc2TypeName = it->getType().getName();
         BOSS::ActionType type = BOSS::ActionTypes::GetActionType(sc2TypeName);
-        BOSS::NumUnits id = unitsFinished.size() + (it - unitsBeingConstructed.begin());
+        BOSS::NumUnits id = BOSS::NumUnits(unitsFinished.size() + (it - unitsBeingConstructed.begin()));
 
         // get the builderID by iterating through all the finished units. If a finished unit
         // is producing something that the tag of what it's producing matches the tag of the building
@@ -162,13 +162,13 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
         {
             if (unit->isTraining() && unit->getUnitPtr()->orders[0].target_unit_tag == it->getID())
             {
-                builderID = unit - unitsFinished.begin();
+                builderID = BOSS::NumUnits(unit - unitsFinished.begin());
             }
         }
 
         // get the frame we started building this unit. Don't have to worry about chronoboost
         // because you can't chronoboost buildings
-        int startFrame = std::floor(m_bot.GetCurrentFrame() - 
+        int startFrame = (int)std::floor(m_bot.GetCurrentFrame() - 
                                 (m_bot.Data(*it).buildTime * it->getBuildPercentage()));
 
         BOSS::Unit unit(type, id, builderID, startFrame);
@@ -193,7 +193,7 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
         std::string sc2TypeName = ccunit.getType().getName();
 
         BOSS::ActionType type = BOSS::ActionTypes::GetActionType(sc2TypeName);
-        BOSS::NumUnits id = unitsFinished.size() + unitsBeingConstructed.size() + (it - unitsBeingTrained.begin());
+        BOSS::NumUnits id = BOSS::NumUnits(unitsFinished.size() + unitsBeingConstructed.size() + (it - unitsBeingTrained.begin()));
 
         BOSS::NumUnits builderID = it->second;
 
@@ -203,7 +203,7 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
         auto & builderOrders = unitsFinished[it->second].getUnitPtr()->orders;
         if (m_bot.Data(builderOrders[0].ability_id) == ccunit.getType())
         {
-            startFrame = std::floor(m_bot.GetCurrentFrame() -
+            startFrame = (int)std::floor(m_bot.GetCurrentFrame() -
                                 builderOrders[0].progress * m_bot.Data(ccunit).buildTime);
         }
 
@@ -299,4 +299,14 @@ void BOSSManager::searchFinished()
 const BOSS::BuildOrderAbilities & BOSSManager::getBuildOrder()
 {
     return m_results.buildOrder;
+}
+
+BOSS::RaceID BOSSManager::getBOSSPlayerRace() const
+{
+    return BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Self));
+}
+
+int BOSSManager::numSupplyProviders() const
+{
+    return m_stateWithSearchResult.getNumTotal(BOSS::ActionTypes::GetSupplyProvider(getBOSSPlayerRace()));
 }

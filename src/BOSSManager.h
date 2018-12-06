@@ -48,11 +48,14 @@ namespace CC
 
         const BOSS::BuildOrderAbilities & BOSSManager::getBuildOrder();
 
+        BOSS::RaceID getBOSSPlayerRace() const;
+        int  numSupplyProviders() const;
+
         //bool searchInProgress() const   { return m_searching; }
         bool searchInProgress() const       { return m_searchThread.joinable(); }
         bool isSearchFinished() const       { return m_searchFinished; }
         void gotData()                      { m_searchFinished = false; }
         int  highestFrameSearched() const   { return m_largestFrameSearched; }
-        int  numSupplyProviders() const      { return m_stateWithSearchResult.getNumTotal(BOSS::ActionTypes::GetSupplyProvider(m_stateWithSearchResult.getRace())); }
+              
     };
 }

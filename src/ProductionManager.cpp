@@ -67,7 +67,7 @@ void ProductionManager::searchBuildOrder()
         searchFinished();
     }
 
-    const int framesToSearch = 5000;
+    const int framesToSearch = 3000;
 
     if (!m_BOSSManager.canSearchAgain(framesToSearch))
     {
@@ -75,7 +75,7 @@ void ProductionManager::searchBuildOrder()
     }
     // actions to search over
     std::vector<std::string> relevantActionsNames = { "Probe", "Pylon", "Nexus", "Assimilator", "Gateway",
-                                                    "CyberneticsCore", "Stalker", "Zealot", "ChronoBoost" };
+                                                    "CyberneticsCore", "Stalker", "Zealot" };
     BOSS::ActionSetAbilities relevantActions;
     for (std::string & actionName : relevantActionsNames)
     {
