@@ -18,6 +18,7 @@ bin/*.exe
 bin/*.ilk
 bin/TechTree.json
 bin/*.lib
+bin/BOSS.lib
 
 *.tlog
 *.obj
