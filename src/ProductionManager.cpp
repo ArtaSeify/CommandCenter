@@ -26,7 +26,7 @@ void ProductionManager::setBuildOrder(const BuildOrder & buildOrder)
 void ProductionManager::onStart()
 {
     m_buildingManager.onStart();
-    //setBuildOrder(m_bot.Strategy().getOpeningBookBuildOrder());
+    setBuildOrder(m_bot.Strategy().getOpeningBookBuildOrder());
 }
 
 void ProductionManager::onFrame()
@@ -55,7 +55,7 @@ void ProductionManager::searchBuildOrder()
     if (m_BOSSManager.searchInProgress())
     {
         // if the current queue is empty, stop the search so we have stuff to build
-        if (m_queue.isEmpty())
+        if (m_queue.isEmpty() && m_buildingManager.buildingsQueued().size() == 0)
         {
             m_BOSSManager.finishSearch();
         }
@@ -67,12 +67,10 @@ void ProductionManager::searchBuildOrder()
         searchFinished();
     }
 
-    const int framesToSearch = 3000;
+    m_BOSSManager.setCurrentGameState();
 
-    if (!m_BOSSManager.canSearchAgain(framesToSearch))
-    {
-        return;
-    }
+    const int framesToSearch = 8000;
+
     // actions to search over
     std::vector<std::string> relevantActionsNames = { "Probe", "Pylon", "Nexus", "Assimilator", "Gateway",
                                                     "CyberneticsCore", "Stalker", "Zealot" };
@@ -88,12 +86,14 @@ void ProductionManager::searchBuildOrder()
     maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Nexus"), 1);
     maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Gateway"), 4);
     maxActions.emplace_back(BOSS::ActionTypes::GetActionType("CyberneticsCore"), 1);
-    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Pylon"), m_BOSSManager.numSupplyProviders() + 4);
+    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Pylon"), m_BOSSManager.numSupplyProviders() + (framesToSearch / 1000) + 4);
 
     // the opening build order to follow inside the search
     BOSS::BuildOrderAbilities openingBuildOrder;
 
-    m_BOSSManager.setParameters(framesToSearch, 4000000, true, maxActions, openingBuildOrder, relevantActions);
+    bool sortActions = true;
+
+    m_BOSSManager.setParameters(framesToSearch, 4000000, true, sortActions, maxActions, openingBuildOrder, relevantActions);
 
     m_BOSSManager.startSearch();
 }

@@ -48,7 +48,7 @@
         "DrawResourceInfo"          : false,
         "DrawUnitTargetInfo"        : false,
         "DrawLastSeenTileInfo"      : false,
-        "DrawSquadInfo"             : false,
+        "DrawSquadInfo"             : true,
         "DrawWorkerInfo"            : false,
         "DrawBuildingInfo"          : false,
         "DrawReservedBuildingTiles" : false
@@ -113,7 +113,7 @@
             "Protoss_BOSS"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : [ "Pylon", "Gateway", "Gateway", "Gateway", "Gateway", "Gateway"],
+                "OpeningBuildOrder" : ["Probe", "Pylon", "Probe", "Gateway", "Probe", "Gateway", "Probe", "Gateway", "Probe", "CyberneticsCore", "Probe", "Zealot", "Assimilator", "Pylon", "Probe", "Zealot", "Zealot", "Probe", "Stalker", "Pylon", "Probe", "Stalker", "Stalker", "Probe", "Stalker", "Pylon", "Probe", "Stalker", "Stalker", "Probe", "Stalker"],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
                 "AttackCondition"   : [ ["Self", "Stalker"], ">=", [ 4 ] ]
             },

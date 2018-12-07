@@ -211,7 +211,7 @@ void CombatCommander::updateDefenseSquads()
         // we can ignore the first enemy worker in our region since we assume it is a scout
         for (auto unit : enemyUnitsInRegion)
         {
-            BOT_ASSERT(unit.isValid(), "null enemyt unit in region");
+            BOT_ASSERT(unit.isValid(), "null enemy unit in region");
 
             if (unit.getType().isWorker())
             {

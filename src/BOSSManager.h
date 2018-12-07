@@ -19,7 +19,6 @@ namespace CC
         CCBot &                             m_bot;
         BOSS::CombatSearch_Integral         m_searcher;
         BOSS::GameState                     m_currentGameState;
-        BOSS::GameState                     m_stateWithSearchResult;
         BOSS::Vector_Unit                   m_currentUnits;
         BOSS::CombatSearchParameters        m_params;
         BOSS::CombatSearchResults           m_results;
@@ -29,7 +28,6 @@ namespace CC
         bool m_searchFinished;
         int  m_largestFrameSearched;
 
-        void setCurrentGameState();
         void setCurrentUnits(const std::vector<Unit> & CCUnits);
         void searchFinished();
         void threadSearch();
@@ -37,16 +35,17 @@ namespace CC
     public:
         BOSSManager(CCBot & bot);
 
-        bool BOSSManager::canSearchAgain(int frameLimit) const;
-        void setParameters(int frameLimit, float timeLimit, bool alwaysMakeWorkers,
+        void setParameters(int frameLimit, float timeLimit, bool alwaysMakeWorkers, bool sortActions,
             const std::vector<std::pair<BOSS::ActionType, int>> & maxActions,
             const BOSS::BuildOrderAbilities & openingBuildOrder,
             const BOSS::ActionSetAbilities & relevantActions);
 
+        void setCurrentGameState();
         void startSearch();
         void finishSearch();
 
         const BOSS::BuildOrderAbilities & BOSSManager::getBuildOrder();
+        void setOpeningBuildOrder();
 
         BOSS::RaceID getBOSSPlayerRace() const;
         int  numSupplyProviders() const;

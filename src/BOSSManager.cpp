@@ -2,6 +2,7 @@
 #include "CCBot.h"
 #include "CombatSearchResults.h"
 #include "BOSS.h"
+#include "Tools.h"
 #include <thread>
 
 using namespace CC;
@@ -10,7 +11,6 @@ BOSSManager::BOSSManager(CCBot & bot)
     : m_bot                     (bot)
     , m_searcher                ()
     , m_currentGameState        ()
-    , m_stateWithSearchResult   ()
     , m_searching               (false)
     , m_searchFinished          (false)
     , m_largestFrameSearched    (0)
@@ -23,13 +23,7 @@ BOSSManager::BOSSManager(CCBot & bot)
     m_params = BOSS::CombatSearchParameters();
 }
 
-bool BOSSManager::canSearchAgain(int frameLimit) const
-{
-    return true;
-    //return (m_bot.GetCurrentFrame() + frameLimit > m_largestFrameSearched + (frameLimit / 2));
-}
-
-void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMakeWorkers,
+void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMakeWorkers, bool sortActions,
                                 const std::vector<std::pair<BOSS::ActionType, int>> & maxActions,
                                 const BOSS::BuildOrderAbilities & openingBuildOrder,
                                 const BOSS::ActionSetAbilities & relevantActions)
@@ -52,31 +46,32 @@ void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMake
     // time limit of the search
     m_params.setSearchTimeLimit(timeLimit);
 
+    // sort moves as we search
+    m_params.setSortActions(sortActions);
     
-    //TODO: STATE IS CHANGED IF ANY UNIT DIES.
-    if (m_bot.GetCurrentFrame() == 1)
+    
+
+    if (m_largestFrameSearched == 0)
     {
         std::cout << "first search!" << std::endl;
-        setCurrentGameState();
-        // current state of the game
-        m_params.setInitialState(m_currentGameState);
-
-        // first search is up to the frame limit
-        m_params.setFrameTimeLimit(frameLimit);
     }
-    else
-    {
-        m_currentGameState = BOSS::GameState(m_stateWithSearchResult);
-        m_params.setInitialState(m_stateWithSearchResult);
 
-        // after the first search, we search from the start frame of the last unit in the build order
-        std::cout << "setting frame limit as: " << m_largestFrameSearched + frameLimit << std::endl;
-        m_params.setFrameTimeLimit(m_largestFrameSearched + frameLimit);
-    }
+    m_params.setInitialState(m_currentGameState);
+
+    // limit is start frame of the last unit in the build order + framelimit
+    std::cout << "setting frame limit as: " << m_largestFrameSearched + frameLimit << std::endl;
+    m_params.setFrameTimeLimit(m_largestFrameSearched + frameLimit);
 }
 
 void BOSSManager::setCurrentGameState()
 {
+    //TODO: STATE IS CHANGED IF ANY UNIT DIES.
+    // we only set the game state at the very first search
+    if (m_currentGameState.getRace() != BOSS::Races::None)
+    {
+        return;
+    }
+
     setCurrentUnits(m_bot.UnitInfo().getUnits(Players::Self));
     BOSS::GameState state(m_currentUnits, BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Self)),
                         BOSS::FracType(m_bot.GetMinerals()), BOSS::FracType(m_bot.GetGas()),
@@ -86,6 +81,8 @@ void BOSSManager::setCurrentGameState()
                         BOSS::NumUnits(m_bot.Workers().getNumRefineries()), BOSS::NumUnits(m_bot.Workers().getNumDepots()));
 
     m_currentGameState = state;
+
+    setOpeningBuildOrder();
 }
 
 // need to transform a vector of CC::Units to BOSS::Units
@@ -264,8 +261,6 @@ void BOSSManager::searchFinished()
         std::cout << "search timed out!" << std::endl;
     }
 
-    m_stateWithSearchResult = BOSS::GameState(m_currentGameState);
-
     // update GameState with the new build order we found
     for (auto & actionTargetPair : m_results.buildOrder)
     {        
@@ -275,25 +270,49 @@ void BOSSManager::searchFinished()
         // do the ability
         if (action.isAbility())
         {
-            m_stateWithSearchResult.doAbility(action, target.targetID);
+            m_currentGameState.doAbility(action, target.targetID);
         }
 
         // perform the action
         else
         {
-            m_stateWithSearchResult.doAction(action);
+            m_currentGameState.doAction(action);
         }
     }
 
     // the biggest frame we've searched to is the start time of the last unit
     // in the build order
-    m_largestFrameSearched = m_stateWithSearchResult.getCurrentFrame();
+    m_largestFrameSearched = m_currentGameState.getCurrentFrame();
 
     m_searcher.printResults();
     std::cout << "\nSearched " << m_results.nodesExpanded << " nodes in " << m_results.timeElapsed << "ms @ " << (1000.0*m_results.nodesExpanded / m_results.timeElapsed) << " nodes/sec\n\n";
 
     m_searching = false;
     m_searchFinished = true;
+}
+
+void BOSSManager::setOpeningBuildOrder()
+{
+    BuildOrder inputBuildOrder = m_bot.Strategy().getOpeningBookBuildOrder();
+    BOSS::BuildOrderAbilities BOSSBuildOrder;
+
+    // create a BOSS build order from the CC build order
+    for (int index = 0; index < inputBuildOrder.size(); ++index)
+    {
+        BOSS::ActionType & BOSSType = BOSS::ActionTypes::GetActionType(inputBuildOrder[index].getUnitType().getName());
+        
+        // TODO: CONSIDER ABILITIES
+        if (BOSSType.isAbility())
+        {
+            continue;
+        }
+
+        BOSSBuildOrder.add(BOSSType);
+    }
+
+    // do the build order
+    BOSS::Tools::DoBuildOrder(m_currentGameState, BOSSBuildOrder);
+    m_largestFrameSearched = m_currentGameState.getCurrentFrame();
 }
 
 const BOSS::BuildOrderAbilities & BOSSManager::getBuildOrder()
@@ -308,5 +327,6 @@ BOSS::RaceID BOSSManager::getBOSSPlayerRace() const
 
 int BOSSManager::numSupplyProviders() const
 {
-    return m_stateWithSearchResult.getNumTotal(BOSS::ActionTypes::GetSupplyProvider(getBOSSPlayerRace()));
+    return m_currentGameState.getNumTotal(BOSS::ActionTypes::GetSupplyProvider(getBOSSPlayerRace()));
 }
+
