@@ -2,7 +2,7 @@
     "Bot Info" :
     {
         "BotName"                   : "CommandCenter",
-        "Authors"                   : "David Churchill",
+        "Authors"                   : "David Churchill, Arta Seify",
         "PrintInfoOnStart"          : false
     },
 
@@ -25,7 +25,7 @@
         
     "Micro" :
     {
-        "KiteWithRangedUnits"       : false,
+        "KiteWithRangedUnits"       : true,
         "ScoutHarassEnemy"          : true
     },
     
@@ -113,9 +113,9 @@
             "Protoss_BOSS"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : ["Probe", "Pylon", "Probe", "Gateway", "Probe", "Gateway", "Probe", "Gateway", "Probe", "CyberneticsCore", "Probe", "Zealot", "Assimilator", "Pylon", "Probe", "Zealot", "Zealot", "Probe", "Stalker", "Pylon", "Probe", "Stalker", "Stalker", "Probe", "Stalker", "Pylon", "Probe", "Stalker", "Stalker", "Probe", "Stalker"],
+                "OpeningBuildOrder" : ["Probe","Assimilator","Probe","Pylon","Probe","Gateway"],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
-                "AttackCondition"   : [ ["Self", "Stalker"], ">=", [ 4 ] ]
+                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 8 ] ]
             },
             "Protoss_ZealotRush"    : 
             { 

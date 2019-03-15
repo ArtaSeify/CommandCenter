@@ -19,7 +19,6 @@ BOSSManager::BOSSManager(CCBot & bot)
 {
     // Initialize all the BOSS internal data
     BOSS::Init("../BOSS/bin/SC2Data.json");
-
     m_params = BOSS::CombatSearchParameters();
 }
 
@@ -49,7 +48,15 @@ void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMake
     // sort moves as we search
     m_params.setSortActions(sortActions);
     
-    
+    //int m_threadsForExperiment;
+    /*m_params.setExplorationValue(BOSS::FracType(0.15));
+    m_params.setChangingRoot(true);
+    m_params.setUseMaxValue(true);
+    m_params.setNumberOfSimulations(5000000);
+    m_params.setSimulationsPerStep(50000); */   
+
+    m_params.setLevel(1);
+    m_params.setNumPlayouts(250);
 
     if (m_largestFrameSearched == 0)
     {
@@ -117,7 +124,7 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
             if (type.isValid())
             {
                 Unit unit(m_bot.Data(it->getUnitPtr()->orders[0].ability_id), m_bot);
-                unitsBeingTrained.emplace_back(unit, unitsFinished.size() - 1);
+                unitsBeingTrained.emplace_back(unit, int(unitsFinished.size() - 1));
             }
         }
 
@@ -233,14 +240,15 @@ void BOSSManager::startSearch()
 
 void BOSSManager::finishSearch()
 {
-    m_searcher.finishSearch();
+    m_searcher->finishSearch();
 }
 
 void BOSSManager::threadSearch()
 {
-    m_searcher = BOSS::CombatSearch_Integral(m_params);
+    //m_searcher = BOSS::CombatSearch_Integral(m_params);
+    m_searcher = std::make_unique<BOSS::NMCS>(m_params);
     
-    m_searcher.search();
+    m_searcher->search();
 
     searchFinished();
 
@@ -250,7 +258,7 @@ void BOSSManager::threadSearch()
 
 void BOSSManager::searchFinished()
 {
-    m_results = m_searcher.getResults();
+    m_results = m_searcher->getResults();
 
     if (m_results.solved)
     {
@@ -284,8 +292,8 @@ void BOSSManager::searchFinished()
     // in the build order
     m_largestFrameSearched = m_currentGameState.getCurrentFrame();
 
-    m_searcher.printResults();
-    std::cout << "\nSearched " << m_results.nodesExpanded << " nodes in " << m_results.timeElapsed << "ms @ " << (1000.0*m_results.nodesExpanded / m_results.timeElapsed) << " nodes/sec\n\n";
+    m_searcher->printResults();
+    //std::cout << "\nSearched " << m_results.nodesExpanded << " nodes in " << m_results.timeElapsed << "ms @ " << (1000.0*m_results.nodesExpanded / m_results.timeElapsed) << " nodes/sec\n\n";
 
     m_searching = false;
     m_searchFinished = true;
@@ -299,7 +307,15 @@ void BOSSManager::setOpeningBuildOrder()
     // create a BOSS build order from the CC build order
     for (int index = 0; index < inputBuildOrder.size(); ++index)
     {
-        BOSS::ActionType & BOSSType = BOSS::ActionTypes::GetActionType(inputBuildOrder[index].getUnitType().getName());
+        BOSS::ActionType BOSSType;
+        if (inputBuildOrder[index].isAbility() && m_bot.GetPlayerRace(Players::Self) == CCRace::Protoss)
+        {
+            BOSSType = BOSS::ActionTypes::GetSpecialAction(BOSS::Races::Protoss);
+        }
+        else
+        {
+            BOSSType = BOSS::ActionTypes::GetActionType(inputBuildOrder[index].getUnitType().getName());
+        }
         
         // TODO: CONSIDER ABILITIES
         if (BOSSType.isAbility())

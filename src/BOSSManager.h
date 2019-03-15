@@ -9,6 +9,8 @@
 #include "BuildOrderAbilities.h"
 #include "CombatSearchParameters.h"
 #include "CombatSearch_Integral.h"
+#include "CombatSearch_IntegralMCTS.h"
+#include "NMCS.h"
 
 namespace CC
 {
@@ -17,9 +19,10 @@ namespace CC
     class BOSSManager
     {
         CCBot &                             m_bot;
-        BOSS::CombatSearch_Integral         m_searcher;
+        //BOSS::CombatSearch_Integral         m_searcher;
+        std::unique_ptr<BOSS::CombatSearch> m_searcher;
         BOSS::GameState                     m_currentGameState;
-        BOSS::Vector_Unit                   m_currentUnits;
+        std::vector<BOSS::Unit>             m_currentUnits;
         BOSS::CombatSearchParameters        m_params;
         BOSS::CombatSearchResults           m_results;
         std::thread                         m_searchThread;

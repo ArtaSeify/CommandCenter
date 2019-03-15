@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include "UnitType.h"
+#include "MetaType.h"
 
 namespace CC
 {
@@ -36,9 +37,11 @@ namespace CC
         CCBot & m_bot;
         std::map<UnitType, TypeData>  m_unitTypeData;
         std::map<CCUpgrade, TypeData> m_upgradeData;
+        std::map<CCAbility, TypeData> m_abilityData;
 
         void initUnitTypeData();
         void initUpgradeData();
+        void initAbilityData();
 
         void outputJSON(const std::string & filename) const;
 
@@ -49,9 +52,8 @@ namespace CC
 
         const TypeData & getData(const UnitType & type) const;
         const TypeData & getData(const CCUpgrade & type) const;
+        const TypeData & getData(const AbilityType & type) const;
         const TypeData & getData(const MetaType & type) const;
-        
         const UnitType & getData(const sc2::AbilityID & ability) const;
-        bool abilityMakesUnit() const;
     };
 }

@@ -205,8 +205,30 @@ void StrategyManager::readStrategyFile(const std::string & filename)
                             ss >> itemName;
                         }
 
+                        // chronoboost
+                        std::string chronoBoostTarget = itemName;
+                        if (itemName.length() > 11 && itemName[11] == '_')
+                        {
+                            itemName = "Effect ChronoBoost";
+                        }
+
                         // Construct the metatype based on the extracted type name
                         MetaType metaType(itemName, m_bot);
+
+                        // get chronoboost target
+                        if (metaType.isAbility())
+                        {
+                            chronoBoostTarget = chronoBoostTarget.substr(12);
+                            for (auto & unit : m_bot.UnitInfo().getUnits(Players::Self))
+                            {
+                                if (unit.getType().getName() == chronoBoostTarget)
+                                {
+                                    metaType.setAbilityTarget(unit.getID());
+                                    break;
+                                }
+                            }
+                        }
+
                         // Add the meta type numTimes to the build order	
                         for (size_t i(0); i < numitems; i++)
                         {

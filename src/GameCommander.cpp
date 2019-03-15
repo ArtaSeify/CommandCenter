@@ -11,7 +11,7 @@ GameCommander::GameCommander(CCBot & bot)
     , m_combatCommander     (bot)
     , m_initialScoutSet     (false)
 {
-
+    
 }
 
 void GameCommander::onStart()

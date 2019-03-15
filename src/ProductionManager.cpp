@@ -69,11 +69,15 @@ void ProductionManager::searchBuildOrder()
 
     m_BOSSManager.setCurrentGameState();
 
-    const int framesToSearch = 8000;
+    const int framesToSearch = 7500;
 
     // actions to search over
-    std::vector<std::string> relevantActionsNames = { "Probe", "Pylon", "Nexus", "Assimilator", "Gateway",
-                                                    "CyberneticsCore", "Stalker", "Zealot" };
+    std::vector<std::string> relevantActionsNames = 
+    { "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker", 
+        "Zealot", "Adept", "Sentry", "Colossus", "FleetBeacon", "Forge", 
+        "TwilightCouncil", "PhotonCannon", "Stargate", "TemplarArchive", "DarkShrine", 
+        "RoboticsBay", "RoboticsFacility", "HighTemplar", "DarkTemplar", "Phoenix", "Carrier", 
+        "VoidRay", "WarpPrism", "Observer", "Immortal", "Oracle", "Tempest", "Disruptor"};
     BOSS::ActionSetAbilities relevantActions;
     for (std::string & actionName : relevantActionsNames)
     {
@@ -83,17 +87,17 @@ void ProductionManager::searchBuildOrder()
     // how many times we are allowed to do an action. if no limit is given, then we can do it
     // as many times as we want
     std::vector<std::pair<BOSS::ActionType, int>> maxActions;
-    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Nexus"), 1);
+    /*maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Nexus"), 1);
     maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Gateway"), 4);
     maxActions.emplace_back(BOSS::ActionTypes::GetActionType("CyberneticsCore"), 1);
-    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Pylon"), m_BOSSManager.numSupplyProviders() + (framesToSearch / 1000) + 4);
+    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Pylon"), m_BOSSManager.numSupplyProviders() + (framesToSearch / 1000) + 4);*/
 
     // the opening build order to follow inside the search
     BOSS::BuildOrderAbilities openingBuildOrder;
 
-    bool sortActions = true;
+    bool sortActions = false;
 
-    m_BOSSManager.setParameters(framesToSearch, 4000000, true, sortActions, maxActions, openingBuildOrder, relevantActions);
+    m_BOSSManager.setParameters(framesToSearch, 2000000, true, sortActions, maxActions, openingBuildOrder, relevantActions);
 
     m_BOSSManager.startSearch();
 }
@@ -116,11 +120,43 @@ void ProductionManager::addToBuildOrder(const BOSS::BuildOrderAbilities & BOSSBu
         // TODO: ABILITIES LIKE CHRONOBOOST
         if (actionType.isAbility())
         {
-            continue;
-        }
+            BOSS::ActionType targetType = target.targetType;
+            BOSS::ActionType targetProductionType = target.targetProductionType;
 
-        MetaType action(actionType.getName(), m_bot);
-        m_queue.queueAsLowestPriority(action, true);
+            auto & allUnits = m_bot.UnitInfo().getUnits(Players::Self);
+            for (auto & unit : allUnits)
+            {
+                // units match
+                std::string CCUnitName = unit.getType().getName();
+                std::string BOSSUnitName = targetType.getName();
+                std::transform(CCUnitName.begin(), CCUnitName.end(), CCUnitName.begin(), ::tolower);
+                std::transform(BOSSUnitName.begin(), BOSSUnitName.end(), BOSSUnitName.begin(), ::tolower);
+
+                MetaType action(sc2::ABILITY_ID::EFFECT_CHRONOBOOST, unit.getUnitPtr()->tag, m_bot);
+                m_queue.queueAsLowestPriority(action, true);
+                std::cout << "CHRONOBOOST ADDED!!!!" << std::endl;
+                break;
+
+                //// what is being produced by the units match
+                //if (CCUnitName == BOSSUnitName && unit.getUnitPtr()->orders.size() > 0 && unit.getUnitPtr()->orders[0].target_unit_tag != sc2::NullTag)
+                //{
+                //    std::string CCUnitProdName = m_bot.GetUnit(unit.getUnitPtr()->orders[0].target_unit_tag).getType().getName();
+                //    std::string BOSSUnitProdName = targetProductionType.getName();
+                //    std::transform(CCUnitProdName.begin(), CCUnitProdName.end(), CCUnitProdName.begin(), ::tolower);
+                //    std::transform(BOSSUnitProdName.begin(), BOSSUnitProdName.end(), BOSSUnitProdName.begin(), ::tolower);
+
+                //    if (CCUnitProdName == BOSSUnitProdName)
+                //    {
+                //        
+                //    }
+                //}
+            }
+        }
+        else
+        {
+            MetaType action(actionType.getName(), m_bot);
+            m_queue.queueAsLowestPriority(action, true);
+        }
         //newBuildOrder.add(action);
     }
 }
@@ -139,6 +175,7 @@ void ProductionManager::manageBuildOrderQueue()
     // while there is still something left in the queue
     while (!m_queue.isEmpty())
     {
+        
         // this is the unit which can produce the currentItem
         Unit producer = getProducer(currentItem.type);
 
@@ -232,7 +269,7 @@ void ProductionManager::fixBuildOrderDeadlock()
 
 Unit ProductionManager::getProducer(const MetaType & type, CCPosition closestTo)
 {
-    // get all the types of units that cna build this type
+    // get all the types of units that can build this type
     auto & producerTypes = m_bot.Data(type).whatBuilds;
 
     // make a set of all candidate producers
@@ -242,10 +279,11 @@ Unit ProductionManager::getProducer(const MetaType & type, CCPosition closestTo)
         // reasons a unit can not train the desired type
         if (std::find(producerTypes.begin(), producerTypes.end(), unit.getType()) == producerTypes.end()) { continue; }
         if (!unit.isCompleted()) { continue; }
-        if (m_bot.Data(unit).isBuilding && unit.isTraining()) { continue; }
+        if (!type.isAbility() && m_bot.Data(unit).isBuilding && unit.isTraining()) { continue; }
         if (unit.isFlying()) { continue; }
 
         // TODO: if unit is not powered continue
+        //if (m_bot.GetPlayerRace(Players::Self) == CCRace::Protoss && unit.getType().isBuilding() && !unit.isPowered()) { continue; }
         // TODO: if the type is an addon, some special cases
         // TODO: if the type requires an addon and the producer doesn't have one
 
@@ -315,6 +353,10 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
         // TODO: UPGRADES
         //Micro::SmartAbility(producer, m_bot.Data(item.type.getUpgradeID()).buildAbility, m_bot);
     }
+    else if (item.type.isAbility())
+    {
+        producer.cast(m_bot.GetUnit(item.type.getAbility().second), item.type.getAbility().first);
+    }
 }
 
 bool ProductionManager::canMakeNow(const Unit & producer, const MetaType & type)
@@ -324,8 +366,18 @@ bool ProductionManager::canMakeNow(const Unit & producer, const MetaType & type)
         return false;
     }
 
+    // can't use chronoboost
+    if (type.isAbility() && type.getAbility().first == sc2::ABILITY_ID::EFFECT_CHRONOBOOST)
+    {
+        if (producer.getEnergy() < 50)
+        {
+            return false;
+        }
+        return true;
+    }
+
 #ifdef SC2API
-    sc2::AvailableAbilities available_abilities = m_bot.Query()->GetAbilitiesForUnit(producer.getUnitPtr());
+    sc2::AvailableAbilities available_abilities = m_bot.Query()->GetAbilitiesForUnit(producer.getUnitPtr(), true);
 
     // quick check if the unit can't do anything it certainly can't build the thing we want
     if (available_abilities.abilities.empty())
@@ -335,7 +387,15 @@ bool ProductionManager::canMakeNow(const Unit & producer, const MetaType & type)
     else
     {
         // check to see if one of the unit's available abilities matches the build ability type
-        sc2::AbilityID MetaTypeAbility = m_bot.Data(type).buildAbility;
+        sc2::AbilityID MetaTypeAbility;
+        if (type.isAbility())
+        {
+            MetaTypeAbility = type.getAbility().first;
+        }
+        else
+        {
+            MetaTypeAbility = m_bot.Data(type).buildAbility;
+        }
         for (const sc2::AvailableAbility & available_ability : available_abilities.abilities)
         {
             if (available_ability.ability_id == MetaTypeAbility)

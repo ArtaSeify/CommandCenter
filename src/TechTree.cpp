@@ -16,6 +16,7 @@ void TechTree::onStart()
 {
     initUnitTypeData();
     initUpgradeData();
+    initAbilityData();
     outputJSON("TechTree.json");
 }
 
@@ -51,7 +52,7 @@ void TechTree::initUnitTypeData()
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_STALKER, m_bot)] =                 { sc2::Race::Protoss, 0, 0, 2, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::TRAIN_STALKER, sc2::ABILITY_ID::TRAINWARP_STALKER, { UnitType(sc2::UNIT_TYPEID::PROTOSS_GATEWAY, m_bot) }, { UnitType(sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, m_bot) }, {} };
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_HIGHTEMPLAR, m_bot)] =             { sc2::Race::Protoss, 0, 0, 2, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::TRAIN_HIGHTEMPLAR, sc2::ABILITY_ID::TRAINWARP_HIGHTEMPLAR, { UnitType(sc2::UNIT_TYPEID::PROTOSS_GATEWAY, m_bot) }, { UnitType(sc2::UNIT_TYPEID::PROTOSS_TEMPLARARCHIVE, m_bot) }, {} };
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_DARKTEMPLAR, m_bot)] =             { sc2::Race::Protoss, 0, 0, 2, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::TRAIN_DARKTEMPLAR, sc2::ABILITY_ID::TRAINWARP_DARKTEMPLAR, { UnitType(sc2::UNIT_TYPEID::PROTOSS_GATEWAY, m_bot) }, { UnitType(sc2::UNIT_TYPEID::PROTOSS_DARKSHRINE, m_bot) }, {} };
-    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_ADEPT, m_bot)] =                   { sc2::Race::Protoss, 0, 0, 2, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::TRAIN_ADEPT, sc2::ABILITY_ID::TRAINWARP_ADEPT, { UnitType(sc2::UNIT_TYPEID::PROTOSS_GATEWAY, m_bot) }, { UnitType(sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, m_bot) }, {} };
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_ADEPT, m_bot)] =                   { sc2::Race::Protoss, 0, 0, 2, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::TRAIN_ADEPT, sc2::ABILITY_ID::TRAINWARP_ADEPT, { UnitType(sc2::UNIT_TYPEID::PROTOSS_GATEWAY, m_bot) }, { UnitType(sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, m_bot) }, {} };   
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_COLOSSUS, m_bot)] =                { sc2::Race::Protoss, 0, 0, 6, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::TRAIN_COLOSSUS,  0, { UnitType(sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY, m_bot) }, { UnitType(sc2::UNIT_TYPEID::PROTOSS_ROBOTICSBAY, m_bot) }, {} };
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_DISRUPTOR, m_bot)] =               { sc2::Race::Protoss, 0, 0, 3, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::TRAIN_DISRUPTOR, 0, { UnitType(sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY, m_bot) }, { UnitType(sc2::UNIT_TYPEID::PROTOSS_ROBOTICSBAY, m_bot) }, {} };
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_WARPPRISM, m_bot)] =               { sc2::Race::Protoss, 0, 0, 2, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::TRAIN_WARPPRISM, 0, { UnitType(sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY, m_bot) }, {}, {} }; 
@@ -270,6 +271,13 @@ void TechTree::initUpgradeData()
     m_upgradeData[sc2::UPGRADE_ID::ZERGMISSILEWEAPONSLEVEL2] =          { sc2::Race::Zerg, 150, 150, 0, 3040, false, false, false, false, false, false, false, sc2::ABILITY_ID::RESEARCH_ZERGMISSILEWEAPONSLEVEL2, 0, { UnitType(sc2::UNIT_TYPEID::ZERG_EVOLUTIONCHAMBER, m_bot) }, { UnitType(sc2::UNIT_TYPEID::ZERG_LAIR, m_bot), UnitType(sc2::UNIT_TYPEID::ZERG_HIVE, m_bot) }, {sc2::UPGRADE_ID::ZERGMISSILEWEAPONSLEVEL1} };
     m_upgradeData[sc2::UPGRADE_ID::ZERGMISSILEWEAPONSLEVEL3] =          { sc2::Race::Zerg, 200, 200, 0, 3520, false, false, false, false, false, false, false, sc2::ABILITY_ID::RESEARCH_ZERGMISSILEWEAPONSLEVEL3, 0, { UnitType(sc2::UNIT_TYPEID::ZERG_EVOLUTIONCHAMBER, m_bot) }, { UnitType(sc2::UNIT_TYPEID::ZERG_HIVE, m_bot) }, {sc2::UPGRADE_ID::ZERGMISSILEWEAPONSLEVEL2} };
 }
+
+void TechTree::initAbilityData()
+{
+    m_abilityData[0] = TypeData();
+
+    m_abilityData[sc2::ABILITY_ID::EFFECT_CHRONOBOOST] =                { sc2::Race::Protoss, 50, 0, 0, 0, false, false, false, false, false, false, false, sc2::ABILITY_ID::EFFECT_CHRONOBOOST, 0, {UnitType(sc2::UNIT_TYPEID::PROTOSS_NEXUS, m_bot) }, {}, {} };
+}
 #else
 void TechTree::initUpgradeData()
 {
@@ -330,10 +338,21 @@ const TypeData & TechTree::getData(const CCUpgrade & type)  const
     if (m_upgradeData.find(type) == m_upgradeData.end())
     {
         //std::cout << "WARNING: Upgrade not found: " << sc2::UpgradeIDToName(type) << "\n";
-        return m_unitTypeData.begin()->second;
+        return m_upgradeData.begin()->second;
     }
 
     return m_upgradeData.at(type);
+}
+
+const TypeData & TechTree::getData(const AbilityType & type) const
+{
+    if (m_abilityData.find(type.first) == m_abilityData.end())
+    {
+        std::cout << "WARNING: Ability not found: " << sc2::AbilityTypeToName(type.first) << "\n";
+        return m_abilityData.begin()->second;
+    }
+
+    return m_abilityData.at(type.first);
 }
 
 const TypeData & TechTree::getData(const MetaType & type) const
@@ -345,6 +364,10 @@ const TypeData & TechTree::getData(const MetaType & type) const
     else if (type.getMetaType() == MetaTypes::Upgrade)
     {
         return getData(type.getUpgrade());
+    }
+    else if (type.getMetaType() == MetaTypes::Ability)
+    {
+        return getData(type.getAbility());
     }
     
     BOT_ASSERT(false, "Can't getData this type: %s", type.getName().c_str());

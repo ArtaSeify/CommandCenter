@@ -83,8 +83,22 @@ int Condition::intEval() const
     }
     else if (m_type == ConditionTypes::UnaryUnitType)
     {
+        // number of units in army
+        if (m_strValue == "ArmyCount")
+        {
+            int numCombatUnits = 0;
+            for (auto & unit : m_bot->UnitInfo().getUnits(Players::Self))
+            {
+                if (unit.getType().isCombatUnit())
+                {
+                    numCombatUnits++;
+                }
+            }
+            return numCombatUnits;
+        }
         return (int)m_bot->UnitInfo().getUnitTypeCount(m_player, UnitType::GetUnitTypeFromName(m_strValue, *m_bot));
     }
+
     else if (m_type == ConditionTypes::UnaryString)
     {
         if (m_strValue == "gameframe")

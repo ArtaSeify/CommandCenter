@@ -42,10 +42,23 @@ MetaType::MetaType(const std::string & name, CCBot & bot)
     // MULE drop, etc.
     for (auto & ability : bot.Observation()->GetAbilityData())
     {
-        if (name == ability.link_name)
+        /*if (ability.button_name.find("chrono") != std::string::npos || ability.button_name.find("Chrono") != std::string::npos)
+        {
+            std::cout << "button " << ability.button_name << std::endl;
+        }
+        if (ability.friendly_name.find("chrono") != std::string::npos || ability.friendly_name.find("Chrono") != std::string::npos)
+        {
+            std::cout << "friendly " << ability.friendly_name << std::endl;
+        }
+        if (ability.link_name.find("chrono") != std::string::npos || ability.link_name.find("Chrono") != std::string::npos)
+        {
+            std::cout << "link " << ability.link_name << std::endl;
+        }*/
+        if (name == ability.friendly_name)
         {
             m_ability.first = ability.ability_id;
             m_type = MetaTypes::Ability;
+            std::cout << "chronoboost added from starting build order!" << std::endl;
             return;
         }
     }
@@ -141,7 +154,7 @@ MetaType::MetaType(const CCUpgrade & upgradeType, CCBot & bot)
 #endif
 }
 
-MetaType::MetaType(const CCAbility & abilityType, int target, CCBot & bot)
+MetaType::MetaType(const CCAbility & abilityType, CCUnitID target, CCBot & bot)
 {
     m_bot = &bot;
     m_type = MetaTypes::Ability;
@@ -182,6 +195,11 @@ bool MetaType::isTech() const
     return m_type == MetaTypes::Tech;
 }
 
+bool MetaType::isAbility() const
+{
+    return m_type == MetaTypes::Ability;
+}
+
 const CCRace & MetaType::getRace() const
 {
     return m_race;
@@ -195,6 +213,11 @@ const UnitType & MetaType::getUnitType() const
 const CCUpgrade & MetaType::getUpgrade() const
 {
     return m_upgrade;
+}
+
+const AbilityType & MetaType::getAbility() const
+{
+    return m_ability;
 }
 
 const std::string & MetaType::getName() const
