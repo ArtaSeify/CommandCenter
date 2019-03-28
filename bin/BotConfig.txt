@@ -25,7 +25,7 @@
         
     "Micro" :
     {
-        "KiteWithRangedUnits"       : true,
+        "KiteWithRangedUnits"       : false,
         "ScoutHarassEnemy"          : true
     },
     
@@ -113,7 +113,7 @@
             "Protoss_BOSS"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : ["Probe","Assimilator","Probe","Pylon","Probe","Gateway"],
+                "OpeningBuildOrder" : ["Probe", "Pylon", "Gateway", "Assimilator", "Probe", "Chronoboost_Nexus_Probe", "Probe", "Probe", "Probe", "Probe", "Chronoboost_Nexus_Probe", "CyberneticsCore", "WarpGateResearch", "Chronoboost_CyberneticsCore_WarpGateResearch", "Chronoboost_CyberneticsCore_WarpGateResearch", "WarpGate", "StalkerWarped", "Probe", "Probe", "Probe"],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
                 "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 8 ] ]
             },

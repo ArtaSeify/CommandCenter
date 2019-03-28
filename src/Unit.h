@@ -71,7 +71,9 @@ namespace CC
         void buildTarget(const UnitType & buildingType, const Unit & target) const;
         void train(const UnitType & buildingType) const;
         void morph(const UnitType & type) const;
-        void cast(const Unit & target, sc2::ABILITY_ID ability) const;
+        void cast(const Unit & target, CCAbility ability) const;
+        void research(CCAbility upgrade) const;
+        void warp(const UnitType & type, CCTilePosition pos) const;
     };
 
 }

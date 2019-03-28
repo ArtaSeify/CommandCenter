@@ -379,11 +379,27 @@ void Unit::morph(const UnitType & type) const
 #endif
 }
 
-void Unit::cast(const Unit & target, sc2::ABILITY_ID ability) const
+void Unit::cast(const Unit & target, CCAbility ability) const
 {
     BOT_ASSERT(isValid(), "Unit is not valid");
 #ifdef SC2API
     m_bot->Actions()->UnitCommand(m_unit, ability, target.getUnitPtr());
+#endif
+}
+
+void Unit::research(CCAbility upgrade) const
+{
+    BOT_ASSERT(isValid(), "Unit is not valid");
+#ifdef SC2API
+    m_bot->Actions()->UnitCommand(m_unit, upgrade);
+#endif
+}
+
+void Unit::warp(const UnitType & type, CCTilePosition pos) const
+{
+    BOT_ASSERT(isValid(), "Unit is not valid");
+#ifdef SC2API
+    m_bot->Actions()->UnitCommand(m_unit, m_bot->Data(type).warpAbility, Util::GetPosition(pos));
 #endif
 }
 

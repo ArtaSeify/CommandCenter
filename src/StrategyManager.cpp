@@ -206,33 +206,43 @@ void StrategyManager::readStrategyFile(const std::string & filename)
                         }
 
                         // chronoboost
-                        std::string chronoBoostTarget = itemName;
-                        if (itemName.length() > 11 && itemName[11] == '_')
+                        if (itemName.find("Chronoboost") != std::string::npos)
                         {
-                            itemName = "Effect ChronoBoost";
-                        }
-
-                        // Construct the metatype based on the extracted type name
-                        MetaType metaType(itemName, m_bot);
-
-                        // get chronoboost target
-                        if (metaType.isAbility())
-                        {
-                            chronoBoostTarget = chronoBoostTarget.substr(12);
-                            for (auto & unit : m_bot.UnitInfo().getUnits(Players::Self))
+                            AbilityAction abilityInfo;
+                            size_t split_index = itemName.find("_", 12);
+                            abilityInfo.target_type = UnitType::GetUnitTypeFromName(itemName.substr(12, split_index - 12), m_bot);
+                            MetaType targetProd = MetaType(itemName.substr(split_index + 1), m_bot);
+                            if (targetProd.isUpgrade())
                             {
-                                if (unit.getType().getName() == chronoBoostTarget)
-                                {
-                                    metaType.setAbilityTarget(unit.getID());
-                                    break;
-                                }
+                                abilityInfo.targetProduction_ability = targetProd.getAbility().first;
                             }
+                            else if (targetProd.isUnit())
+                            {
+                                abilityInfo.targetProduction_ability = m_bot.Data(targetProd.getUnitType()).buildAbility;
+                            }  
+
+                            MetaType metaType("Chronoboost", abilityInfo, m_bot);
+                            buildOrder.add(metaType);
                         }
 
-                        // Add the meta type numTimes to the build order	
-                        for (size_t i(0); i < numitems; i++)
+                        //// Warp-in units
+                        //else if (itemName.find("Warped") != std::string::npos)
+                        //{
+                        //    std::string name = itemName.substr(0, itemName.find("_"));
+                        //    std::cout << name << std::endl;
+                        //    MetaType metaType(name, m_bot);
+                        //    buildOrder.add(metaType);
+                        //}
+
+                        else
                         {
-                            buildOrder.add(metaType);
+                            // Add the meta type numTimes to the build order	
+                            for (size_t i(0); i < numitems; i++)
+                            {
+                                // Construct the metatype based on the extracted type name
+                                MetaType metaType(itemName, m_bot);
+                                buildOrder.add(metaType);
+                            }
                         }
                     }
 
