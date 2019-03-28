@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include "UnitType.h"
+#include "AbilityAction.h"
 
 namespace CC
 {
@@ -10,11 +11,21 @@ namespace CC
         enum { Unit, Upgrade, Buff, Tech, Ability, None };
     }
 
-    using AbilityType = std::pair<CCAbility, CCUnitID>;
+    struct AbilityAction
+    {
+        CCUnitID        target_id;
+        UnitType        target_type;
+        sc2::AbilityID  targetProduction_ability;
 
+        AbilityAction() : target_id(), target_type(), targetProduction_ability() {}
+    };
+
+    using AbilityType = std::pair<CCAbility, AbilityAction>;
+    
     class CCBot;
     class MetaType
     {
+    private:
         CCBot *         m_bot;
         size_t          m_type;
         std::string     m_name;
@@ -28,12 +39,12 @@ namespace CC
 #endif
 
     public:
-
         MetaType();
         MetaType(const std::string & name, CCBot & bot);
+        MetaType(const std::string & name, const AbilityAction & abilityInfo, CCBot & bot);
         MetaType(const UnitType & unitType, CCBot & bot);
         MetaType(const CCUpgrade & upgradeType, CCBot & bot);
-        MetaType(const CCAbility & abilityType, CCUnitID target, CCBot & bot);
+        MetaType(const CCAbility & abilityType, const AbilityAction & abilityInfo, CCBot & bot);
 
         bool    isUnit()        const;
         bool    isUpgrade()     const;
@@ -47,8 +58,6 @@ namespace CC
         const UnitType &        getUnitType() const;
         const CCUpgrade &       getUpgrade()  const;
         const AbilityType &     getAbility()  const;
-
-        void setAbilityTarget(const CCUnitID & target) { m_ability.second = target; }
 
         std::vector<UnitType>   whatBuilds;
 

@@ -276,7 +276,7 @@ void TechTree::initAbilityData()
 {
     m_abilityData[0] = TypeData();
 
-    m_abilityData[sc2::ABILITY_ID::EFFECT_CHRONOBOOST] =                { sc2::Race::Protoss, 50, 0, 0, 0, false, false, false, false, false, false, false, sc2::ABILITY_ID::EFFECT_CHRONOBOOST, 0, {UnitType(sc2::UNIT_TYPEID::PROTOSS_NEXUS, m_bot) }, {}, {} };
+    m_abilityData[sc2::ABILITY_ID::EFFECT_CHRONOBOOST] =                { sc2::Race::Protoss, 0, 0, 0, 0, false, false, false, false, false, false, false, sc2::ABILITY_ID::EFFECT_CHRONOBOOST, 0, {UnitType(sc2::UNIT_TYPEID::PROTOSS_NEXUS, m_bot) }, {}, {} };
 }
 #else
 void TechTree::initUpgradeData()

@@ -31,7 +31,7 @@ void ProductionManager::onStart()
 
 void ProductionManager::onFrame()
 {
-    searchBuildOrder();
+    //searchBuildOrder();
     fixBuildOrderDeadlock();
     manageBuildOrderQueue();
 
@@ -69,15 +69,21 @@ void ProductionManager::searchBuildOrder()
 
     m_BOSSManager.setCurrentGameState();
 
-    const int framesToSearch = 7500;
+    const int framesToSearch = 5000;
 
     // actions to search over
-    std::vector<std::string> relevantActionsNames = 
-    { "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker", 
-        "Zealot", "Adept", "Sentry", "Colossus", "FleetBeacon", "Forge", 
-        "TwilightCouncil", "PhotonCannon", "Stargate", "TemplarArchive", "DarkShrine", 
+    std::vector<std::string> relevantActionsNames =
+    { "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker",
+        "Zealot", "ChronoBoost", "Colossus", "Forge", "FleetBeacon", "TwilightCouncil", "Stargate", "TemplarArchive", 
+        "DarkShrine", "RoboticsBay", "RoboticsFacility", "ZealotWarped", "Zealot", "StalkerWarped", "Stalker", 
+        "HighTemplarWarped", "HighTemplar", "DarkTemplarWarped", "DarkTemplar", "SentryWarped", "Sentry", 
+        "Phoenix", "Carrier", "VoidRay", "WarpPrism", "Observer", "Immortal", "Probe", "Interceptor", 
+        "WarpGate", "ChronoBoost", "AdeptWarped", "Adept", "Oracle", "Tempest", "Disruptor", "WarpGateResearch" };
+    
+        /*"Adept", "Sentry", "Colossus", "FleetBeacon", "Forge",
+        "TwilightCouncil", "Stargate", "TemplarArchive", "DarkShrine", 
         "RoboticsBay", "RoboticsFacility", "HighTemplar", "DarkTemplar", "Phoenix", "Carrier", 
-        "VoidRay", "WarpPrism", "Observer", "Immortal", "Oracle", "Tempest", "Disruptor"};
+        "VoidRay", "WarpPrism", "Observer", "Immortal", "Oracle", "Tempest", "Disruptor"};*/
     BOSS::ActionSetAbilities relevantActions;
     for (std::string & actionName : relevantActionsNames)
     {
@@ -117,47 +123,27 @@ void ProductionManager::addToBuildOrder(const BOSS::BuildOrderAbilities & BOSSBu
         auto & actionType = actionTargetPair.first;
         auto & target = actionTargetPair.second;
 
-        // TODO: ABILITIES LIKE CHRONOBOOST
         if (actionType.isAbility())
         {
-            BOSS::ActionType targetType = target.targetType;
-            BOSS::ActionType targetProductionType = target.targetProductionType;
-
-            auto & allUnits = m_bot.UnitInfo().getUnits(Players::Self);
-            for (auto & unit : allUnits)
+            AbilityAction abilityInfo;
+            abilityInfo.target_type = UnitType::GetUnitTypeFromName(target.targetType.getName(), m_bot);
+            MetaType targetProd = MetaType(target.targetProductionType.getName(), m_bot);
+            if (targetProd.isUpgrade())
             {
-                // units match
-                std::string CCUnitName = unit.getType().getName();
-                std::string BOSSUnitName = targetType.getName();
-                std::transform(CCUnitName.begin(), CCUnitName.end(), CCUnitName.begin(), ::tolower);
-                std::transform(BOSSUnitName.begin(), BOSSUnitName.end(), BOSSUnitName.begin(), ::tolower);
-
-                MetaType action(sc2::ABILITY_ID::EFFECT_CHRONOBOOST, unit.getUnitPtr()->tag, m_bot);
-                m_queue.queueAsLowestPriority(action, true);
-                std::cout << "CHRONOBOOST ADDED!!!!" << std::endl;
-                break;
-
-                //// what is being produced by the units match
-                //if (CCUnitName == BOSSUnitName && unit.getUnitPtr()->orders.size() > 0 && unit.getUnitPtr()->orders[0].target_unit_tag != sc2::NullTag)
-                //{
-                //    std::string CCUnitProdName = m_bot.GetUnit(unit.getUnitPtr()->orders[0].target_unit_tag).getType().getName();
-                //    std::string BOSSUnitProdName = targetProductionType.getName();
-                //    std::transform(CCUnitProdName.begin(), CCUnitProdName.end(), CCUnitProdName.begin(), ::tolower);
-                //    std::transform(BOSSUnitProdName.begin(), BOSSUnitProdName.end(), BOSSUnitProdName.begin(), ::tolower);
-
-                //    if (CCUnitProdName == BOSSUnitProdName)
-                //    {
-                //        
-                //    }
-                //}
+                abilityInfo.targetProduction_ability = targetProd.getAbility().first;
             }
+            else if (targetProd.isUnit())
+            {
+                abilityInfo.targetProduction_ability = m_bot.Data(targetProd.getUnitType()).buildAbility;
+            }
+            MetaType action("Chronoboost", abilityInfo, m_bot);
+            m_queue.queueAsLowestPriority(action, true);
         }
         else
         {
             MetaType action(actionType.getName(), m_bot);
             m_queue.queueAsLowestPriority(action, true);
         }
-        //newBuildOrder.add(action);
     }
 }
 
@@ -343,6 +329,11 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
             m_buildingManager.addBuildingTask(item.type.getUnitType(), Util::GetTilePosition(m_bot.GetStartLocation()));
         }
     }
+    else if (item.type.isUnit() && item.type.getName().find("Warped") != std::string::npos)
+    {
+        std::cout << "warping unit!" << std::endl;
+        producer.warp(item.type.getUnitType(), m_buildingManager.getBuildingLocation(Building(item.type.getUnitType(), Util::GetTilePosition(sc2::Point2D(producer.getUnitPtr()->pos)))));
+    }
     // if we're dealing with a non-building unit
     else if (item.type.isUnit())
     {
@@ -350,12 +341,24 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
     }
     else if (item.type.isUpgrade())
     {
-        // TODO: UPGRADES
-        //Micro::SmartAbility(producer, m_bot.Data(item.type.getUpgradeID()).buildAbility, m_bot);
+        producer.research(item.type.getAbility().first);
     }
     else if (item.type.isAbility())
     {
-        producer.cast(m_bot.GetUnit(item.type.getAbility().second), item.type.getAbility().first);
+        const AbilityType & action = item.type.getAbility();
+
+        for (auto & unit : m_bot.UnitInfo().getUnits(Players::Self))
+        {            
+            if (unit.getType() == action.second.target_type && unit.getUnitPtr()->orders.size() > 0)
+            {                
+                if (unit.getUnitPtr()->orders[0].ability_id == action.second.targetProduction_ability)
+                {
+                    producer.cast(m_bot.GetUnit(unit.getID()), action.first);
+                    return;
+                }
+            }
+        }        
+        std::cerr << "Could not find target for chronoboost!" << std::endl;
     }
 }
 
@@ -373,7 +376,30 @@ bool ProductionManager::canMakeNow(const Unit & producer, const MetaType & type)
         {
             return false;
         }
-        return true;
+        for (auto & unit : m_bot.UnitInfo().getUnits(Players::Self))
+        {
+            if (unit.getType() == type.getAbility().second.target_type && unit.getUnitPtr()->orders.size() > 0)
+            {
+                if (unit.getUnitPtr()->orders[0].ability_id == type.getAbility().second.targetProduction_ability)
+                {
+                    
+                    for (int index = 0; index < unit.getUnitPtr()->buffs.size(); ++index)
+                    {
+                        std::cout << "index: " << index << std::endl;
+                        auto buff = unit.getUnitPtr()->buffs[index];
+                        std::cout << buff.to_string() << std::endl;
+                        if (buff == 281)
+                        {
+                            std::cout << "can't use cb yet!" << std::endl;
+                            return false;
+                        }
+                    }
+                    std::cout << "can use cb!" << std::endl;
+                    return true;
+                }
+            }
+        }
+        return true;        
     }
 
 #ifdef SC2API
@@ -388,16 +414,23 @@ bool ProductionManager::canMakeNow(const Unit & producer, const MetaType & type)
     {
         // check to see if one of the unit's available abilities matches the build ability type
         sc2::AbilityID MetaTypeAbility;
-        if (type.isAbility())
+        if (type.getName().find("Warped") != std::string::npos)
         {
-            MetaTypeAbility = type.getAbility().first;
+            std::cout << "checking metatypeability for warped" << std::endl;
+            MetaTypeAbility = m_bot.Data(type).warpAbility;
+            std::cout << "MetaTypeAbility is: " << MetaTypeAbility << std::endl;
         }
         else
         {
-            MetaTypeAbility = m_bot.Data(type).buildAbility;
+            MetaTypeAbility = m_bot.Data(type).buildAbility; 
         }
+
         for (const sc2::AvailableAbility & available_ability : available_abilities.abilities)
         {
+            if (type.getName().find("Warped") != std::string::npos)
+            {
+                std::cout << available_ability.ability_id << std::endl;
+            }
             if (available_ability.ability_id == MetaTypeAbility)
             {
                 return true;

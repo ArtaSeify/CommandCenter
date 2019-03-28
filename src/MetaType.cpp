@@ -21,7 +21,15 @@ MetaType::MetaType(const std::string & name, CCBot & bot)
     m_bot = &bot;
     m_name = name;
 
-    m_unitType = UnitType::GetUnitTypeFromName(m_name, bot);
+    if (m_name.find("Warped") != std::string::npos)
+    {
+        m_unitType = UnitType::GetUnitTypeFromName(m_name.substr(0, m_name.find("Warped")), bot);
+    }
+    else
+    {
+        m_unitType = UnitType::GetUnitTypeFromName(m_name, bot);
+    }
+    
     if (m_unitType.isValid())
     {
         m_type = MetaTypes::Unit;
@@ -33,36 +41,11 @@ MetaType::MetaType(const std::string & name, CCBot & bot)
         if (name == data.name)
         {
             m_upgrade = data.upgrade_id;
+            m_ability.first = data.ability_id;
             m_type = MetaTypes::Upgrade;
             return;
         }
     }
-
-    // ability actions. Needed for actions such as Chrono Boost,
-    // MULE drop, etc.
-    for (auto & ability : bot.Observation()->GetAbilityData())
-    {
-        /*if (ability.button_name.find("chrono") != std::string::npos || ability.button_name.find("Chrono") != std::string::npos)
-        {
-            std::cout << "button " << ability.button_name << std::endl;
-        }
-        if (ability.friendly_name.find("chrono") != std::string::npos || ability.friendly_name.find("Chrono") != std::string::npos)
-        {
-            std::cout << "friendly " << ability.friendly_name << std::endl;
-        }
-        if (ability.link_name.find("chrono") != std::string::npos || ability.link_name.find("Chrono") != std::string::npos)
-        {
-            std::cout << "link " << ability.link_name << std::endl;
-        }*/
-        if (name == ability.friendly_name)
-        {
-            m_ability.first = ability.ability_id;
-            m_type = MetaTypes::Ability;
-            std::cout << "chronoboost added from starting build order!" << std::endl;
-            return;
-        }
-    }
-
     BOT_ASSERT(false, "Could not find MetaType with name: %s", name.c_str());
 }
 #else
@@ -129,6 +112,43 @@ MetaType::MetaType(const BWAPI::TechType & t, CCBot & bot)
 }
 #endif
 
+// ability actions. Needed for actions such as Chrono Boost
+MetaType::MetaType(const std::string & name, const AbilityAction & abilityInfo, CCBot & bot)
+{
+    if (name == "Chronoboost")
+    {
+        m_bot = &bot;
+        m_race = m_bot->GetPlayerRace(Players::Self);
+        m_name = name;
+
+        m_ability.first = sc2::ABILITY_ID::EFFECT_CHRONOBOOST;
+        m_ability.second = abilityInfo;
+        m_type = MetaTypes::Ability;
+        
+        return;
+    }
+    std::cerr << "Ability MetaType called but not found" << std::endl;
+    //for (auto & ability : bot.Observation()->GetAbilityData())
+    //{
+    //    /*if (ability.button_name.find("chrono") != std::string::npos || ability.button_name.find("Chrono") != std::string::npos)
+    //    {
+    //        std::cout << "button " << ability.button_name << std::endl;
+    //    }
+    //    if (ability.friendly_name.find("chrono") != std::string::npos || ability.friendly_name.find("Chrono") != std::string::npos)
+    //    {
+    //        std::cout << "friendly " << ability.friendly_name << std::endl;
+    //    }
+    //    if (ability.link_name.find("chrono") != std::string::npos || ability.link_name.find("Chrono") != std::string::npos)
+    //    {
+    //        std::cout << "link " << ability.link_name << std::endl;
+    //    }*/
+    //    if (name == ability.friendly_name)
+    //    {
+    //        
+    //    }
+    //}
+}
+
 
 MetaType::MetaType(const UnitType & unitType, CCBot & bot)
 {
@@ -144,6 +164,14 @@ MetaType::MetaType(const CCUpgrade & upgradeType, CCBot & bot)
     m_bot           = &bot;
     m_type          = MetaTypes::Upgrade;
     m_upgrade       = upgradeType;
+    
+    for (const sc2::UpgradeData & data : bot.Observation()->GetUpgradeData())
+    {
+        if (data.upgrade_id == m_upgrade)
+        {
+            m_ability.first = data.ability_id;
+        }
+    }
 
 #ifdef SC2API
     m_race          = m_bot->GetPlayerRace(Players::Self);
@@ -154,12 +182,12 @@ MetaType::MetaType(const CCUpgrade & upgradeType, CCBot & bot)
 #endif
 }
 
-MetaType::MetaType(const CCAbility & abilityType, CCUnitID target, CCBot & bot)
+MetaType::MetaType(const CCAbility & abilityType, const AbilityAction & abilityInfo, CCBot & bot)
 {
     m_bot = &bot;
     m_type = MetaTypes::Ability;
     m_ability.first = abilityType;
-    m_ability.second = target;
+    m_ability.second = abilityInfo;
 
 #ifdef SC2API
     m_race = m_bot->GetPlayerRace(Players::Self);

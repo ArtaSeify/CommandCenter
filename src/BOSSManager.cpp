@@ -49,14 +49,14 @@ void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMake
     m_params.setSortActions(sortActions);
     
     //int m_threadsForExperiment;
-    /*m_params.setExplorationValue(BOSS::FracType(0.15));
+    m_params.setExplorationValue(BOSS::FracType(0.15));
     m_params.setChangingRoot(true);
     m_params.setUseMaxValue(true);
     m_params.setNumberOfSimulations(5000000);
-    m_params.setSimulationsPerStep(50000); */   
-
+    m_params.setSimulationsPerStep(50000);    
+/*
     m_params.setLevel(1);
-    m_params.setNumPlayouts(250);
+    m_params.setNumPlayouts(250);*/
 
     if (m_largestFrameSearched == 0)
     {
@@ -245,8 +245,8 @@ void BOSSManager::finishSearch()
 
 void BOSSManager::threadSearch()
 {
-    //m_searcher = BOSS::CombatSearch_Integral(m_params);
-    m_searcher = std::make_unique<BOSS::NMCS>(m_params);
+    m_searcher = std::unique_ptr<BOSS::CombatSearch>(new BOSS::CombatSearch_IntegralMCTS(m_params));
+    //m_searcher = std::make_unique<BOSS::NMCS>(m_params);
     
     m_searcher->search();
 
@@ -314,7 +314,7 @@ void BOSSManager::setOpeningBuildOrder()
         }
         else
         {
-            BOSSType = BOSS::ActionTypes::GetActionType(inputBuildOrder[index].getUnitType().getName());
+            BOSSType = BOSS::ActionTypes::GetActionType(inputBuildOrder[index].getName());
         }
         
         // TODO: CONSIDER ABILITIES
