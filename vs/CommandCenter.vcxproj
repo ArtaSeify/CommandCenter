@@ -78,6 +78,7 @@
     <ClInclude Include="..\src\DistanceMap.h" />
     <ClInclude Include="..\src\GameCommander.h" />
     <ClInclude Include="..\src\JSONTools.h" />
+    <ClInclude Include="..\src\LadderInterface.h" />
     <ClInclude Include="..\src\MapTools.h" />
     <ClInclude Include="..\src\MeleeManager.h" />
     <ClInclude Include="..\src\MetaType.h" />
@@ -164,8 +165,8 @@
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>C:\School Work\SC2API_Binary_vs2017\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\School Work\SC2API_Binary_vs2017\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\School Work\s2client-api\build\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\School Work\s2client-api\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LibraryPath>C:\Libraries\BWAPI_420\lib;$(LibraryPath)</LibraryPath>
@@ -174,8 +175,8 @@
     <OutDir>$(ProjectDir)/../bin/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>C:\School Work\SC2API_Binary_vs2017\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\School Work\SC2API_Binary_vs2017\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\School Work\s2client-api\build\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\School Work\s2client-api\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LibraryPath>C:\Libraries\BWAPI_420\lib;$(LibraryPath)</LibraryPath>
@@ -185,7 +186,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories); $(SolutionDir)\..\BOSS\src; $(SolutionDir)..\BOSS\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories); C:\School Work\BOSS\src; C:\School Work\BOSS\include</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Debug/</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -217,7 +218,7 @@
     <Link>
       <AdditionalOptions>%(AdditionalOptions)  /machine:x64 /ignore:4099</AdditionalOptions>
       <AdditionalDependencies>$(SolutionDir)/../bin/BOSS_d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;sc2apid.lib;sc2libd.lib;sc2utilsd.lib;sc2rendererd.lib;sc2protocold.lib;libprotobufd.lib;civetweb.lib;winmm.lib;imm32.lib;version.lib;dinput8.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(SolutionDir)..\BOSS\libs</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); C:\School Work\BOSS\libs</AdditionalLibraryDirectories>
       <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>
@@ -284,7 +285,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories); $(SolutionDir)\..\..\BOSS\src; $(SolutionDir)..\..\BOSS\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories); C:\School Work\BOSS\src; C:\School Work\BOSS\include</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Release/</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -317,7 +318,7 @@
     <Link>
       <AdditionalOptions>%(AdditionalOptions)  /machine:x64</AdditionalOptions>
       <AdditionalDependencies>$(SolutionDir)\..\bin\BOSS.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;sc2api.lib;sc2lib.lib;sc2utils.lib;sc2renderer.lib;sc2protocol.lib;libprotobuf.lib;civetweb.lib;winmm.lib;imm32.lib;version.lib;dinput8.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(SolutionDir)..\BOSS\libs</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); C:\School Work\BOSS\libs</AdditionalLibraryDirectories>
       <GenerateDebugInformation>No</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>

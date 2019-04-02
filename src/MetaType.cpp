@@ -115,7 +115,7 @@ MetaType::MetaType(const BWAPI::TechType & t, CCBot & bot)
 // ability actions. Needed for actions such as Chrono Boost
 MetaType::MetaType(const std::string & name, const AbilityAction & abilityInfo, CCBot & bot)
 {
-    if (name == "Chronoboost")
+    if (name == "ChronoBoost")
     {
         m_bot = &bot;
         m_race = m_bot->GetPlayerRace(Players::Self);
@@ -128,25 +128,6 @@ MetaType::MetaType(const std::string & name, const AbilityAction & abilityInfo, 
         return;
     }
     std::cerr << "Ability MetaType called but not found" << std::endl;
-    //for (auto & ability : bot.Observation()->GetAbilityData())
-    //{
-    //    /*if (ability.button_name.find("chrono") != std::string::npos || ability.button_name.find("Chrono") != std::string::npos)
-    //    {
-    //        std::cout << "button " << ability.button_name << std::endl;
-    //    }
-    //    if (ability.friendly_name.find("chrono") != std::string::npos || ability.friendly_name.find("Chrono") != std::string::npos)
-    //    {
-    //        std::cout << "friendly " << ability.friendly_name << std::endl;
-    //    }
-    //    if (ability.link_name.find("chrono") != std::string::npos || ability.link_name.find("Chrono") != std::string::npos)
-    //    {
-    //        std::cout << "link " << ability.link_name << std::endl;
-    //    }*/
-    //    if (name == ability.friendly_name)
-    //    {
-    //        
-    //    }
-    //}
 }
 
 

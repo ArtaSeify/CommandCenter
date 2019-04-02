@@ -19,7 +19,7 @@
         "BotRace"                   : "Protoss",
         "EnemyDifficulty"           : 1,
         "EnemyRace"                 : "Random",
-        "MapFile"                   : "InterloperLE.SC2Map",
+        "MapFile"                   : "AbyssalReefLE.SC2Map",
         "StepSize"                  : 1
     },
         
@@ -113,7 +113,7 @@
             "Protoss_BOSS"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : ["Probe", "Pylon", "Gateway", "Assimilator", "Probe", "Chronoboost_Nexus_Probe", "Probe", "Probe", "Probe", "Probe", "Chronoboost_Nexus_Probe", "CyberneticsCore", "WarpGateResearch", "Chronoboost_CyberneticsCore_WarpGateResearch", "Chronoboost_CyberneticsCore_WarpGateResearch", "WarpGate", "StalkerWarped", "Probe", "Probe", "Probe"],
+                "OpeningBuildOrder" : ["Probe","ChronoBoost_Nexus_Probe","Assimilator","Probe","Pylon","Probe","Gateway","Probe","Pylon","Probe","CyberneticsCore","Probe", "Gateway", "WarpGateResearch", "ChronoBoost_CyberneticsCore_WarpGateResearch", "WarpGate"],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
                 "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 8 ] ]
             },

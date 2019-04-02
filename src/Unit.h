@@ -73,7 +73,7 @@ namespace CC
         void morph(const UnitType & type) const;
         void cast(const Unit & target, CCAbility ability) const;
         void research(CCAbility upgrade) const;
-        void warp(const UnitType & type, CCTilePosition pos) const;
+        void warp(const UnitType & type, CCPosition pos) const;
     };
 
 }

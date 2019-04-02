@@ -18,7 +18,7 @@ BOSSManager::BOSSManager(CCBot & bot)
     , m_searchThread            ()
 {
     // Initialize all the BOSS internal data
-    BOSS::Init("../BOSS/bin/SC2Data.json");
+    BOSS::Init("../bin/SC2Data.json");
     m_params = BOSS::CombatSearchParameters();
 }
 
@@ -40,7 +40,7 @@ void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMake
     m_params.setAlwaysMakeWorkers(alwaysMakeWorkers);
 
     // the initial build order to follow
-    m_params.setOpeningBuildOrder(openingBuildOrder);
+    m_params.setInitialState(m_currentGameState);
 
     // time limit of the search
     m_params.setSearchTimeLimit(timeLimit);
@@ -50,10 +50,10 @@ void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMake
     
     //int m_threadsForExperiment;
     m_params.setExplorationValue(BOSS::FracType(0.15));
-    m_params.setChangingRoot(true);
+    m_params.setChangingRoot(false);
     m_params.setUseMaxValue(true);
-    m_params.setNumberOfSimulations(5000000);
-    m_params.setSimulationsPerStep(50000);    
+    m_params.setNumberOfSimulations(10000);
+    m_params.setSimulationsPerStep(100);    
 /*
     m_params.setLevel(1);
     m_params.setNumPlayouts(250);*/
@@ -62,8 +62,6 @@ void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMake
     {
         std::cout << "first search!" << std::endl;
     }
-
-    m_params.setInitialState(m_currentGameState);
 
     // limit is start frame of the last unit in the build order + framelimit
     std::cout << "setting frame limit as: " << m_largestFrameSearched + frameLimit << std::endl;
@@ -89,6 +87,7 @@ void BOSSManager::setCurrentGameState()
 
     m_currentGameState = state;
 
+    std::cout << "set opening build order called" << std::endl;
     setOpeningBuildOrder();
 }
 
@@ -147,7 +146,9 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
         BOSS::NumUnits id = BOSS::NumUnits(it - unitsFinished.begin());
         BOSS::NumUnits builderID = -1;
 
-        m_currentUnits.push_back(BOSS::Unit(type, id, builderID, 0));
+        BOSS::Unit unit(type, id, builderID, 0);
+        unit.setEnergy(it->getEnergy());
+        m_currentUnits.push_back(unit);
     }
 
     // the units (buildings) that are being constructed. We need to find out how many frames until the unit
@@ -241,14 +242,19 @@ void BOSSManager::startSearch()
 void BOSSManager::finishSearch()
 {
     m_searcher->finishSearch();
+    m_finishSearching = true;
 }
 
 void BOSSManager::threadSearch()
 {
-    m_searcher = std::unique_ptr<BOSS::CombatSearch>(new BOSS::CombatSearch_IntegralMCTS(m_params));
-    //m_searcher = std::make_unique<BOSS::NMCS>(m_params);
-    
-    m_searcher->search();
+    while (!m_finishSearching)
+    {
+        m_searcher = std::unique_ptr<BOSS::CombatSearch>(new BOSS::CombatSearch_IntegralMCTS(m_params));
+        //m_searcher = std::make_unique<BOSS::NMCS>(m_params);
+
+        m_searcher->search();
+        storeResults();
+    }
 
     searchFinished();
 
@@ -256,10 +262,24 @@ void BOSSManager::threadSearch()
     m_searchThread.detach();
 }
 
+void BOSSManager::storeResults()
+{
+    m_searchResults.push_back(m_searcher->getResults());
+}
+
 void BOSSManager::searchFinished()
 {
-    m_results = m_searcher->getResults();
+    m_results.highestEval = std::numeric_limits<float>::min();
+    
+    for (auto & result : m_searchResults)
+    {
+        if (result.highestEval > m_results.highestEval)
+        {
+            m_results = result;
+        }
+    }
 
+    m_results = m_searcher->getResults();
     if (m_results.solved)
     {
         std::cout << "search solved!" << std::endl;
@@ -270,21 +290,15 @@ void BOSSManager::searchFinished()
     }
 
     // update GameState with the new build order we found
-    for (auto & actionTargetPair : m_results.buildOrder)
-    {        
-        auto & action = actionTargetPair.first;
-        auto & target = actionTargetPair.second;
-
-        // do the ability
-        if (action.isAbility())
+    for (auto & action : m_results.finishedUnitsBuildOrder)
+    {
+        if (action.first.isAbility())
         {
-            m_currentGameState.doAbility(action, target.targetID);
+            m_currentGameState.doAbility(action.first, action.second.targetID);
         }
-
-        // perform the action
         else
         {
-            m_currentGameState.doAction(action);
+            m_currentGameState.doAction(action.first);
         }
     }
 
@@ -295,8 +309,10 @@ void BOSSManager::searchFinished()
     m_searcher->printResults();
     //std::cout << "\nSearched " << m_results.nodesExpanded << " nodes in " << m_results.timeElapsed << "ms @ " << (1000.0*m_results.nodesExpanded / m_results.timeElapsed) << " nodes/sec\n\n";
 
+    m_searchResults.clear();
     m_searching = false;
     m_searchFinished = true;
+    m_finishSearching = false;
 }
 
 void BOSSManager::setOpeningBuildOrder()
@@ -310,20 +326,17 @@ void BOSSManager::setOpeningBuildOrder()
         BOSS::ActionType BOSSType;
         if (inputBuildOrder[index].isAbility() && m_bot.GetPlayerRace(Players::Self) == CCRace::Protoss)
         {
+            AbilityAction abilityInfo = inputBuildOrder[index].getAbility().second;
             BOSSType = BOSS::ActionTypes::GetSpecialAction(BOSS::Races::Protoss);
+            BOSS::AbilityAction ability(BOSSType, 0, 0, 0, BOSS::ActionTypes::GetActionType(abilityInfo.target_type.getName()), 
+                        BOSS::ActionTypes::GetActionType(abilityInfo.targetProduction_name));
+            BOSSBuildOrder.add(BOSSType, ability);
         }
         else
         {
             BOSSType = BOSS::ActionTypes::GetActionType(inputBuildOrder[index].getName());
+            BOSSBuildOrder.add(BOSSType);
         }
-        
-        // TODO: CONSIDER ABILITIES
-        if (BOSSType.isAbility())
-        {
-            continue;
-        }
-
-        BOSSBuildOrder.add(BOSSType);
     }
 
     // do the build order
@@ -333,7 +346,7 @@ void BOSSManager::setOpeningBuildOrder()
 
 const BOSS::BuildOrderAbilities & BOSSManager::getBuildOrder()
 {
-    return m_results.buildOrder;
+    return m_results.finishedUnitsBuildOrder;
 }
 
 BOSS::RaceID BOSSManager::getBOSSPlayerRace() const

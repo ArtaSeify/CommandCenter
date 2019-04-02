@@ -31,7 +31,7 @@ void ProductionManager::onStart()
 
 void ProductionManager::onFrame()
 {
-    //searchBuildOrder();
+    searchBuildOrder();
     fixBuildOrderDeadlock();
     manageBuildOrderQueue();
 
@@ -136,7 +136,8 @@ void ProductionManager::addToBuildOrder(const BOSS::BuildOrderAbilities & BOSSBu
             {
                 abilityInfo.targetProduction_ability = m_bot.Data(targetProd.getUnitType()).buildAbility;
             }
-            MetaType action("Chronoboost", abilityInfo, m_bot);
+            abilityInfo.targetProduction_name = targetProd.getName();
+            MetaType action("ChronoBoost", abilityInfo, m_bot);
             m_queue.queueAsLowestPriority(action, true);
         }
         else
@@ -161,7 +162,6 @@ void ProductionManager::manageBuildOrderQueue()
     // while there is still something left in the queue
     while (!m_queue.isEmpty())
     {
-        
         // this is the unit which can produce the currentItem
         Unit producer = getProducer(currentItem.type);
 
@@ -323,25 +323,59 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
         if (item.type.getUnitType().isMorphedBuilding())
         {
             producer.morph(item.type.getUnitType());
+            std::cout << producer.getPosition().x << "," << producer.getPosition().y << std::endl;
+            std::cout << "morphing!" << std::endl;
         }
         else
         {
             m_buildingManager.addBuildingTask(item.type.getUnitType(), Util::GetTilePosition(m_bot.GetStartLocation()));
+            std::cout << "building!" << std::endl;
         }
+        
     }
     else if (item.type.isUnit() && item.type.getName().find("Warped") != std::string::npos)
     {
         std::cout << "warping unit!" << std::endl;
-        producer.warp(item.type.getUnitType(), m_buildingManager.getBuildingLocation(Building(item.type.getUnitType(), Util::GetTilePosition(sc2::Point2D(producer.getUnitPtr()->pos)))));
+        float closest_to_enemy_pylon_pos = std::numeric_limits<float>::max();
+        CCPosition warpPos;
+        for (auto & unit : m_bot.UnitInfo().getUnits(Players::Self))
+        {
+            if (unit.getType().getAPIUnitType() == sc2::UNIT_TYPEID::PROTOSS_PYLON)
+            {
+                float distance = Util::Dist(unit.getPosition(), m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition());
+                if (distance < closest_to_enemy_pylon_pos)
+                {
+                    closest_to_enemy_pylon_pos = distance;
+                    warpPos = unit.getPosition();
+                }
+            }
+        }
+
+        for (int x = -5; x < 6; ++x)
+        {
+            for (int y = -5; y < 6; ++y)
+            {
+                if (m_bot.Query()->Placement(m_bot.Data(item.type.getUnitType()).warpAbility, CCPosition(warpPos.x + x, warpPos.y + y)))
+                {
+                    warpPos.x += x;
+                    warpPos.y += y;
+                }
+            }
+        }
+
+        producer.warp(item.type.getUnitType(), warpPos);
+        std::cout << "warping!" << std::endl;
     }
     // if we're dealing with a non-building unit
     else if (item.type.isUnit())
     {
         producer.train(item.type.getUnitType());
+        std::cout << "training unit!" << std::endl;
     }
     else if (item.type.isUpgrade())
     {
         producer.research(item.type.getAbility().first);
+        std::cout << "researching upgrade!" << std::endl;
     }
     else if (item.type.isAbility())
     {
@@ -354,6 +388,7 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
                 if (unit.getUnitPtr()->orders[0].ability_id == action.second.targetProduction_ability)
                 {
                     producer.cast(m_bot.GetUnit(unit.getID()), action.first);
+                    std::cout << "casting ability!" << std::endl;
                     return;
                 }
             }
@@ -376,29 +411,7 @@ bool ProductionManager::canMakeNow(const Unit & producer, const MetaType & type)
         {
             return false;
         }
-        for (auto & unit : m_bot.UnitInfo().getUnits(Players::Self))
-        {
-            if (unit.getType() == type.getAbility().second.target_type && unit.getUnitPtr()->orders.size() > 0)
-            {
-                if (unit.getUnitPtr()->orders[0].ability_id == type.getAbility().second.targetProduction_ability)
-                {
-                    
-                    for (int index = 0; index < unit.getUnitPtr()->buffs.size(); ++index)
-                    {
-                        std::cout << "index: " << index << std::endl;
-                        auto buff = unit.getUnitPtr()->buffs[index];
-                        std::cout << buff.to_string() << std::endl;
-                        if (buff == 281)
-                        {
-                            std::cout << "can't use cb yet!" << std::endl;
-                            return false;
-                        }
-                    }
-                    std::cout << "can use cb!" << std::endl;
-                    return true;
-                }
-            }
-        }
+        
         return true;        
     }
 
@@ -416,9 +429,7 @@ bool ProductionManager::canMakeNow(const Unit & producer, const MetaType & type)
         sc2::AbilityID MetaTypeAbility;
         if (type.getName().find("Warped") != std::string::npos)
         {
-            std::cout << "checking metatypeability for warped" << std::endl;
             MetaTypeAbility = m_bot.Data(type).warpAbility;
-            std::cout << "MetaTypeAbility is: " << MetaTypeAbility << std::endl;
         }
         else
         {
@@ -427,10 +438,6 @@ bool ProductionManager::canMakeNow(const Unit & producer, const MetaType & type)
 
         for (const sc2::AvailableAbility & available_ability : available_abilities.abilities)
         {
-            if (type.getName().find("Warped") != std::string::npos)
-            {
-                std::cout << available_ability.ability_id << std::endl;
-            }
             if (available_ability.ability_id == MetaTypeAbility)
             {
                 return true;

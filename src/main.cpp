@@ -7,17 +7,13 @@
 
 #include "sc2utils/sc2_manage_process.h"
 #include "sc2api/sc2_api.h"
+#include "LadderInterface.h"
 
 using namespace CC;
 
 int main(int argc, char* argv[]) 
 {
-    sc2::Coordinator coordinator;
-    if (!coordinator.LoadSettings(argc, argv)) 
-    {
-        std::cout << "Unable to find or parse settings." << std::endl;
-        return 1;
-    }
+    bool connectToLadder = true;
 
     // Add the custom bot, it will control the players.
     CCBot bot;
@@ -61,6 +57,20 @@ int main(int argc, char* argv[])
         std::cerr << "Config file has no 'Game Info' object, required for starting the bot\n";
         std::cerr << "Please read the instructions and try again\n";
         exit(-1);
+    }
+
+    if (connectToLadder)
+    {
+        RunBot(argc, argv, &bot, sc2::Race::Protoss);
+
+        return 0;
+    }
+
+    sc2::Coordinator coordinator;
+    if (!coordinator.LoadSettings(argc, argv))
+    {
+        std::cout << "Unable to find or parse settings." << std::endl;
+        return 1;
     }
     
     // WARNING: Bot logic has not been thorougly tested on step sizes > 1

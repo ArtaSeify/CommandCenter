@@ -16,6 +16,7 @@ namespace CC
         CCUnitID        target_id;
         UnitType        target_type;
         sc2::AbilityID  targetProduction_ability;
+        std::string     targetProduction_name;
 
         AbilityAction() : target_id(), target_type(), targetProduction_ability() {}
     };
