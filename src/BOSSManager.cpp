@@ -18,7 +18,7 @@ BOSSManager::BOSSManager(CCBot & bot)
     , m_searchThread            ()
 {
     // Initialize all the BOSS internal data
-    BOSS::Init("../BOSS/bin/SC2Data.json");
+    BOSS::Init("../bin/SC2Data.json");
     m_params = BOSS::CombatSearchParameters();
 }
 
