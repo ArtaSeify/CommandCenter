@@ -206,12 +206,13 @@ void StrategyManager::readStrategyFile(const std::string & filename)
                         }
 
                         // chronoboost
-                        if (itemName.find("Chronoboost") != std::string::npos)
+                        if (itemName.find("ChronoBoost") != std::string::npos)
                         {
                             AbilityAction abilityInfo;
                             size_t split_index = itemName.find("_", 12);
                             abilityInfo.target_type = UnitType::GetUnitTypeFromName(itemName.substr(12, split_index - 12), m_bot);
                             MetaType targetProd = MetaType(itemName.substr(split_index + 1), m_bot);
+                            abilityInfo.targetProduction_name = targetProd.getName();
                             if (targetProd.isUpgrade())
                             {
                                 abilityInfo.targetProduction_ability = targetProd.getAbility().first;
@@ -221,7 +222,7 @@ void StrategyManager::readStrategyFile(const std::string & filename)
                                 abilityInfo.targetProduction_ability = m_bot.Data(targetProd.getUnitType()).buildAbility;
                             }  
 
-                            MetaType metaType("Chronoboost", abilityInfo, m_bot);
+                            MetaType metaType("ChronoBoost", abilityInfo, m_bot);
                             buildOrder.add(metaType);
                         }
 

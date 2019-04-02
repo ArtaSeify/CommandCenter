@@ -395,11 +395,11 @@ void Unit::research(CCAbility upgrade) const
 #endif
 }
 
-void Unit::warp(const UnitType & type, CCTilePosition pos) const
+void Unit::warp(const UnitType & type, CCPosition pos) const
 {
     BOT_ASSERT(isValid(), "Unit is not valid");
 #ifdef SC2API
-    m_bot->Actions()->UnitCommand(m_unit, m_bot->Data(type).warpAbility, Util::GetPosition(pos));
+    m_bot->Actions()->UnitCommand(m_unit, m_bot->Data(type).warpAbility, pos);
 #endif
 }
 

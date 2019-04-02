@@ -125,6 +125,7 @@ void BuildingManager::assignWorkersToUnassignedBuildings()
         // grab the worker unit from WorkerManager which is closest to this final position
         Unit builderUnit = m_bot.Workers().getBuilder(b);
         b.builderUnit = builderUnit;
+
         if (!b.builderUnit.isValid())
         {
             continue;

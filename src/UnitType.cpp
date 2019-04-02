@@ -250,6 +250,7 @@ int UnitType::tileWidth() const
 #ifdef SC2API
     if (isMineral()) { return 2; }
     if (isGeyser()) { return 3; }
+    if (isCombatUnit()) { return 2; }
     else { return (int)(2 * m_bot->Observation()->GetAbilityData()[m_bot->Data(*this).buildAbility].footprint_radius); }
 #else
     return m_type.tileWidth();
@@ -261,6 +262,7 @@ int UnitType::tileHeight() const
 #ifdef SC2API
     if (isMineral()) { return 1; }
     if (isGeyser()) { return 3; }
+    if (isCombatUnit()) { return 2; }
     else { return (int)(2 * m_bot->Observation()->GetAbilityData()[m_bot->Data(*this).buildAbility].footprint_radius); }
 #else
     return m_type.tileHeight();
@@ -394,6 +396,7 @@ bool UnitType::isMorphedBuilding() const
         case sc2::UNIT_TYPEID::ZERG_GREATERSPIRE:           { return true;  }
         case sc2::UNIT_TYPEID::TERRAN_PLANETARYFORTRESS:    { return true;  }
         case sc2::UNIT_TYPEID::TERRAN_ORBITALCOMMAND:       { return true;  }
+        case sc2::UNIT_TYPEID::PROTOSS_WARPGATE:            { return true;  }
         default:                                            { return false; }                                                            
     }
 #else

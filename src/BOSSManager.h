@@ -26,12 +26,15 @@ namespace CC
         BOSS::CombatSearchParameters        m_params;
         BOSS::CombatSearchResults           m_results;
         std::thread                         m_searchThread;
+        std::vector<BOSS::CombatSearchResults> m_searchResults;
 
         bool m_searching;
         bool m_searchFinished;
+        bool m_finishSearching;
         int  m_largestFrameSearched;
 
         void setCurrentUnits(const std::vector<Unit> & CCUnits);
+        void storeResults();
         void searchFinished();
         void threadSearch();
 
