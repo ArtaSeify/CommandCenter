@@ -118,6 +118,7 @@ void BuildingManager::assignWorkersToUnassignedBuildings()
             // unreserve the resources
             m_reservedMinerals -= b.type.mineralPrice();
             m_reservedGas -= b.type.gasPrice();
+            break;
         }
 
         b.finalPosition = testLocation;

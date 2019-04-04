@@ -13,7 +13,7 @@ using namespace CC;
 
 int main(int argc, char* argv[]) 
 {
-    bool connectToLadder = true;
+    bool connectToLadder = false;
 
     // Add the custom bot, it will control the players.
     CCBot bot;
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
         std::cerr << "Please read the instructions and try again\n";
         exit(-1);
     }*/
-
+    
     std::string botRaceString;
     std::string enemyRaceString;
     std::string mapString;
@@ -87,6 +87,12 @@ int main(int argc, char* argv[])
     // Start the game.
     coordinator.LaunchStarcraft();
     coordinator.StartGame(mapString);
+
+    bot.Debug()->DebugIgnoreFood();
+    bot.Debug()->DebugIgnoreMineral();
+    bot.Debug()->DebugGiveAllResources();
+    bot.Debug()->DebugIgnoreResourceCost();
+    bot.Debug()->DebugFastBuild();
 
     // Step forward the game simulation.
     while (true) 

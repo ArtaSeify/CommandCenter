@@ -19,10 +19,12 @@ namespace CC
     class BOSSManager
     {
         CCBot &                             m_bot;
-        //BOSS::CombatSearch_Integral         m_searcher;
         std::unique_ptr<BOSS::CombatSearch> m_searcher;
+
         BOSS::GameState                     m_currentGameState;
         std::vector<BOSS::Unit>             m_currentUnits;
+        std::vector<int>                    m_enemyUnits;
+
         BOSS::CombatSearchParameters        m_params;
         BOSS::CombatSearchResults           m_results;
         std::thread                         m_searchThread;
