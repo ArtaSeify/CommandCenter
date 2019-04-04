@@ -13,8 +13,6 @@ using namespace CC;
 
 int main(int argc, char* argv[]) 
 {
-    bool connectToLadder = true;
-
     // Add the custom bot, it will control the players.
     CCBot bot;
     
@@ -37,6 +35,7 @@ int main(int argc, char* argv[])
         exit(-1);
     }*/
 
+    bool connectToLadder = j["ConnectToLadder"].get<bool>();
     std::string botRaceString;
     std::string enemyRaceString;
     std::string mapString;

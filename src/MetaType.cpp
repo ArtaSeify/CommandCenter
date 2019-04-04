@@ -121,7 +121,8 @@ MetaType::MetaType(const std::string & name, const AbilityAction & abilityInfo, 
         m_race = m_bot->GetPlayerRace(Players::Self);
         m_name = name;
 
-        m_ability.first = sc2::ABILITY_ID::EFFECT_CHRONOBOOST;
+        //m_ability.first = sc2::ABILITY_ID::EFFECT_CHRONOBOOST;
+        m_ability.first = 3755;
         m_ability.second = abilityInfo;
         m_type = MetaTypes::Ability;
         

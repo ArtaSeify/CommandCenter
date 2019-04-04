@@ -26,3 +26,4 @@ bin/*.bsc
 vs/RelWithDebInfo/CommandCenter.log
 *.log
 *.pdb
+/BOSS

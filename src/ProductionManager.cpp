@@ -31,7 +31,7 @@ void ProductionManager::onStart()
 
 void ProductionManager::onFrame()
 {
-    searchBuildOrder();
+    //searchBuildOrder();
     fixBuildOrderDeadlock();
     manageBuildOrderQueue();
 
@@ -69,7 +69,7 @@ void ProductionManager::searchBuildOrder()
 
     m_BOSSManager.setCurrentGameState();
 
-    const int framesToSearch = 5000;
+    const int framesToSearch = 4032;
 
     // actions to search over
     std::vector<std::string> relevantActionsNames =
@@ -322,20 +322,17 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
     {
         if (item.type.getUnitType().isMorphedBuilding())
         {
+            std::cout << "morphing gateway!" << std::endl;
             producer.morph(item.type.getUnitType());
-            std::cout << producer.getPosition().x << "," << producer.getPosition().y << std::endl;
-            std::cout << "morphing!" << std::endl;
         }
         else
         {
             m_buildingManager.addBuildingTask(item.type.getUnitType(), Util::GetTilePosition(m_bot.GetStartLocation()));
-            std::cout << "building!" << std::endl;
         }
         
     }
     else if (item.type.isUnit() && item.type.getName().find("Warped") != std::string::npos)
     {
-        std::cout << "warping unit!" << std::endl;
         float closest_to_enemy_pylon_pos = std::numeric_limits<float>::max();
         CCPosition warpPos;
         for (auto & unit : m_bot.UnitInfo().getUnits(Players::Self))
@@ -364,18 +361,15 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
         }
 
         producer.warp(item.type.getUnitType(), warpPos);
-        std::cout << "warping!" << std::endl;
     }
     // if we're dealing with a non-building unit
     else if (item.type.isUnit())
     {
         producer.train(item.type.getUnitType());
-        std::cout << "training unit!" << std::endl;
     }
     else if (item.type.isUpgrade())
     {
         producer.research(item.type.getAbility().first);
-        std::cout << "researching upgrade!" << std::endl;
     }
     else if (item.type.isAbility())
     {
@@ -388,7 +382,6 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
                 if (unit.getUnitPtr()->orders[0].ability_id == action.second.targetProduction_ability)
                 {
                     producer.cast(m_bot.GetUnit(unit.getID()), action.first);
-                    std::cout << "casting ability!" << std::endl;
                     return;
                 }
             }

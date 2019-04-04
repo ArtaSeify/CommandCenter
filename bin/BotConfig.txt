@@ -1,4 +1,6 @@
 {
+    "ConnectToLadder" : false,
+
     "Bot Info" :
     {
         "BotName"                   : "CommandCenter",
@@ -113,7 +115,7 @@
             "Protoss_BOSS"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : ["Probe","ChronoBoost_Nexus_Probe","Assimilator","Probe","Pylon","Probe","Gateway","Probe","Pylon","Probe","CyberneticsCore","Probe", "Gateway", "WarpGateResearch", "ChronoBoost_CyberneticsCore_WarpGateResearch", "WarpGate"],
+                "OpeningBuildOrder" : ["Probe","ChronoBoost_Nexus_Probe","Assimilator","Probe","Pylon","Probe","Gateway","Probe","Pylon","Probe","CyberneticsCore","Probe", "Gateway", "WarpGateResearch", "ChronoBoost_CyberneticsCore_WarpGateResearch"],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
                 "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 8 ] ]
             },

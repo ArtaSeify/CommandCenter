@@ -16,6 +16,7 @@ BOSSManager::BOSSManager(CCBot & bot)
     , m_largestFrameSearched    (0)
     , m_currentUnits            ()
     , m_searchThread            ()
+    , m_finishSearching         (false)
 {
     // Initialize all the BOSS internal data
     BOSS::Init("../bin/SC2Data.json");
@@ -50,10 +51,10 @@ void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMake
     
     //int m_threadsForExperiment;
     m_params.setExplorationValue(BOSS::FracType(0.15));
-    m_params.setChangingRoot(false);
+    m_params.setChangingRoot(true);
     m_params.setUseMaxValue(true);
-    m_params.setNumberOfSimulations(10000);
-    m_params.setSimulationsPerStep(100);    
+    m_params.setNumberOfSimulations(200000);
+    m_params.setSimulationsPerStep(5000);    
 /*
     m_params.setLevel(1);
     m_params.setNumPlayouts(250);*/
