@@ -13,10 +13,10 @@ BOSSManager::BOSSManager(CCBot & bot)
     , m_currentGameState        ()
     , m_searching               (false)
     , m_searchFinished          (false)
+    , m_finishSearching         (false)
     , m_largestFrameSearched    (0)
     , m_currentUnits            ()
     , m_searchThread            ()
-    , m_finishSearching         (false)
 {
     // Initialize all the BOSS internal data
     BOSS::Init("../bin/SC2Data.json");
@@ -43,6 +43,10 @@ void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMake
     // the initial build order to follow
     m_params.setInitialState(m_currentGameState);
 
+    // the enemy data
+    m_params.setEnemyUnits(m_enemyUnits);
+    m_params.setEnemyRace(BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Enemy)));
+
     // time limit of the search
     m_params.setSearchTimeLimit(timeLimit);
 
@@ -53,7 +57,7 @@ void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMake
     m_params.setExplorationValue(BOSS::FracType(0.15));
     m_params.setChangingRoot(true);
     m_params.setUseMaxValue(true);
-    m_params.setNumberOfSimulations(200000);
+    m_params.setNumberOfSimulations(500000);
     m_params.setSimulationsPerStep(5000);    
 /*
     m_params.setLevel(1);
@@ -230,6 +234,18 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
 
         m_currentUnits.push_back(unit);
     }
+
+    // enemy units
+    m_enemyUnits.clear();
+    m_enemyUnits = std::vector<int>(BOSS::ActionTypes::GetAllActionTypes().size());
+
+    std::cout << "enemy units:" << std::endl;
+    auto enemyUnits = m_bot.UnitInfo().getUnits(Players::Enemy);
+    for (auto & enemyUnit : enemyUnits)
+    {
+        m_enemyUnits[BOSS::ActionTypes::GetActionType(enemyUnit.getType().getName()).getID()]++;
+        std::cout << enemyUnit.getType().getName() << std::endl;
+    }
 }
 
 void BOSSManager::startSearch()
@@ -244,6 +260,7 @@ void BOSSManager::finishSearch()
 {
     m_searcher->finishSearch();
     m_finishSearching = true;
+    std::cout << "finish search called!" << std::endl;
 }
 
 void BOSSManager::threadSearch()
@@ -307,7 +324,7 @@ void BOSSManager::searchFinished()
     // in the build order
     m_largestFrameSearched = m_currentGameState.getCurrentFrame();
 
-    m_searcher->printResults();
+    //m_searcher->printResults();
     //std::cout << "\nSearched " << m_results.nodesExpanded << " nodes in " << m_results.timeElapsed << "ms @ " << (1000.0*m_results.nodesExpanded / m_results.timeElapsed) << " nodes/sec\n\n";
 
     m_searchResults.clear();

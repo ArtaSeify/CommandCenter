@@ -87,6 +87,12 @@ int main(int argc, char* argv[])
     coordinator.LaunchStarcraft();
     coordinator.StartGame(mapString);
 
+    bot.Debug()->DebugIgnoreFood();
+    bot.Debug()->DebugIgnoreMineral();
+    bot.Debug()->DebugGiveAllResources();
+    bot.Debug()->DebugIgnoreResourceCost();
+    bot.Debug()->DebugFastBuild();
+
     // Step forward the game simulation.
     while (true) 
     {

@@ -31,7 +31,7 @@ void ProductionManager::onStart()
 
 void ProductionManager::onFrame()
 {
-    //searchBuildOrder();
+    searchBuildOrder();
     fixBuildOrderDeadlock();
     manageBuildOrderQueue();
 
@@ -267,6 +267,8 @@ Unit ProductionManager::getProducer(const MetaType & type, CCPosition closestTo)
         if (!unit.isCompleted()) { continue; }
         if (!type.isAbility() && m_bot.Data(unit).isBuilding && unit.isTraining()) { continue; }
         if (unit.isFlying()) { continue; }
+        if (m_bot.GetPlayerRace(Players::Self) == CCRace::Protoss 
+            && unit.getType().isMorphedBuilding() && m_bot.Query()->GetAbilitiesForUnit(unit.getUnitPtr()).abilities.empty()) { continue; }
 
         // TODO: if unit is not powered continue
         //if (m_bot.GetPlayerRace(Players::Self) == CCRace::Protoss && unit.getType().isBuilding() && !unit.isPowered()) { continue; }
@@ -322,22 +324,25 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
     {
         if (item.type.getUnitType().isMorphedBuilding())
         {
-            std::cout << "morphing gateway!" << std::endl;
             producer.morph(item.type.getUnitType());
+            std::cout << producer.getPosition().x << "," << producer.getPosition().y << std::endl;
+            //std::cout << "morphing!" << std::endl;
         }
         else
         {
             m_buildingManager.addBuildingTask(item.type.getUnitType(), Util::GetTilePosition(m_bot.GetStartLocation()));
+            //std::cout << "building!" << std::endl;
         }
         
     }
     else if (item.type.isUnit() && item.type.getName().find("Warped") != std::string::npos)
     {
+        //std::cout << "warping unit!" << std::endl;
         float closest_to_enemy_pylon_pos = std::numeric_limits<float>::max();
         CCPosition warpPos;
         for (auto & unit : m_bot.UnitInfo().getUnits(Players::Self))
         {
-            if (unit.getType().getAPIUnitType() == sc2::UNIT_TYPEID::PROTOSS_PYLON)
+            if (unit.getType().getAPIUnitType() == sc2::UNIT_TYPEID::PROTOSS_PYLON || unit.getType().getAPIUnitType() == sc2::UNIT_TYPEID::PROTOSS_WARPPRISMPHASING)
             {
                 float distance = Util::Dist(unit.getPosition(), m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition());
                 if (distance < closest_to_enemy_pylon_pos)
@@ -348,28 +353,43 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
             }
         }
 
+        CCPosition closest_position;
+        float closest_distance = std::numeric_limits<float>::max();
         for (int x = -5; x < 6; ++x)
         {
             for (int y = -5; y < 6; ++y)
             {
-                if (m_bot.Query()->Placement(m_bot.Data(item.type.getUnitType()).warpAbility, CCPosition(warpPos.x + x, warpPos.y + y)))
+                CCPosition pos = CCPosition(warpPos.x + x, warpPos.y + y);
+                if (m_bot.Query()->Placement(m_bot.Data(item.type.getUnitType()).warpAbility, pos))
                 {
-                    warpPos.x += x;
-                    warpPos.y += y;
+                    float distToEnemyBase = Util::Dist(pos, m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition());
+                    if (distToEnemyBase < closest_distance)
+                    {
+                        closest_position = pos;
+                        closest_distance = distToEnemyBase;
+                    }
+                    //std::cout << "warp-in is possible in location: " << warpPos.x + x << "," << warpPos.y + y << std::endl;
+                }
+                else
+                {
+                    //std::cout << "unable to warp in location: " << warpPos.x + x << "," << warpPos.y + y << std::endl;
                 }
             }
         }
 
-        producer.warp(item.type.getUnitType(), warpPos);
+        producer.warp(item.type.getUnitType(), closest_position);
+        std::cout << "warping! " << closest_position.x << "," << closest_position.y << std::endl;
     }
     // if we're dealing with a non-building unit
     else if (item.type.isUnit())
     {
         producer.train(item.type.getUnitType());
+        //std::cout << "training unit!" << std::endl;
     }
     else if (item.type.isUpgrade())
     {
         producer.research(item.type.getAbility().first);
+        //std::cout << "researching upgrade!" << std::endl;
     }
     else if (item.type.isAbility())
     {
@@ -382,6 +402,7 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
                 if (unit.getUnitPtr()->orders[0].ability_id == action.second.targetProduction_ability)
                 {
                     producer.cast(m_bot.GetUnit(unit.getID()), action.first);
+                    //std::cout << "casting ability!" << std::endl;
                     return;
                 }
             }
@@ -397,7 +418,7 @@ bool ProductionManager::canMakeNow(const Unit & producer, const MetaType & type)
         return false;
     }
 
-    // can't use chronoboost
+    // can't use chronoboost if the nexus has less than 50 energy
     if (type.isAbility() && type.getAbility().first == sc2::ABILITY_ID::EFFECT_CHRONOBOOST)
     {
         if (producer.getEnergy() < 50)
