@@ -93,8 +93,8 @@ void ProductionManager::searchBuildOrder()
     // how many times we are allowed to do an action. if no limit is given, then we can do it
     // as many times as we want
     std::vector<std::pair<BOSS::ActionType, int>> maxActions;
-    /*maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Nexus"), 1);
-    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Gateway"), 4);
+    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Nexus"), 2);
+    /*maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Gateway"), 4);
     maxActions.emplace_back(BOSS::ActionTypes::GetActionType("CyberneticsCore"), 1);
     maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Pylon"), m_BOSSManager.numSupplyProviders() + (framesToSearch / 1000) + 4);*/
 
@@ -379,6 +379,7 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
 
         producer.warp(item.type.getUnitType(), closest_position);
         std::cout << "warping! " << closest_position.x << "," << closest_position.y << std::endl;
+        system("pause");
     }
     // if we're dealing with a non-building unit
     else if (item.type.isUnit())

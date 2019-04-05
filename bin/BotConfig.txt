@@ -43,7 +43,7 @@
         "DrawGameInfo"              : true, 
         "DrawProductionInfo"        : true, 
         "DrawBaseLocationInfo"      : true,
-        "DrawTileInfo"              : false,
+        "DrawTileInfo"              : true,
         "DrawWalkableSectors"       : false,
         "DrawScoutInfo"             : false,
         "DrawEnemyUnitInfo"         : false,
@@ -52,8 +52,8 @@
         "DrawLastSeenTileInfo"      : false,
         "DrawSquadInfo"             : true,
         "DrawWorkerInfo"            : false,
-        "DrawBuildingInfo"          : false,
-        "DrawReservedBuildingTiles" : false
+        "DrawBuildingInfo"          : true,
+        "DrawReservedBuildingTiles" : true
     },
     
     "Modules" :
@@ -115,7 +115,7 @@
             "Protoss_BOSS"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : ["Probe","ChronoBoost_Nexus_Probe","Assimilator","Probe","Pylon","Probe","Gateway","Probe","Pylon","Probe","CyberneticsCore","Probe", "Gateway", "WarpGateResearch", "ChronoBoost_CyberneticsCore_WarpGateResearch"],
+                "OpeningBuildOrder" : ["Probe","Assimilator", "Assimilator", "Probe","ChronoBoost_Nexus_Probe","Pylon","Probe","Gateway","Probe","Gateway","Probe","Zealot","Probe","CyberneticsCore","WarpGateResearch", "Probe", "Nexus", "Gateway", "Gateway", "Gateway", "Pylon", "Pylon", "Pylon", "Gateway", "Gateway", "Gateway"],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
                 "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 8 ] ]
             },

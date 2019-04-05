@@ -30,10 +30,15 @@ bool BuildingPlacer::canBuildHere(int bx, int by, const Building & b) const
         return false;
     }
 
+    int width = b.type.tileWidth();
+    int height = b.type.tileHeight();
+    int xdelta = (int)std::ceil((width - 1.0) / 2);
+    int ydelta = (int)std::ceil((height - 1.0) / 2);
+
     // check the reserve map
-    for (int x = bx; x < bx + b.type.tileWidth(); x++)
+    for (int x = bx - xdelta; x < bx + width - xdelta; x++)
     {
-        for (int y = by; y < by + b.type.tileHeight(); y++)
+        for (int y = by - ydelta; y < by + height - ydelta; y++)
         {
             if (!m_bot.Map().isValidTile(x, y) || m_reserveMap[x][y])
             {
@@ -65,19 +70,26 @@ bool BuildingPlacer::canBuildHereWithSpace(int bx, int by, const Building & b, i
     // height and width of the building
     int width  = b.type.tileWidth();
     int height = b.type.tileHeight();
+    int xdelta = (int)std::ceil((width - 1.0) / 2);
+    int ydelta = (int)std::ceil((height - 1.0) / 2);
 
     // TODO: make sure we leave space for add-ons. These types of units can have addons:
 
     // define the rectangle of the building spot
-    int startx = bx - buildDist;
-    int starty = by - buildDist;
-    int endx   = bx + width + buildDist - 1;
-    int endy   = by + height + buildDist - 1;
+    int startx = bx - buildDist - xdelta;
+    int starty = by - buildDist - ydelta;
+    int endx   = bx + width + buildDist - xdelta;
+    int endy   = by + height + buildDist - ydelta;
 
     // TODO: recalculate start and end positions for addons
 
     // if this rectangle doesn't fit on the map we can't build here
-    if (startx < 0 || starty < 0 || endx > m_bot.Map().width() || endx < bx + width - 1 || endy > m_bot.Map().height() || endy < by + height - 1)
+    if (startx < 0 || starty < 0 || endx > m_bot.Map().width() || endx < bx + width - xdelta || endy > m_bot.Map().height() || endy < by + height - ydelta)
+    {
+        return false;
+    }
+
+    if (!m_bot.Map().canBuildTypeAtPosition(bx, by, b.type))
     {
         return false;
     }
@@ -102,6 +114,11 @@ bool BuildingPlacer::canBuildHereWithSpace(int bx, int by, const Building & b, i
 
 CCTilePosition BuildingPlacer::getBuildLocationNear(const Building & b, int buildDist) const
 {
+    if (b.posFindFailTimes > 0 && b.posFindFailTimes % 30 != 0)
+    {
+        return CCTilePosition(0, 0);
+    }
+
     Timer t;
     t.start();
 
@@ -139,10 +156,15 @@ bool BuildingPlacer::tileOverlapsBaseLocation(int x, int y, UnitType type) const
     }
 
     // dimensions of the proposed location
-    int tx1 = x;
-    int ty1 = y;
-    int tx2 = tx1 + type.tileWidth();
-    int ty2 = ty1 + type.tileHeight();
+    int width = type.tileWidth();
+    int height = type.tileHeight();
+    int xdelta = (int)std::ceil((width - 1.0) / 2);
+    int ydelta = (int)std::ceil((height - 1.0) / 2);
+
+    int tx1 = x - xdelta;
+    int ty1 = y - ydelta;
+    int tx2 = tx1 + width - xdelta;
+    int ty2 = ty1 + height - ydelta;
 
     // for each base location
     for (const BaseLocation * base : m_bot.Bases().getBaseLocations())
@@ -170,7 +192,7 @@ bool BuildingPlacer::tileOverlapsBaseLocation(int x, int y, UnitType type) const
 bool BuildingPlacer::buildable(const Building & b, int x, int y) const
 {
     // TODO: does this take units on the map into account?
-    if (!m_bot.Map().isValidTile(x, y) || !m_bot.Map().canBuildTypeAtPosition(x, y, b.type))
+    if (!m_bot.Map().isValidTile(x, y))
     {
         return false;
     }
@@ -184,9 +206,13 @@ void BuildingPlacer::reserveTiles(int bx, int by, int width, int height)
 {
     int rwidth = (int)m_reserveMap.size();
     int rheight = (int)m_reserveMap[0].size();
-    for (int x = bx; x < bx + width && x < rwidth; x++)
+
+    int xdelta = (int)std::ceil((width - 1.0) / 2);
+    int ydelta = (int)std::ceil((height - 1.0) / 2);
+
+    for (int x = bx - xdelta; x < bx + width - xdelta && x < rwidth; x++)
     {
-        for (int y = by; y < by + height && y < rheight; y++)
+        for (int y = by - ydelta; y < by + height - ydelta && y < rheight; y++)
         {
             m_reserveMap[x][y] = true;
         }
@@ -220,9 +246,12 @@ void BuildingPlacer::freeTiles(int bx, int by, int width, int height)
     int rwidth = (int)m_reserveMap.size();
     int rheight = (int)m_reserveMap[0].size();
 
-    for (int x = bx; x < bx + width && x < rwidth; x++)
+    int xdelta = (int)std::ceil((width - 1.0) / 2);
+    int ydelta = (int)std::ceil((height - 1.0) / 2);
+
+    for (int x = bx - xdelta; x < bx + width - xdelta && x < rwidth; x++)
     {
-        for (int y = by; y < by + height && y < rheight; y++)
+        for (int y = by - ydelta; y < by + height - ydelta && y < rheight; y++)
         {
             m_reserveMap[x][y] = false;
         }

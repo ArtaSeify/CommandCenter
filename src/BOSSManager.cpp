@@ -58,7 +58,7 @@ void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMake
     m_params.setChangingRoot(true);
     m_params.setUseMaxValue(true);
     m_params.setNumberOfSimulations(500000);
-    m_params.setSimulationsPerStep(5000);    
+    m_params.setSimulationsPerStep(10000);    
 /*
     m_params.setLevel(1);
     m_params.setNumPlayouts(250);*/

@@ -384,9 +384,9 @@ const UnitType & TechTree::getData(const sc2::AbilityID & ability) const
         }
     }
 
-    return UnitType();
-
     //BOT_ASSERT(false, "Can't getData this ability: %s", sc2::AbilityTypeToName(ability));
+
+    return m_unitTypeData.begin()->first;
 }
 
 void TechTree::outputJSON(const std::string & filename) const

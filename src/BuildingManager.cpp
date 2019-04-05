@@ -112,12 +112,19 @@ void BuildingManager::assignWorkersToUnassignedBuildings()
         // remove buildings that we can't find a location to place
         if ((testLocation.x == 0 && testLocation.y == 0))
         {
-            if (m_debugMode) { printf("Can't build %s, removing from queue\n", b.type.getName().c_str()); }
-            toRemove.push_back(b);
+            if (b.posFindFailTimes > 300)
+            {
+                if (m_debugMode) { printf("Can't build %s, removing from queue\n", b.type.getName().c_str()); }
+                toRemove.push_back(b);
 
-            // unreserve the resources
-            m_reservedMinerals -= b.type.mineralPrice();
-            m_reservedGas -= b.type.gasPrice();
+                // unreserve the resources
+                m_reservedMinerals -= b.type.mineralPrice();
+                m_reservedGas -= b.type.gasPrice();
+            }
+            else
+            {
+                b.posFindFailTimes++;
+            }
             break;
         }
 
@@ -393,10 +400,12 @@ void BuildingManager::drawBuildingInformation()
         {
             ss << "Assigned " << b.type.getName() << "    " << b.builderUnit.getID() << " " << getBuildingWorkerCode(b) << " (" << b.finalPosition.x << "," << b.finalPosition.y << ")\n";
 
-            int x1 = b.finalPosition.x;
-            int y1 = b.finalPosition.y;
-            int x2 = b.finalPosition.x + b.type.tileWidth();
-            int y2 = b.finalPosition.y + b.type.tileHeight();
+            int xdelta = (int)std::ceil((b.type.tileWidth() - 1.0) / 2);
+            int ydelta = (int)std::ceil((b.type.tileHeight() - 1.0) / 2);
+            int x1 = b.finalPosition.x - xdelta;
+            int y1 = b.finalPosition.y - ydelta;
+            int x2 = b.finalPosition.x + b.type.tileWidth() - xdelta;
+            int y2 = b.finalPosition.y + b.type.tileHeight() - ydelta;
 
             m_bot.Map().drawBox((CCPositionType)x1, (CCPositionType)y1, (CCPositionType)x2, (CCPositionType)y2, CCColor(255, 0, 0));
             //m_bot.Map().drawLine(b.finalPosition, m_bot.GetUnit(b.builderUnitTag)->pos, CCColors::Yellow);

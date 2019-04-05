@@ -22,6 +22,7 @@ namespace CC
         Unit            buildingUnit;
         Unit            builderUnit;
         size_t          status;
+        size_t          posFindFailTimes;
         int             lastOrderFrame;
         bool            buildCommandGiven;
         bool            underConstruction;
