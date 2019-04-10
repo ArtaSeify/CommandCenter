@@ -74,11 +74,11 @@ void ProductionManager::searchBuildOrder()
     // actions to search over
     std::vector<std::string> relevantActionsNames =
     { "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker",
-        "Zealot", "ChronoBoost", "Colossus", "Forge", "FleetBeacon", "TwilightCouncil", "Stargate", "TemplarArchive", 
+        "Zealot", "Colossus", "Forge", "FleetBeacon", "TwilightCouncil", "Stargate", "TemplarArchive", 
         "DarkShrine", "RoboticsBay", "RoboticsFacility", "ZealotWarped", "Zealot", "StalkerWarped", "Stalker", 
         "HighTemplarWarped", "HighTemplar", "DarkTemplarWarped", "DarkTemplar", "SentryWarped", "Sentry", 
         "Phoenix", "Carrier", "VoidRay", "WarpPrism", "Observer", "Immortal", "Probe", "Interceptor", 
-        "WarpGate", "ChronoBoost", "AdeptWarped", "Adept", "Oracle", "Tempest", "Disruptor", "WarpGateResearch" };
+        "WarpGate", "AdeptWarped", "Adept", "Oracle", "Tempest", "Disruptor", "WarpGateResearch" };
     
         /*"Adept", "Sentry", "Colossus", "FleetBeacon", "Forge",
         "TwilightCouncil", "Stargate", "TemplarArchive", "DarkShrine", 
@@ -379,7 +379,7 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
 
         producer.warp(item.type.getUnitType(), closest_position);
         std::cout << "warping! " << closest_position.x << "," << closest_position.y << std::endl;
-        system("pause");
+        //system("pause");
     }
     // if we're dealing with a non-building unit
     else if (item.type.isUnit())

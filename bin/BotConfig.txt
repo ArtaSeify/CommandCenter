@@ -115,7 +115,7 @@
             "Protoss_BOSS"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : ["Probe","Assimilator", "Assimilator", "Probe","ChronoBoost_Nexus_Probe","Pylon","Probe","Gateway","Probe","Gateway","Probe","Zealot","Probe","CyberneticsCore","WarpGateResearch", "Probe", "Nexus", "Gateway", "Gateway", "Gateway", "Pylon", "Pylon", "Pylon", "Gateway", "Gateway", "Gateway"],
+                "OpeningBuildOrder" : ["Probe","Assimilator", "Assimilator", "Probe","Pylon","Probe","Gateway","Probe","Gateway","Probe","Zealot","Probe","CyberneticsCore","WarpGateResearch"],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
                 "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 8 ] ]
             },
