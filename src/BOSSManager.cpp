@@ -56,9 +56,9 @@ void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMake
     //int m_threadsForExperiment;
     m_params.setExplorationValue(BOSS::FracType(0.15));
     m_params.setChangingRoot(true);
-    m_params.setUseMaxValue(true);
+    m_params.setUseMaxValue(false);
     m_params.setNumberOfSimulations(500000);
-    m_params.setSimulationsPerStep(10000);    
+    m_params.setSimulationsPerStep(4000);    
 /*
     m_params.setLevel(1);
     m_params.setNumPlayouts(250);*/
@@ -308,7 +308,7 @@ void BOSSManager::searchFinished()
     }
 
     // update GameState with the new build order we found
-    for (auto & action : m_results.finishedUnitsBuildOrder)
+    for (auto & action : m_results.usefulBuildOrder)
     {
         if (action.first.isAbility())
         {

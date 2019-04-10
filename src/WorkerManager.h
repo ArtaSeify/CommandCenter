@@ -49,6 +49,6 @@ namespace CC
         Unit getBuilder(Building & b, bool setJobAsBuilder = true) const;
         Unit getClosestDepot(Unit worker) const;
         Unit getGasWorker(Unit refinery) const;
-        Unit getClosestMineralWorkerTo(const CCPosition & pos) const;
+        Unit getClosestWorkerTo(const CCPosition & pos) const;
     };
 }

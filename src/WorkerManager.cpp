@@ -93,7 +93,7 @@ void WorkerManager::handleRepairWorkers()
     // TODO
 }
 
-Unit WorkerManager::getClosestMineralWorkerTo(const CCPosition & pos) const
+Unit WorkerManager::getClosestWorkerTo(const CCPosition & pos) const
 {
     Unit closestMineralWorker;
     double closestDist = std::numeric_limits<double>::max();
@@ -104,14 +104,15 @@ Unit WorkerManager::getClosestMineralWorkerTo(const CCPosition & pos) const
         if (!worker.isValid()) { continue; }
 
         // if it is a mineral worker
-        if (m_workerData.getWorkerJob(worker) == WorkerJobs::Minerals)
+        if (m_workerData.getWorkerJob(worker) == WorkerJobs::Minerals ||
+            m_workerData.getWorkerJob(worker) == WorkerJobs::Idle)
         {
             double dist = Util::DistSq(worker.getPosition(), pos);
 
-            if (!closestMineralWorker.isValid() || dist < closestDist)
+            if (dist < closestDist)
             {
                 closestMineralWorker = worker;
-                dist = closestDist;
+                closestDist = dist;
             }
         }
     }
@@ -145,6 +146,11 @@ Unit WorkerManager::getClosestDepot(Unit worker) const
 
         if (unit.getType().isResourceDepot() && unit.isCompleted())
         {
+            if (unit.getUnitPtr()->assigned_harvesters >= unit.getUnitPtr()->ideal_harvesters)
+            {
+                continue;
+            }
+
             double distance = Util::Dist(unit, worker);
             if (!closestDepot.isValid() || distance < closestDistance)
             {
@@ -169,7 +175,7 @@ void WorkerManager::finishedWithWorker(const Unit & unit)
 
 Unit WorkerManager::getGasWorker(Unit refinery) const
 {
-    return getClosestMineralWorkerTo(refinery.getPosition());
+    return getClosestWorkerTo(refinery.getPosition());
 }
 
 void WorkerManager::setBuildingWorker(Unit worker, Building & b)
@@ -182,14 +188,13 @@ void WorkerManager::setBuildingWorker(Unit worker, Building & b)
 // set 'setJobAsBuilder' to false if we just want to see which worker will build a building
 Unit WorkerManager::getBuilder(Building & b, bool setJobAsBuilder) const
 {
-    Unit builderWorker = getClosestMineralWorkerTo(Util::GetPosition(b.finalPosition));
+    Unit builderWorker = getClosestWorkerTo(Util::GetPosition(b.finalPosition));
 
     // if the worker exists (one may not have been found in rare cases)
     if (builderWorker.isValid() && setJobAsBuilder)
     {
         m_workerData.setWorkerJob(builderWorker, WorkerJobs::Build, b.builderUnit);
     }
-
     return builderWorker;
 }
 

@@ -1,2 +1,2 @@
-Can't detect expansion location after the first one
-Warp in location is still bugged??
+Attack in batches
+Workers added to defense squad if the enemy is close to a depot

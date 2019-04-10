@@ -92,7 +92,7 @@ void WorkerData::setWorkerJob(const Unit & unit, int job, Unit jobUnit)
         m_depotWorkerCount[jobUnit]++;
 
         // find the mineral to mine and mine it
-        Unit mineralToMine = getMineralToMine(unit);
+        Unit mineralToMine = getMineralToMine(jobUnit);
         
         unit.rightClick(mineralToMine);
     }

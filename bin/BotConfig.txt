@@ -1,5 +1,6 @@
 {
     "ConnectToLadder" : false,
+    "Cheat"           : false,
 
     "Bot Info" :
     {
@@ -19,8 +20,8 @@
     "SC2API" :
     {
         "BotRace"                   : "Protoss",
-        "EnemyDifficulty"           : 1,
-        "EnemyRace"                 : "Random",
+        "EnemyDifficulty"           : 5,
+        "EnemyRace"                 : "Protoss",
         "MapFile"                   : "AbyssalReefLE.SC2Map",
         "StepSize"                  : 1
     },
@@ -45,13 +46,13 @@
         "DrawBaseLocationInfo"      : true,
         "DrawTileInfo"              : true,
         "DrawWalkableSectors"       : false,
-        "DrawScoutInfo"             : false,
-        "DrawEnemyUnitInfo"         : false,
-        "DrawResourceInfo"          : false,
-        "DrawUnitTargetInfo"        : false,
+        "DrawScoutInfo"             : true,
+        "DrawEnemyUnitInfo"         : true,
+        "DrawResourceInfo"          : true,
+        "DrawUnitTargetInfo"        : true,
         "DrawLastSeenTileInfo"      : false,
         "DrawSquadInfo"             : true,
-        "DrawWorkerInfo"            : false,
+        "DrawWorkerInfo"            : true,
         "DrawBuildingInfo"          : true,
         "DrawReservedBuildingTiles" : true
     },
@@ -108,16 +109,16 @@
         "Terran"                    : "Terran_MarineRush",
         "Zerg"                      : "Zerg_2HatchRoach",
         
-        "ScoutHarassEnemy"          : true,
+        "ScoutHarassEnemy"          : false,
         
         "Strategies" :
         {
             "Protoss_BOSS"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : ["Probe","Assimilator", "Assimilator", "Probe","ChronoBoost_Nexus_Probe","Pylon","Probe","Gateway","Probe","Gateway","Probe","Zealot","Probe","CyberneticsCore","WarpGateResearch", "Probe", "Nexus", "Gateway", "Gateway", "Gateway", "Pylon", "Pylon", "Pylon", "Gateway", "Gateway", "Gateway"],
+                "OpeningBuildOrder" : [ "Probe","Assimilator","Probe","Pylon","Probe","Gateway" ],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
-                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 8 ] ]
+                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 12 ] ]
             },
             "Protoss_ZealotRush"    : 
             { 

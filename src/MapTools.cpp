@@ -168,7 +168,7 @@ void MapTools::onFrame()
 
 void MapTools::computeConnectivity()
 {
-    // the fringe data structe we will use to do our BFS searches
+    // the fringe data structure we will use to do our BFS searches
     std::vector<std::array<int, 2>> fringe;
     fringe.reserve(m_width*m_height);
     int sectorNumber = 0;
@@ -425,6 +425,9 @@ bool MapTools::isConnected(int x1, int y1, int x2, int y2) const
 
     int s1 = getSectorNumber(x1, y1);
     int s2 = getSectorNumber(x2, y2);
+
+    std::cout << s1 << std::endl;
+    std::cout << s2 << std::endl;
 
     return s1 != 0 && (s1 == s2);
 }

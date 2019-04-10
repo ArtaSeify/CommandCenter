@@ -16,7 +16,6 @@ namespace CC
 
         // queries for various BuildingPlacer data
         bool buildable(const Building & b, int x, int y) const;
-        bool isReserved(int x, int y) const;
         bool isInResourceBox(int x, int y) const;
         bool tileOverlapsBaseLocation(int x, int y, UnitType type) const;
 
@@ -26,6 +25,8 @@ namespace CC
         BuildingPlacer(CCBot & bot);
 
         void onStart();
+
+        bool isReserved(int x, int y) const;
 
         // determines whether we can build at a given location
         bool canBuildHere(int bx, int by, const Building & b) const;
