@@ -66,6 +66,10 @@ void TechTree::initUnitTypeData()
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_INTERCEPTOR, m_bot)] =             { sc2::Race::Protoss, 0, 0, 0, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::BUILD_INTERCEPTORS, 0, { UnitType(sc2::UNIT_TYPEID::PROTOSS_CARRIER, m_bot) }, {}, {} }; 
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_ORACLESTASISTRAP, m_bot)] =        { sc2::Race::Protoss, 0, 0, 0, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::BUILD_STASISTRAP, 0, { UnitType(sc2::UNIT_TYPEID::PROTOSS_ORACLE, m_bot) }, {}, {} }; 
 
+    // Protoss equivalent types
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_WARPPRISMPHASING, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_WARPPRISM, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_DISRUPTORPHASED, m_bot)]  = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_DISRUPTOR, m_bot)] =
+
     // Terran Buildings                                                                      m  g  s  t  unit  bld   wrk    rfn    sup    hall   add
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_COMMANDCENTER, m_bot)] =            { sc2::Race::Terran, 0, 0, 0, 0, true, true, false, false, false,  true, false, sc2::ABILITY_ID::BUILD_COMMANDCENTER, 0, { UnitType(sc2::UNIT_TYPEID::TERRAN_SCV, m_bot) }, {}, {} }; 
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_SUPPLYDEPOT, m_bot)] =              { sc2::Race::Terran, 0, 0, 0, 0, true, true, false, false,  true, false, false, sc2::ABILITY_ID::BUILD_SUPPLYDEPOT, 0, { UnitType(sc2::UNIT_TYPEID::TERRAN_SCV, m_bot) }, {}, {} };  
@@ -119,6 +123,14 @@ void TechTree::initUnitTypeData()
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_MEDIVAC, m_bot)] =                  { sc2::Race::Terran, 0, 0, 2, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::TRAIN_MEDIVAC, 0, { UnitType(sc2::UNIT_TYPEID::TERRAN_STARPORT, m_bot) }, {}, {} };
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_MULE, m_bot)] =                     { sc2::Race::Terran, 0, 0, 0, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::EFFECT_CALLDOWNMULE, 0, { UnitType(sc2::UNIT_TYPEID::TERRAN_ORBITALCOMMAND, m_bot) }, {}, {} }; 
 
+    // Terran equivalent units
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_SIEGETANKSIEGED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_SIEGETANK, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_VIKINGASSAULT, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_VIKINGFIGHTER, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_HELLIONTANK, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_HELLION, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_WIDOWMINEBURROWED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_WIDOWMINE, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_LIBERATORAG, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_LIBERATOR, m_bot)];
+
+
     // Zerg Buildings                                                                      m  g  s  t  unit  bld   wrk    rfn    sup    hall   add
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_HATCHERY, m_bot)] =                   { sc2::Race::Zerg, 0, 0, 0, 0, true, true, false, false, false,  true, false, sc2::ABILITY_ID::BUILD_HATCHERY, 0, { UnitType(sc2::UNIT_TYPEID::ZERG_DRONE, m_bot) }, {}, {} }; 
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_EXTRACTOR, m_bot)] =                  { sc2::Race::Zerg, 0, 0, 0, 0, true, true, false,  true, false, false, false, sc2::ABILITY_ID::BUILD_EXTRACTOR, 0, { UnitType(sc2::UNIT_TYPEID::ZERG_DRONE, m_bot) }, {}, {} }; 
@@ -155,6 +167,19 @@ void TechTree::initUnitTypeData()
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_LARVA, m_bot)] =                      { sc2::Race::Zerg, 0, 0, 2, 0, true, false, false, false, false, false, false, 0, 0, { UnitType() }, { UnitType() }, {} };
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_EGG, m_bot)] =                        { sc2::Race::Zerg, 0, 0, 2, 0, true, false, false, false, false, false, false, 0, 0, { UnitType() }, { UnitType() }, {} };
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_BROODLING, m_bot)] =                  { sc2::Race::Zerg, 0, 0, 0, 0, true, false, false, false, false, false, false, 0, 0, { UnitType() }, { UnitType() }, {} };
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_BROODLORD, m_bot)] =                  { sc2::Race::Zerg, 0, 0, 2, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::MORPH_BROODLORD, 0, { UnitType(sc2::UNIT_TYPEID::ZERG_CORRUPTOR, m_bot) }, { UnitType(sc2::UNIT_TYPEID::ZERG_GREATERSPIRE, m_bot) }, {} };
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_RAVAGER, m_bot)] =                    { sc2::Race::Zerg, 0, 0, 1, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::MORPH_RAVAGER, 0, { UnitType(sc2::UNIT_TYPEID::ZERG_ROACH, m_bot) }, { UnitType(sc2::UNIT_TYPEID::ZERG_ROACHWARREN, m_bot) }, {} };
+
+    // Zerg equivalent units
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_BANELINGBURROWED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_BANELING, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_DRONEBURROWED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_DRONE, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_HYDRALISKBURROWED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_HYDRALISK, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_INFESTORBURROWED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_INFESTOR, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_ROACHBURROWED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_ROACH, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_SWARMHOSTBURROWEDMP, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_SWARMHOSTMP, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_ZERGLINGBURROWED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_ZERGLING, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_QUEENBURROWED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_QUEEN, m_bot)];
+
 
     // Set the Mineral / Gas cost of each unit
     for (auto & kv : m_unitTypeData)

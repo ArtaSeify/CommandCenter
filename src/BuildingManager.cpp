@@ -443,7 +443,7 @@ CCTilePosition BuildingManager::getBuildingLocation(const Building & b)
 
     if (b.type.isResourceDepot())
     {
-        return m_bot.Bases().getNextExpansion(Players::Self);
+        return m_bot.Bases().getNextExpansion(Players::Self, m_buildingPlacer);
     }
 
     //In case of Protoss if there are no finished Pylons only a Pylon can be build.

@@ -107,11 +107,6 @@ void CombatCommander::updateAttackSquads()
 
 void CombatCommander::updateScoutDefenseSquad()
 {
-    if (m_combatUnits.empty())
-    {
-        return;
-    }
-
     // if the current squad has units in it then we can ignore this
     Squad & scoutDefenseSquad = m_squadData.getSquad("ScoutDefense");
 
@@ -139,8 +134,13 @@ void CombatCommander::updateScoutDefenseSquad()
         Unit enemyWorkerUnit = *enemyUnitsInRegion.begin();
         BOT_ASSERT(enemyWorkerUnit.isValid(), "null enemy worker unit");
 
+        if (!m_combatUnits.empty())
+        {
+            m_squadData.assignUnitToSquad(m_combatUnits[0], scoutDefenseSquad);
+        }
+
         // get our worker unit that is mining that is closest to it
-        Unit workerDefender = findClosestWorkerTo(m_combatUnits, enemyWorkerUnit.getPosition());
+        Unit workerDefender = m_bot.Workers().getClosestWorkerTo(enemyWorkerUnit.getPosition());
 
         if (enemyWorkerUnit.isValid() && workerDefender.isValid())
         {
@@ -172,11 +172,6 @@ void CombatCommander::updateScoutDefenseSquad()
 
 void CombatCommander::updateDefenseSquads()
 {
-    if (m_combatUnits.empty())
-    {
-        return;
-    }
-
     // for each of our occupied regions
     const BaseLocation * enemyBaseLocation = m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy);
     for (const BaseLocation * myBaseLocation : m_bot.Bases().getOccupiedBaseLocations(Players::Self))
@@ -331,6 +326,11 @@ void CombatCommander::updateDefenseSquadUnits(Squad & defenseSquad, const size_t
 
         if (defenderToAdd.isValid())
         {
+            if (defenderToAdd.getType().isWorker())
+            {
+                m_bot.Workers().setCombatWorker(defenderToAdd);
+                std::cout << "assigning worker to defend!" << std::endl;
+            }
             m_squadData.assignUnitToSquad(defenderToAdd, defenseSquad);
             defendersAdded++;
         }
@@ -362,6 +362,17 @@ Unit CombatCommander::findClosestDefender(const Squad & defenseSquad, const CCPo
         {
             closestDefender = unit;
             minDistance = dist;
+        }
+    }
+
+    // if no combat units are found, but we still need defenders,
+    // we assign a worker to help defend
+    if (!closestDefender.isValid())
+    {
+        auto & closestWorker = m_bot.Workers().getClosestWorkerTo(pos);
+        if (m_squadData.canAssignUnitToSquad(closestWorker, defenseSquad))
+        {
+            closestDefender = closestWorker;
         }
     }
 

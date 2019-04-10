@@ -87,7 +87,7 @@ void GameCommander::setScoutUnits()
         if (shouldSendInitialScout())
         {
             // grab the closest worker to the supply provider to send to scout
-            Unit workerScout = m_bot.Workers().getClosestMineralWorkerTo(m_bot.GetStartLocation());
+            Unit workerScout = m_bot.Workers().getClosestWorkerTo(m_bot.GetStartLocation());
 
             // if we find a worker (which we should) add it to the scout units
             if (workerScout.isValid())

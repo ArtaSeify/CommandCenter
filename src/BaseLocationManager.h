@@ -5,6 +5,7 @@
 namespace CC
 {
     class CCBot;
+    class BuildingPlacer;
 
     class BaseLocationManager
     {
@@ -33,6 +34,7 @@ namespace CC
         const BaseLocation * getPlayerStartingBaseLocation(int player) const;
 
         CCTilePosition getNextExpansion(int player) const;
+        CCTilePosition getNextExpansion(int player, const BuildingPlacer & placer) const;
 
     };
 }

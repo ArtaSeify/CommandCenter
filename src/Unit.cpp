@@ -340,7 +340,7 @@ void Unit::repair(const Unit & target) const
 
 void Unit::build(const UnitType & buildingType, CCTilePosition pos) const
 {
-    BOT_ASSERT(m_bot->Map().isConnected(getTilePosition(), pos), "Error: Build Position is not connected to worker");
+    //BOT_ASSERT(m_bot->Map().isConnected(getTilePosition(), pos), "Error: Build Position is not connected to worker");
     BOT_ASSERT(isValid(), "Unit is not valid");
 #ifdef SC2API
     m_bot->Actions()->UnitCommand(m_unit, m_bot->Data(buildingType).buildAbility, Util::GetPosition(pos));

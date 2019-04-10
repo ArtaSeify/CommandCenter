@@ -24,6 +24,7 @@ MetaType::MetaType(const std::string & name, CCBot & bot)
     if (m_name.find("Warped") != std::string::npos)
     {
         m_unitType = UnitType::GetUnitTypeFromName(m_name.substr(0, m_name.find("Warped")), bot);
+        m_ability.first = bot.Data(m_unitType).warpAbility;
     }
     else
     {

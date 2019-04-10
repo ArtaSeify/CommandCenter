@@ -55,7 +55,7 @@ void ProductionManager::searchBuildOrder()
     if (m_BOSSManager.searchInProgress())
     {
         // if the current queue is empty, stop the search so we have stuff to build
-        if (m_queue.isEmpty() && m_buildingManager.buildingsQueued().size() == 0)
+        if (m_queue.isEmpty())
         {
             m_BOSSManager.finishSearch();
         }
@@ -73,12 +73,12 @@ void ProductionManager::searchBuildOrder()
 
     // actions to search over
     std::vector<std::string> relevantActionsNames =
-    { "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker",
-        "Zealot", "Colossus", "Forge", "FleetBeacon", "TwilightCouncil", "Stargate", "TemplarArchive", 
-        "DarkShrine", "RoboticsBay", "RoboticsFacility", "ZealotWarped", "Zealot", "StalkerWarped", "Stalker", 
-        "HighTemplarWarped", "HighTemplar", "DarkTemplarWarped", "DarkTemplar", "SentryWarped", "Sentry", 
-        "Phoenix", "Carrier", "VoidRay", "WarpPrism", "Observer", "Immortal", "Probe", "Interceptor", 
-        "WarpGate", "AdeptWarped", "Adept", "Oracle", "Tempest", "Disruptor", "WarpGateResearch" };
+    { "ChronoBoost", "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker",
+        "Zealot", "Colossus", "Forge", "FleetBeacon", "TwilightCouncil", "Stargate", "TemplarArchive",
+        "DarkShrine", "RoboticsBay", "RoboticsFacility", "ZealotWarped", "Zealot", "StalkerWarped", "Stalker",
+        "HighTemplarWarped", "HighTemplar", "DarkTemplarWarped", "DarkTemplar", "SentryWarped", "Sentry",
+        "Phoenix", "Carrier", "VoidRay", "WarpPrism", "Observer", "Immortal", "Probe", "Interceptor", "AdeptWarped", 
+        "Adept", "Oracle", "Tempest", "Disruptor", "WarpGateResearch" };
     
         /*"Adept", "Sentry", "Colossus", "FleetBeacon", "Forge",
         "TwilightCouncil", "Stargate", "TemplarArchive", "DarkShrine", 
@@ -93,7 +93,8 @@ void ProductionManager::searchBuildOrder()
     // how many times we are allowed to do an action. if no limit is given, then we can do it
     // as many times as we want
     std::vector<std::pair<BOSS::ActionType, int>> maxActions;
-    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Nexus"), 2);
+    //maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Nexus"), 2);
+    //maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Nexus"), 2);
     /*maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Gateway"), 4);
     maxActions.emplace_back(BOSS::ActionTypes::GetActionType("CyberneticsCore"), 1);
     maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Pylon"), m_BOSSManager.numSupplyProviders() + (framesToSearch / 1000) + 4);*/
@@ -267,8 +268,16 @@ Unit ProductionManager::getProducer(const MetaType & type, CCPosition closestTo)
         if (!unit.isCompleted()) { continue; }
         if (!type.isAbility() && m_bot.Data(unit).isBuilding && unit.isTraining()) { continue; }
         if (unit.isFlying()) { continue; }
-        if (m_bot.GetPlayerRace(Players::Self) == CCRace::Protoss 
-            && unit.getType().isMorphedBuilding() && m_bot.Query()->GetAbilitiesForUnit(unit.getUnitPtr()).abilities.empty()) { continue; }
+        // WarpGates need special consideration because the building doesn't actually produce the unit, it casts an ability that does
+        if (m_bot.GetPlayerRace(Players::Self) == CCRace::Protoss && unit.getType().isMorphedBuilding()) 
+        { 
+            auto & abilities = m_bot.Query()->GetAbilitiesForUnit(unit.getUnitPtr()).abilities;
+            if (std::find_if(abilities.begin(), abilities.end(), 
+                [type](const sc2::AvailableAbility & ability) { return ability.ability_id == type.getAbility().first; }) == abilities.end())
+            {
+                continue;
+            }
+        }
 
         // TODO: if unit is not powered continue
         //if (m_bot.GetPlayerRace(Players::Self) == CCRace::Protoss && unit.getType().isBuilding() && !unit.isPowered()) { continue; }
@@ -335,51 +344,87 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
         }
         
     }
+    // warp in unit
     else if (item.type.isUnit() && item.type.getName().find("Warped") != std::string::npos)
     {
         //std::cout << "warping unit!" << std::endl;
+        // get the closest warp in pylon or warpprism to the enemy base
+        std::vector<Unit> pylonsAndWarpPrisms;
         float closest_to_enemy_pylon_pos = std::numeric_limits<float>::max();
-        CCPosition warpPos;
+        CCPosition powerPos;
         for (auto & unit : m_bot.UnitInfo().getUnits(Players::Self))
         {
             if (unit.getType().getAPIUnitType() == sc2::UNIT_TYPEID::PROTOSS_PYLON || unit.getType().getAPIUnitType() == sc2::UNIT_TYPEID::PROTOSS_WARPPRISMPHASING)
             {
-                float distance = Util::Dist(unit.getPosition(), m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition());
+                pylonsAndWarpPrisms.push_back(unit);
+                float distance = m_bot.Query()->PathingDistance(unit.getPosition(), m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition());
                 if (distance < closest_to_enemy_pylon_pos)
                 {
                     closest_to_enemy_pylon_pos = distance;
-                    warpPos = unit.getPosition();
+                    powerPos = unit.getPosition();
                 }
             }
         }
 
-        CCPosition closest_position;
+        CCPosition warpPosition(-1, -1);
         float closest_distance = std::numeric_limits<float>::max();
+
+        // get the closest point in the power sphere to the enemy base
         for (int x = -5; x < 6; ++x)
         {
             for (int y = -5; y < 6; ++y)
             {
-                CCPosition pos = CCPosition(warpPos.x + x, warpPos.y + y);
-                if (m_bot.Query()->Placement(m_bot.Data(item.type.getUnitType()).warpAbility, pos))
+                CCPosition pos = CCPosition(powerPos.x + x, powerPos.y + y);
+                if (m_bot.Map().isVisible(int(pos.x), int(pos.y)) && m_bot.Query()->Placement(m_bot.Data(item.type.getUnitType()).warpAbility, pos)
+                    && Util::Dist(getClosestUnitToPosition(m_bot.UnitInfo().getUnits(Players::Self), pos).getPosition(), pos) > item.type.getUnitType().tileWidth() / 2)
                 {
-                    float distToEnemyBase = Util::Dist(pos, m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition());
+                    float distToEnemyBase = m_bot.Query()->PathingDistance(pos, m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition());
                     if (distToEnemyBase < closest_distance)
                     {
-                        closest_position = pos;
+                        warpPosition = pos;
                         closest_distance = distToEnemyBase;
                     }
-                    //std::cout << "warp-in is possible in location: " << warpPos.x + x << "," << warpPos.y + y << std::endl;
+                    //std::cout << "warp-in is possible in location: " << powerPos.x + x << "," << powerPos.y + y << std::endl;
                 }
                 else
                 {
-                    //std::cout << "unable to warp in location: " << warpPos.x + x << "," << warpPos.y + y << std::endl;
+                    //std::cout << "unable to warp in location: " << powerPos.x + x << "," << powerPos.y + y << std::endl;
                 }
             }
         }
 
-        producer.warp(item.type.getUnitType(), closest_position);
-        std::cout << "warping! " << closest_position.x << "," << closest_position.y << std::endl;
-        //system("pause");
+        // couldn't find a location to warp with this pylon
+        if (!m_bot.Map().isValidPosition(warpPosition))
+        {
+            std::cout << "closest pylon wasn't valid!" << std::endl;
+            std::random_device dev;
+            std::mt19937 rng(dev());
+            std::uniform_int_distribution<std::mt19937::result_type> dist(-5, 6); // distribution in range [-5, 5]
+
+            // go through every pylon and warp prism
+            for (auto & powerStructure : pylonsAndWarpPrisms)
+            {
+                CCPosition powerPos = powerStructure.getPosition();
+                // try 30 random positions within the power grid
+                for (int count = 0; count < 30; ++count)
+                {
+                    int dx = dist(rng);
+                    int dy = dist(rng);
+
+                    CCPosition pos = CCPosition(powerPos.x + dx, powerPos.y + dy);
+                    // take the first valid position you find
+                    if (m_bot.Map().isVisible(int(pos.x), int(pos.y)) && m_bot.Query()->Placement(m_bot.Data(item.type.getUnitType()).warpAbility, pos) 
+                        && Util::Dist(getClosestUnitToPosition(m_bot.UnitInfo().getUnits(Players::Self), pos).getPosition(), pos) > item.type.getUnitType().tileWidth() / 2)
+                    {
+                        warpPosition = pos;
+                        break;
+                    }
+                }
+            }
+        }
+
+        producer.warp(item.type.getUnitType(), warpPosition);
+        std::cout << "warping! " << warpPosition.x << "," << warpPosition.y << std::endl;
     }
     // if we're dealing with a non-building unit
     else if (item.type.isUnit())

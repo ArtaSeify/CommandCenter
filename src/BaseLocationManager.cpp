@@ -312,6 +312,50 @@ CCTilePosition BaseLocationManager::getNextExpansion(int player) const
     int minDistance = std::numeric_limits<int>::max();
 
     CCPosition homeTile = homeBase->getPosition();
+
+    for (auto & base : getBaseLocations())
+    {
+        // skip mineral only and starting locations (TODO: fix this)
+        if (base->isMineralOnly() || base->isStartLocation())
+        {
+            continue;
+        }
+
+        // get the tile position of the base
+        auto tile = base->getDepotPosition();
+
+        // a building is already there or the tiles are reserved
+        if (!m_bot.Query()->Placement(m_bot.Data(Util::GetTownHall(m_bot.GetPlayerRace(Players::Self), m_bot)).buildAbility, CCPosition(float(tile.x), float(tile.y))))
+        {
+            continue;
+        }
+
+        // the base's distance from our main nexus
+        int distanceFromHome = homeBase->getGroundDistance(tile);
+
+        // if it is not connected, continue
+        if (distanceFromHome < 0)
+        {
+            continue;
+        }
+
+        if (!closestBase || distanceFromHome < minDistance)
+        {
+            closestBase = base;
+            minDistance = distanceFromHome;
+        }
+    }
+
+    return closestBase ? closestBase->getDepotPosition() : CCTilePosition(0, 0);
+}
+
+CCTilePosition BaseLocationManager::getNextExpansion(int player, const BuildingPlacer & placer) const
+{
+    const BaseLocation * homeBase = getPlayerStartingBaseLocation(player);
+    const BaseLocation * closestBase = nullptr;
+    int minDistance = std::numeric_limits<int>::max();
+
+    CCPosition homeTile = homeBase->getPosition();
     
     for (auto & base : getBaseLocations())
     {
@@ -324,9 +368,9 @@ CCTilePosition BaseLocationManager::getNextExpansion(int player) const
         // get the tile position of the base
         auto tile = base->getDepotPosition();
         
-        bool buildingInTheWay = false; // TODO: check if there are any units on the tile
-
-        if (buildingInTheWay)
+        // a building is already there or the tiles are reserved
+        if (!m_bot.Query()->Placement(m_bot.Data(Util::GetTownHall(m_bot.GetPlayerRace(Players::Self), m_bot)).buildAbility, CCPosition(float(tile.x), float(tile.y)))
+            || placer.isReserved(tile.x, tile.y))
         {
             continue;
         }
