@@ -61,10 +61,14 @@ void CCBot::OnGameStart()
 
 void CCBot::OnStep()
 {
+	if (GetCurrentFrame() % 25 == 0)
+	{
+		m_startTime = std::chrono::system_clock::now();
+	}
     // calculating FPS
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> diff = end - m_startTime;
-    m_framesPerSecond = double(GetCurrentFrame()) / diff.count();
+    m_framesPerSecond = double(GetCurrentFrame() % 25) / diff.count();
 
     setUnits();
     m_map.onFrame();

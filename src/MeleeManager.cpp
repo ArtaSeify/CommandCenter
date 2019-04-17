@@ -61,6 +61,11 @@ void MeleeManager::assignTargets(const std::vector<Unit> & targets)
                 // if we're not near the order position
                 if (Util::Dist(meleeUnit, order.getPosition()) > 4)
                 {
+					// don't spam move command
+					if (meleeUnit.getUnitPtr()->orders.size() > 0 && CCPosition(meleeUnit.getUnitPtr()->orders[0].target_pos) == order.getPosition())
+					{
+						continue;
+					}
                     // move to it
                     meleeUnit.move(order.getPosition());
                 }

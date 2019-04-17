@@ -60,6 +60,11 @@ void RangedManager::assignTargets(const std::vector<Unit> & targets)
                 // if we're not near the order position
                 if (Util::Dist(rangedUnit, order.getPosition()) > 4)
                 {
+					// don't spam move command
+					if (rangedUnit.getUnitPtr()->orders.size() > 0 && CCPosition(rangedUnit.getUnitPtr()->orders[0].target_pos) == order.getPosition())
+					{
+						continue;
+					}
                     // move to it
                     rangedUnit.move(order.getPosition());
                 }

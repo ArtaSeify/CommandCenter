@@ -16,6 +16,7 @@ BOSSManager::BOSSManager(CCBot & bot)
     , m_currentUnits            ()
     , m_searchThread            ()
     , m_unitStartTimes          ()
+    , m_haveResults             (false)
 {
     // Initialize all the BOSS internal data
     BOSS::Init("../bin/SC2Data.json");
@@ -78,7 +79,7 @@ void BOSSManager::onFrame(SearchMessage message)
 {
     printDebugInfo();
     // supply maxed, no reason to search
-    if (m_currentGameState.getCurrentSupply() == 200)
+    if (m_currentGameState.getCurrentSupply() == 200 && message != SearchMessage::UnitDied)
     {
         return;
     }
@@ -88,10 +89,18 @@ void BOSSManager::onFrame(SearchMessage message)
         finishSearch(message);
     }
 
+    // the enemy data
+    /*SearchMessage unitsChanged = setEnemyUnits();
+
+    if (unitsChanged == SearchMessage::NewEnemyUnit)
+    {
+        finishSearch(unitsChanged);
+    }    */
+
     if (m_searchState == SearchState::Free)
     {
         // supply maxed, no reason to search
-        if (m_currentGameState.getCurrentSupply() == 200)
+        if (m_currentGameState.getCurrentSupply() == 200 && message != SearchMessage::UnitDied)
         {
             return;
         }
@@ -122,12 +131,6 @@ void BOSSManager::setCurrentGameState(bool reset)
     if (m_currentGameState.getRace() != BOSS::Races::None && !reset)
     {
         m_params.setInitialState(m_currentGameState);
-
-        // the enemy data
-        setEnemyUnits();
-
-        //m_params.setEnemyUnits(m_enemyUnits);
-        //m_params.setEnemyRace(BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Enemy)));
         return;
     }
 
@@ -288,19 +291,36 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
     }
 }
 
-void BOSSManager::setEnemyUnits()
+BOSSManager::SearchMessage BOSSManager::setEnemyUnits()
 {
-    // enemy units
-    m_enemyUnits.clear();
-    m_enemyUnits = std::vector<int>(BOSS::ActionTypes::GetAllActionTypes().size(), 0);
+    return SearchMessage::None;
 
-    std::cout << "enemy units:" << std::endl;
+    auto enemyUnitTypes = std::vector<int>(BOSS::ActionTypes::GetAllActionTypes().size(), 0);
     auto enemyUnits = m_bot.UnitInfo().getUnits(Players::Enemy);
-    for (auto& enemyUnit : enemyUnits)
+    bool change = false;
+
+    if (enemyUnits.size() > 0)
     {
-        m_enemyUnits[BOSS::ActionTypes::GetActionType(enemyUnit.getType().getName()).getID()]++;
-        std::cout << enemyUnit.getType().getName() << std::endl;
+        std::cout << "enemy units:" << std::endl;
+        for (auto& enemyUnit : enemyUnits)
+        {
+            const BOSS::ActionID index = BOSS::ActionTypes::GetActionType(enemyUnit.getType().getName()).getID();
+            enemyUnitTypes[index]++;
+            if (m_enemyUnits[index] == 0)
+            {
+                change = true;
+            }
+            std::cout << enemyUnit.getType().getName() << std::endl;
+        }
     }
+
+    if (change)
+    {
+        m_enemyUnits = enemyUnitTypes;
+        return SearchMessage::NewEnemyUnit;
+    }
+
+    return SearchMessage::None;
 }
 
 void BOSSManager::startSearch(bool reset)
@@ -331,6 +351,12 @@ void BOSSManager::finishSearch(SearchMessage message)
     }
     else if (message == SearchMessage::UnitDied)
     {
+        unitDied();
+    }
+    else if (message == SearchMessage::NewEnemyUnit)
+    {
+        m_params.setEnemyUnits(m_enemyUnits);
+        m_params.setEnemyRace(BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Enemy)));
         unitDied();
     }
 }
@@ -421,6 +447,7 @@ void BOSSManager::queueEmpty()
 
     m_searchResults.clear();
     m_searchState = SearchState::Free;
+    m_haveResults = true;
 }
 
 void BOSSManager::unitDied()
@@ -429,7 +456,7 @@ void BOSSManager::unitDied()
     m_results = m_searchResults[0];
     double avgSearchTime = 0;
 
-    for (auto& result : m_searchResults)
+    for (const auto & result : m_searchResults)
     {
         avgSearchTime += result.timeElapsed;
         if (result.usefulEval > m_results.usefulEval)
@@ -448,6 +475,7 @@ void BOSSManager::unitDied()
         std::cout << "have time to restart!" << std::endl;
         m_searchResults.clear();
         m_searchState = SearchState::Free;
+        m_haveResults = false;
         return;
     }
 
@@ -509,6 +537,7 @@ void BOSSManager::unitDied()
 
     m_searchResults.clear();
     m_searchState = SearchState::Free;
+    m_haveResults = true;
 }
 
 void BOSSManager::setOpeningBuildOrder()

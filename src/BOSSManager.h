@@ -46,10 +46,11 @@ namespace CC
 
         std::atomic<int>                    m_searchState;
         int                                 m_largestFrameSearched;
+        bool                                m_haveResults;
 
         void printDebugInfo() const;
         void setCurrentUnits(const std::vector<Unit> & CCUnits);
-        void setEnemyUnits();
+        SearchMessage setEnemyUnits();
         void getResult();
         void storeUnitStartTime(const BOSS::ActionAbilityPair& action);
         void queueEmpty();
@@ -72,5 +73,6 @@ namespace CC
         void setOpeningBuildOrder();
 
         int  highestFrameSearched() const   { return m_largestFrameSearched; }
+		bool haveResults() const			{ return m_haveResults; }
     };
 }

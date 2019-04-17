@@ -55,7 +55,7 @@ void ProductionManager::onUnitDestroy(const Unit & unit)
 
 void ProductionManager::searchBuildOrder()
 {
-    if (m_queue.isEmpty())
+    if (m_queue.isEmpty() && m_bot.GetCurrentSupply() < 200)
     {
         m_BOSSManager.onFrame(m_BOSSManager.SearchMessage::QueueEmpty);
         searchFinished();
@@ -74,12 +74,7 @@ void ProductionManager::searchBuildOrder()
 
 void ProductionManager::searchFinished()
 {
-    if (m_bot.GetCurrentSupply() >= 200)
-    {
-        return;
-    }
-
-    auto & BOSSBuildOrder = m_BOSSManager.getBuildOrder();
+    auto BOSSBuildOrder = m_BOSSManager.getBuildOrder();
     //std::cout << "build order:" << std::endl;
     //BOSSBuildOrder.print();
     //std::cout << std::endl;

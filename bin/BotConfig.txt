@@ -20,7 +20,7 @@
     "SC2API" :
     {
         "BotRace"                   : "Protoss",
-        "EnemyDifficulty"           : 1,
+        "EnemyDifficulty"           : 10,
         "EnemyRace"                 : "Protoss",
         "MapFile"                   : "AbyssalReefLE.SC2Map",
         "StepSize"                  : 1
@@ -119,7 +119,7 @@
                 "Race"              : "Protoss", 
                 "OpeningBuildOrder" : [ "Probe", "Probe", "Pylon", "Probe", "Probe", "Gateway", "Pylon", "Probe" ],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
-                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 50 ] ]
+                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 1 ] ]
             },
             "Protoss_Test"          :
             {
