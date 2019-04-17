@@ -12,6 +12,7 @@ Squad::Squad(CCBot & bot)
     , m_name("Default")
     , m_meleeManager(bot)
     , m_rangedManager(bot)
+    , m_regroupingFrames(0)
 {
 
 }
@@ -25,6 +26,7 @@ Squad::Squad(const std::string & name, const SquadOrder & order, size_t priority
     , m_priority(priority)
     , m_meleeManager(bot)
     , m_rangedManager(bot)
+    , m_regroupingFrames(0)
 {
 }
 
@@ -33,12 +35,20 @@ void Squad::onFrame()
     // update all necessary unit information within this squad
     updateUnits();
 
+    // we are currently regrouping
+    if (m_regroupingFrames > 0)
+    {
+        m_regroupingFrames--;
+        return;
+    }
     // determine whether or not we should regroup
     bool needToRegroup = needsToRegroup();
     
     // if we do need to regroup, do it
     if (needToRegroup)
     {
+        m_regroupingFrames = 80;
+        
         CCPosition regroupPosition = calcRegroupPosition();
 
         m_bot.Map().drawCircle(regroupPosition, 3, CCColor(255, 0, 255));
@@ -86,6 +96,7 @@ void Squad::setAllUnits()
     {
         if (!unit.isValid()) { continue; }
         if (unit.isBeingConstructed()) { continue; }
+        if (!unit.isAlive()) { std::cout << "removing dead unit from squad!" << std::endl; continue; }
         
         goodUnits.insert(unit);
     }
@@ -145,9 +156,42 @@ void Squad::addUnitsToMicroManagers()
     //m_tankManager.setUnits(tankUnits);
 }
 
-// TODO: calculates whether or not to regroup
 bool Squad::needsToRegroup() const
 {
+    // dont need to regroup idle squad
+    if (m_name == "Idle")
+    {
+        return false;
+    }
+
+    float minDist = std::numeric_limits<float>::max();
+    Unit minDistUnit;
+
+    // regroup if there is a big gap between the units attacking. 
+    for (auto & unit : m_units)
+    {
+        float dist = Util::Dist(m_order.getPosition(), unit.getPosition());
+        if (dist < minDist)
+        {
+            minDist = dist;
+            minDistUnit = unit;
+        }
+    }
+
+    for (auto & unit : m_units)
+    {
+        float dist = Util::Dist(unit.getPosition(), minDistUnit.getPosition());
+        // prevents regrouping because of newly made units
+        if (dist > 30)
+        {
+            continue;
+        }
+        if (dist > 15)
+        {
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -214,17 +258,19 @@ CCPosition Squad::calcRegroupPosition() const
 
     float minDist = std::numeric_limits<float>::max();
 
+    //regroup = calcCenter();
+
     for (auto unit : m_units)
     {
-        if (!m_nearEnemy.at(unit))
-        {
+        //if (!m_nearEnemy.at(unit))
+        //{
             float dist = Util::Dist(m_order.getPosition(), unit.getPosition());
             if (dist < minDist)
             {
                 minDist = dist;
                 regroup = unit.getPosition();
             }
-        }
+        //}
     }
 
     if (regroup.x == 0.0f && regroup.y == 0.0f)

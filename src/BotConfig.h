@@ -58,6 +58,7 @@ namespace CC
         int WorkersPerRefinery;
         int BuildingSpacing;
         int PylonSpacing;
+        bool UseBOSS;
 
         BotConfig();
 

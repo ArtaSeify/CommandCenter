@@ -137,6 +137,7 @@ void WorkerManager::setMineralWorker(const Unit & unit)
 
 Unit WorkerManager::getClosestDepot(Unit worker) const
 {
+    Unit firstDepot;
     Unit closestDepot;
     double closestDistance = std::numeric_limits<double>::max();
 
@@ -146,6 +147,11 @@ Unit WorkerManager::getClosestDepot(Unit worker) const
 
         if (unit.getType().isResourceDepot() && unit.isCompleted())
         {
+            if (!firstDepot.isValid())
+            {
+                firstDepot = unit;
+            }
+
             if (unit.getUnitPtr()->assigned_harvesters >= unit.getUnitPtr()->ideal_harvesters)
             {
                 continue;
@@ -158,6 +164,12 @@ Unit WorkerManager::getClosestDepot(Unit worker) const
                 closestDistance = distance;
             }
         }
+    }
+
+    // all the depots are maxed out, so send worker to the first depot in our list
+    if (!closestDepot.isValid())
+    {
+        return firstDepot;
     }
 
     return closestDepot;

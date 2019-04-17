@@ -76,8 +76,8 @@ bool BuildingPlacer::canBuildHereWithSpace(int bx, int by, const Building & b, i
     // TODO: make sure we leave space for add-ons. These types of units can have addons:
 
     // define the rectangle of the building spot
-    int startx = bx - buildDist - xdelta;
-    int starty = by - buildDist - ydelta;
+    int startx = bx - (buildDist + xdelta);
+    int starty = by - (buildDist + ydelta);
     int endx   = bx + width + buildDist - xdelta;
     int endy   = by + height + buildDist - ydelta;
 

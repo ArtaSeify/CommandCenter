@@ -65,10 +65,12 @@ void TechTree::initUnitTypeData()
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_TEMPEST, m_bot)] =                 { sc2::Race::Protoss, 0, 0, 4, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::TRAIN_TEMPEST, 0, { UnitType(sc2::UNIT_TYPEID::PROTOSS_STARGATE, m_bot) }, { UnitType(sc2::UNIT_TYPEID::PROTOSS_FLEETBEACON, m_bot) }, {} };
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_INTERCEPTOR, m_bot)] =             { sc2::Race::Protoss, 0, 0, 0, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::BUILD_INTERCEPTORS, 0, { UnitType(sc2::UNIT_TYPEID::PROTOSS_CARRIER, m_bot) }, {}, {} }; 
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_ORACLESTASISTRAP, m_bot)] =        { sc2::Race::Protoss, 0, 0, 0, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::BUILD_STASISTRAP, 0, { UnitType(sc2::UNIT_TYPEID::PROTOSS_ORACLE, m_bot) }, {}, {} }; 
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_ARCHON, m_bot)] =                  { sc2::Race::Protoss, 0, 0, 0, 0, true, false, false, false, false, false, false, sc2::ABILITY_ID::MORPH_ARCHON, 0, { UnitType(sc2::UNIT_TYPEID::PROTOSS_HIGHTEMPLAR, m_bot) }, {}, {} };
 
     // Protoss equivalent types
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_WARPPRISMPHASING, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_WARPPRISM, m_bot)];
-    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_DISRUPTORPHASED, m_bot)]  = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_DISRUPTOR, m_bot)] =
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_DISRUPTORPHASED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_DISRUPTOR, m_bot)];
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_ADEPTPHASESHIFT, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::PROTOSS_ADEPT, m_bot)];
 
     // Terran Buildings                                                                      m  g  s  t  unit  bld   wrk    rfn    sup    hall   add
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::TERRAN_COMMANDCENTER, m_bot)] =            { sc2::Race::Terran, 0, 0, 0, 0, true, true, false, false, false,  true, false, sc2::ABILITY_ID::BUILD_COMMANDCENTER, 0, { UnitType(sc2::UNIT_TYPEID::TERRAN_SCV, m_bot) }, {}, {} }; 

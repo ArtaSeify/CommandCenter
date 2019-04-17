@@ -27,11 +27,15 @@ void ProductionManager::onStart()
 {
     m_buildingManager.onStart();
     setBuildOrder(m_bot.Strategy().getOpeningBookBuildOrder());
+    m_BOSSManager.onStart();
 }
 
 void ProductionManager::onFrame()
 {
-    searchBuildOrder();
+    if (m_bot.Config().UseBOSS)
+    {
+        searchBuildOrder();
+    }
     fixBuildOrderDeadlock();
     manageBuildOrderQueue();
 
@@ -51,69 +55,34 @@ void ProductionManager::onUnitDestroy(const Unit & unit)
 
 void ProductionManager::searchBuildOrder()
 {
-    // currently searching for a build order
-    if (m_BOSSManager.searchInProgress())
+    if (m_queue.isEmpty())
     {
-        // if the current queue is empty, stop the search so we have stuff to build
-        if (m_queue.isEmpty())
-        {
-            m_BOSSManager.finishSearch();
-        }
-        return;
-    }
-
-    if (m_BOSSManager.isSearchFinished())
-    {
+        m_BOSSManager.onFrame(m_BOSSManager.SearchMessage::QueueEmpty);
         searchFinished();
     }
-
-    m_BOSSManager.setCurrentGameState();
-
-    const int framesToSearch = 4032;
-
-    // actions to search over
-    std::vector<std::string> relevantActionsNames =
-    { "ChronoBoost", "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker",
-        "Zealot", "Colossus", "Forge", "FleetBeacon", "TwilightCouncil", "Stargate", "TemplarArchive",
-        "DarkShrine", "RoboticsBay", "RoboticsFacility", "ZealotWarped", "Zealot", "StalkerWarped", "Stalker",
-        "HighTemplarWarped", "HighTemplar", "DarkTemplarWarped", "DarkTemplar", "SentryWarped", "Sentry",
-        "Phoenix", "Carrier", "VoidRay", "WarpPrism", "Observer", "Immortal", "Probe", "Interceptor", "AdeptWarped", 
-        "Adept", "Oracle", "Tempest", "Disruptor", "WarpGateResearch" };
-    
-        /*"Adept", "Sentry", "Colossus", "FleetBeacon", "Forge",
-        "TwilightCouncil", "Stargate", "TemplarArchive", "DarkShrine", 
-        "RoboticsBay", "RoboticsFacility", "HighTemplar", "DarkTemplar", "Phoenix", "Carrier", 
-        "VoidRay", "WarpPrism", "Observer", "Immortal", "Oracle", "Tempest", "Disruptor"};*/
-    BOSS::ActionSetAbilities relevantActions;
-    for (std::string & actionName : relevantActionsNames)
+    else if (m_bot.UnitInfo().getNumUnitsDied(Players::Self) > 0)
     {
-        relevantActions.add(BOSS::ActionTypes::GetActionType(actionName));
+        std::cout << "unit died!!!" << std::endl;
+        m_BOSSManager.onFrame(m_BOSSManager.SearchMessage::UnitDied);
+        searchFinished();
     }
-
-    // how many times we are allowed to do an action. if no limit is given, then we can do it
-    // as many times as we want
-    std::vector<std::pair<BOSS::ActionType, int>> maxActions;
-    //maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Nexus"), 2);
-    //maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Nexus"), 2);
-    /*maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Gateway"), 4);
-    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("CyberneticsCore"), 1);
-    maxActions.emplace_back(BOSS::ActionTypes::GetActionType("Pylon"), m_BOSSManager.numSupplyProviders() + (framesToSearch / 1000) + 4);*/
-
-    // the opening build order to follow inside the search
-    BOSS::BuildOrderAbilities openingBuildOrder;
-
-    bool sortActions = false;
-
-    m_BOSSManager.setParameters(framesToSearch, 2000000, true, sortActions, maxActions, openingBuildOrder, relevantActions);
-
-    m_BOSSManager.startSearch();
+    else
+    {
+        m_BOSSManager.onFrame(m_BOSSManager.SearchMessage::None);
+    }
 }
 
 void ProductionManager::searchFinished()
 {
-    auto & BOSSBuildOrder = m_BOSSManager.getBuildOrder();
-    m_BOSSManager.gotData();
+    if (m_bot.GetCurrentSupply() >= 200)
+    {
+        return;
+    }
 
+    auto & BOSSBuildOrder = m_BOSSManager.getBuildOrder();
+    //std::cout << "build order:" << std::endl;
+    //BOSSBuildOrder.print();
+    //std::cout << std::endl;
     addToBuildOrder(BOSSBuildOrder);   
 }
 
@@ -342,7 +311,7 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
             m_buildingManager.addBuildingTask(item.type.getUnitType(), Util::GetTilePosition(m_bot.GetStartLocation()));
             //std::cout << "building!" << std::endl;
         }
-        
+        //system("pause");
     }
     // warp in unit
     else if (item.type.isUnit() && item.type.getName().find("Warped") != std::string::npos)
@@ -424,17 +393,20 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
         }
 
         producer.warp(item.type.getUnitType(), warpPosition);
-        std::cout << "warping! " << warpPosition.x << "," << warpPosition.y << std::endl;
+        //system("pause");
+        //std::cout << "warping! " << warpPosition.x << "," << warpPosition.y << std::endl;
     }
     // if we're dealing with a non-building unit
     else if (item.type.isUnit())
     {
         producer.train(item.type.getUnitType());
+        //system("pause");
         //std::cout << "training unit!" << std::endl;
     }
     else if (item.type.isUpgrade())
     {
         producer.research(item.type.getAbility().first);
+        //system("pause");
         //std::cout << "researching upgrade!" << std::endl;
     }
     else if (item.type.isAbility())
@@ -448,6 +420,7 @@ void ProductionManager::create(const Unit & producer, BuildOrderItem & item)
                 if (unit.getUnitPtr()->orders[0].ability_id == action.second.targetProduction_ability)
                 {
                     producer.cast(m_bot.GetUnit(unit.getID()), action.first);
+                    //system("pause");
                     //std::cout << "casting ability!" << std::endl;
                     return;
                 }
@@ -578,5 +551,5 @@ void ProductionManager::drawProductionInformation()
 
     ss << m_queue.getQueueInformation();
 
-    m_bot.Map().drawTextScreen(0.01f, 0.01f, ss.str(), CCColor(255, 255, 0));
+    m_bot.Map().drawTextScreen(0.01f, 0.03f, ss.str(), CCColor(255, 255, 0));
 }

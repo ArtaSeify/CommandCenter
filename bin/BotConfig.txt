@@ -1,6 +1,6 @@
 {
     "ConnectToLadder" : false,
-    "Cheat"           : false,
+    "Cheat"           : true,
 
     "Bot Info" :
     {
@@ -20,7 +20,7 @@
     "SC2API" :
     {
         "BotRace"                   : "Protoss",
-        "EnemyDifficulty"           : 5,
+        "EnemyDifficulty"           : 1,
         "EnemyRace"                 : "Protoss",
         "MapFile"                   : "AbyssalReefLE.SC2Map",
         "StepSize"                  : 1
@@ -36,7 +36,8 @@
     {
         "WorkersPerRefinery"        : 3,
         "BuildingSpacing"           : 0,
-        "PylonSpacing"              : 3
+        "PylonSpacing"              : 3,
+        "UseBOSS"                   : true
     },
 
     "Debug" :
@@ -52,7 +53,7 @@
         "DrawUnitTargetInfo"        : true,
         "DrawLastSeenTileInfo"      : false,
         "DrawSquadInfo"             : true,
-        "DrawWorkerInfo"            : true,
+        "DrawWorkerInfo"            : false,
         "DrawBuildingInfo"          : true,
         "DrawReservedBuildingTiles" : true
     },
@@ -116,9 +117,16 @@
             "Protoss_BOSS"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : [ "Probe","Assimilator","Probe","Pylon","Probe","Gateway" ],
+                "OpeningBuildOrder" : [ "Probe", "Probe", "Pylon", "Probe", "Probe", "Gateway", "Pylon", "Probe" ],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
-                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 12 ] ]
+                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 50 ] ]
+            },
+            "Protoss_Test"          :
+            {
+                "Race"              : "Protoss", 
+                "OpeningBuildOrder" : [ "Nexus", "Pylon", "Gateway", "Zealot", "Zealot", "Pylon", "Pylon", "Pylon", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot"],
+                "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
+                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 10 ] ]
             },
             "Protoss_ZealotRush"    : 
             { 

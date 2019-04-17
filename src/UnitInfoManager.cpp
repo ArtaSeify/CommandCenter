@@ -37,15 +37,29 @@ void UnitInfoManager::updateUnitInfo()
         m_units[unit.getPlayer()].push_back(unit);     
     }
 
+    m_unitsDiedLastFrame.clear();
     // remove bad enemy units
+    size_t unitSizeBefore = m_unitData[Players::Self].getUnitInfoMap().size();
     m_unitData[Players::Self].removeBadUnits();
+    m_unitsDiedLastFrame[Players::Self] = unitSizeBefore - m_unitData[Players::Self].getUnitInfoMap().size();
+
+    unitSizeBefore = m_unitData[Players::Enemy].getUnitInfoMap().size();
     m_unitData[Players::Enemy].removeBadUnits();
+    m_unitsDiedLastFrame[Players::Enemy] = unitSizeBefore - m_unitData[Players::Enemy].getUnitInfoMap().size();
+
+    unitSizeBefore = m_unitData[Players::Neutral].getUnitInfoMap().size();
     m_unitData[Players::Neutral].removeBadUnits();
+    m_unitsDiedLastFrame[Players::Neutral] = unitSizeBefore - m_unitData[Players::Neutral].getUnitInfoMap().size();
 }
 
 const std::map<Unit, UnitInfo> & UnitInfoManager::getUnitInfoMap(CCPlayer player) const
 {
     return getUnitData(player).getUnitInfoMap();
+}
+
+size_t UnitInfoManager::getNumUnitsDied(CCPlayer player) const
+{
+    return m_unitsDiedLastFrame.at(player);
 }
 
 const std::vector<Unit> & UnitInfoManager::getUnits(CCPlayer player) const
@@ -204,10 +218,23 @@ void UnitInfoManager::drawUnitInformation(float x,float y) const
     }
 
     std::stringstream ss;
+    auto enemyUnits = m_unitData.at(Players::Enemy).getUnitInfoMap();
+    
+    ss << "Enemy units: " << enemyUnits.size() << "\n\n";
+    
+    for (auto & unit : enemyUnits)
+    {
+        if (unit.first.getType().isCombatUnit())
+        {
+            ss << unit.first.getType().getName() << "\n";
+        }
+    }
+
+    m_bot.Map().drawTextScreen(0.90f, 0.05f, ss.str(), CCColor(255, 255, 0));
 
     // TODO: move this to unitData
 
-    //// for each unit in the queue
+    // for each unit in the queue
     //for (auto & kv : m_)
     //{
     //    int numUnits =      m_unitData.at(Players::Self).getNumUnits(t);
@@ -219,13 +246,13 @@ void UnitInfoManager::drawUnitInformation(float x,float y) const
     //        ss << numUnits << "   " << numDeadUnits << "   " << sc2::UnitTypeToName(t) << "\n";
     //    }
     //}
-    //
-    //for (auto & kv : getUnitData(Players::Enemy).getUnitInfoMap())
-    //{
-    //    m_bot.Map().drawCircle(kv.second.lastPosition, 0.5f);
-    //    m_bot.Map().drawText(kv.second.lastPosition, sc2::UnitTypeToName(kv.second.type));
-    //}
-    //
+    
+    /*for (auto & kv : getUnitData(Players::Enemy).getUnitInfoMap())
+    {
+        m_bot.Map().drawCircle(kv.second.lastPosition, 0.5f);
+        m_bot.Map().drawText(kv.second.lastPosition, sc2::UnitTypeToName(kv.second.type));
+    }*/
+    
 }
 
 void UnitInfoManager::updateUnit(const Unit & unit)

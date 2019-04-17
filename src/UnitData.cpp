@@ -13,11 +13,16 @@ UnitData::UnitData()
 void UnitData::updateUnit(const Unit & unit)
 {
     bool firstSeen = false;
+
     const auto & it = m_unitMap.find(unit);
     if (it == m_unitMap.end())
     {
         firstSeen = true;
         m_unitMap[unit] = UnitInfo();
+        /*if (unit.getUnitPtr()->alliance == sc2::Unit::Alliance::Enemy && unit.getType().isCombatUnit())
+        {
+            std::cout << "unit doesn't exist!" << std::endl;
+        }*/
     }
 
     UnitInfo & ui   = m_unitMap[unit];
@@ -55,6 +60,21 @@ void UnitData::removeBadUnits()
 {
     for (auto iter = m_unitMap.begin(); iter != m_unitMap.end();)
     {
+        if (!iter->first.isAlive())
+        {
+            m_numUnits[iter->second.type]--;
+            m_numDeadUnits[iter->second.type]++;
+            
+            iter = m_unitMap.erase(iter);
+        }
+        else
+        {
+            iter++;
+        }
+    }
+
+    /*for (auto iter = m_unitMap.begin(); iter != m_unitMap.end();)
+    {
         if (badUnitInfo(iter->second))
         {
             m_numUnits[iter->second.type]--;
@@ -64,7 +84,7 @@ void UnitData::removeBadUnits()
         {
             iter++;
         }
-    }
+    }*/
 }
 
 bool UnitData::badUnitInfo(const UnitInfo & ui) const

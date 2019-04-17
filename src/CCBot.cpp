@@ -54,19 +54,24 @@ void CCBot::OnGameStart()
     m_unitInfo.onStart();
     m_bases.onStart();
     m_workers.onStart();
-
     m_gameCommander.onStart();
+
+    m_startTime = std::chrono::system_clock::now();
 }
 
 void CCBot::OnStep()
 {
+    // calculating FPS
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> diff = end - m_startTime;
+    m_framesPerSecond = double(GetCurrentFrame()) / diff.count();
+
     setUnits();
     m_map.onFrame();
     m_unitInfo.onFrame();
     m_bases.onFrame();
     m_workers.onFrame();
     m_strategy.onFrame();
-
     m_gameCommander.onFrame();
 
 #ifdef SC2API
@@ -174,6 +179,11 @@ int CCBot::GetCurrentFrame() const
 #else
     return BWAPI::Broodwar->getFrameCount();
 #endif
+}
+
+double CCBot::GetFramesPerSecond() const
+{
+    return m_framesPerSecond;
 }
 
 const TypeData & CCBot::Data(const UnitType & type) const

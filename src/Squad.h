@@ -16,6 +16,7 @@ namespace CC
         std::string         m_name;
         std::set<Unit> m_units;
         std::string         m_regroupStatus;
+        int					m_regroupingFrames;
         int                 m_lastRetreatSwitch;
         bool                m_lastRetreatSwitchVal;
         size_t              m_priority;

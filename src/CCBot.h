@@ -33,6 +33,8 @@ namespace CC
 
         std::vector<Unit>       m_allUnits;
         std::vector<CCPosition> m_baseLocations;
+        std::chrono::time_point<std::chrono::system_clock> m_startTime;
+        double                  m_framesPerSecond;
 
         void setUnits();
 
@@ -69,6 +71,7 @@ namespace CC
         CCPosition GetStartLocation() const;
 
         int GetCurrentFrame() const;
+        double GetFramesPerSecond() const;
         int GetMinerals() const;
         int GetCurrentSupply() const;
         int GetMaxSupply() const;

@@ -89,8 +89,8 @@ int main(int argc, char* argv[])
 
     if (j["Cheat"].get<bool>())
     {
-        bot.Debug()->DebugIgnoreFood();
-        bot.Debug()->DebugIgnoreMineral();
+        //bot.Debug()->DebugIgnoreFood();
+        //bot.Debug()->DebugIgnoreMineral();
         bot.Debug()->DebugGiveAllResources();
         bot.Debug()->DebugIgnoreResourceCost();
         bot.Debug()->DebugFastBuild();

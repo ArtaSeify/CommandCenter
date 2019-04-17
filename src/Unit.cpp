@@ -65,12 +65,12 @@ const BWAPI::UnitType & Unit::getAPIUnitType() const
 #endif
 bool Unit::operator < (const Unit & rhs) const
 {
-    return m_unit < rhs.m_unit;
+    return m_unitID < rhs.m_unitID;
 }
 
 bool Unit::operator == (const Unit & rhs) const
 {
-    return m_unit == rhs.m_unit;
+    return m_unitID == rhs.m_unitID;
 }
 
 const UnitType & Unit::getType() const

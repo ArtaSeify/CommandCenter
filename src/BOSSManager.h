@@ -12,16 +12,30 @@
 #include "CombatSearch_IntegralMCTS.h"
 #include "NMCS.h"
 
+#include <atomic>
+
 namespace CC
 {
     class CCBot;
 
     class BOSSManager
     {
+    public:
+        enum SearchState
+        {
+            Free, Searching, GettingResults, ExitSearch
+        };
+        enum SearchMessage
+        {
+            None, QueueEmpty, UnitDied, NewEnemyUnit
+        };
+
+    private:
         CCBot &                             m_bot;
         std::unique_ptr<BOSS::CombatSearch> m_searcher;
 
         BOSS::GameState                     m_currentGameState;
+        std::vector<std::pair<std::string, std::string>> m_unitStartTimes;
         std::vector<BOSS::Unit>             m_currentUnits;
         std::vector<int>                    m_enemyUnits;
 
@@ -30,39 +44,33 @@ namespace CC
         std::thread                         m_searchThread;
         std::vector<BOSS::CombatSearchResults> m_searchResults;
 
-        bool m_searching;
-        bool m_searchFinished;
-        bool m_finishSearching;
-        int  m_largestFrameSearched;
+        std::atomic<int>                    m_searchState;
+        int                                 m_largestFrameSearched;
 
+        void printDebugInfo() const;
         void setCurrentUnits(const std::vector<Unit> & CCUnits);
-        void storeResults();
-        void searchFinished();
+        void setEnemyUnits();
+        void getResult();
+        void storeUnitStartTime(const BOSS::ActionAbilityPair& action);
+        void queueEmpty();
+        void unitDied();
         void threadSearch();
 
     public:
         BOSSManager(CCBot & bot);
 
-        void setParameters(int frameLimit, float timeLimit, bool alwaysMakeWorkers, bool sortActions,
-            const std::vector<std::pair<BOSS::ActionType, int>> & maxActions,
-            const BOSS::BuildOrderAbilities & openingBuildOrder,
-            const BOSS::ActionSetAbilities & relevantActions);
+        void onStart();
+        void onFrame(SearchMessage message);
 
-        void setCurrentGameState();
-        void startSearch();
-        void finishSearch();
+        void setParameters(bool reset);
+        void setCurrentGameState(bool reset);
+        void startSearch(bool reset);
 
-        const BOSS::BuildOrderAbilities & BOSSManager::getBuildOrder();
+        void finishSearch(SearchMessage message);
+
+        const BOSS::BuildOrderAbilities & getBuildOrder();
         void setOpeningBuildOrder();
 
-        BOSS::RaceID getBOSSPlayerRace() const;
-        int  numSupplyProviders() const;
-
-        //bool searchInProgress() const   { return m_searching; }
-        bool searchInProgress() const       { return m_searchThread.joinable(); }
-        bool isSearchFinished() const       { return m_searchFinished; }
-        void gotData()                      { m_searchFinished = false; }
         int  highestFrameSearched() const   { return m_largestFrameSearched; }
-              
     };
 }

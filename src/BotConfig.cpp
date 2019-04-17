@@ -24,6 +24,8 @@ BotConfig::BotConfig()
     UserInput                           = true;
     CompleteMapInformation              = false;
 
+    UseBOSS                             = false;
+
     DrawGameInfo                        = true;
     DrawProductionInfo                  = true;
     DrawTileInfo                        = false;
@@ -115,6 +117,7 @@ void BotConfig::readConfigFile()
         JSONTools::ReadInt("BuildingSpacing", macro, BuildingSpacing);
         JSONTools::ReadInt("PylongSpacing", macro, PylonSpacing);
         JSONTools::ReadInt("WorkersPerRefinery", macro, WorkersPerRefinery);
+        JSONTools::ReadBool("UseBOSS", macro, UseBOSS);
     }
 
     // Parse the Debug Options

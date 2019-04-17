@@ -1,2 +1,1 @@
 Attack in batches
-Workers added to defense squad if the enemy is close to a depot

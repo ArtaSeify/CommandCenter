@@ -14,6 +14,7 @@ namespace CC
 
         std::map<CCPlayer, UnitData> m_unitData;
         std::map<CCPlayer, std::vector<Unit>> m_units;
+        std::map<CCPlayer, size_t> m_unitsDiedLastFrame;
 
         void                    updateUnit(const Unit & unit);
         void                    updateUnitInfo();
@@ -31,6 +32,7 @@ namespace CC
         void                    onStart();
 
         const std::vector<Unit> & getUnits(CCPlayer player) const;
+        size_t                    getNumUnitsDied(CCPlayer player) const;
 
         size_t                  getUnitTypeCount(CCPlayer player, UnitType type, bool completed = true) const;
 

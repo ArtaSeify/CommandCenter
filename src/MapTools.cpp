@@ -164,6 +164,7 @@ void MapTools::onFrame()
     }
 
     draw();
+    drawTextScreen(0.01f, 0.01f, "FPS: " + std::to_string(m_bot.GetFramesPerSecond()));
 }
 
 void MapTools::computeConnectivity()

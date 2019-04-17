@@ -11,74 +11,123 @@ BOSSManager::BOSSManager(CCBot & bot)
     : m_bot                     (bot)
     , m_searcher                ()
     , m_currentGameState        ()
-    , m_searching               (false)
-    , m_searchFinished          (false)
-    , m_finishSearching         (false)
+    , m_searchState             (SearchState::Free)
     , m_largestFrameSearched    (0)
     , m_currentUnits            ()
     , m_searchThread            ()
+    , m_unitStartTimes          ()
 {
     // Initialize all the BOSS internal data
     BOSS::Init("../bin/SC2Data.json");
     m_params = BOSS::CombatSearchParameters();
 }
 
-void BOSSManager::setParameters(int frameLimit, float timeLimit, bool alwaysMakeWorkers, bool sortActions,
-                                const std::vector<std::pair<BOSS::ActionType, int>> & maxActions,
-                                const BOSS::BuildOrderAbilities & openingBuildOrder,
-                                const BOSS::ActionSetAbilities & relevantActions)
+void BOSSManager::onStart()
 {
+    std::vector<std::string> relevantActionsNames =
+    { "ChronoBoost", "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker",
+        "Zealot", "Colossus", "Forge", "FleetBeacon", "TwilightCouncil", "Stargate", "TemplarArchive",
+        "DarkShrine", "RoboticsBay", "RoboticsFacility", "ZealotWarped", "Zealot", "StalkerWarped", "Stalker",
+        "DarkTemplarWarped", "DarkTemplar", "Carrier", "VoidRay", "Immortal", "Probe", "AdeptWarped",
+        "Adept", "Tempest"};
+    //, "WarpGateResearch" 
+    BOSS::ActionSetAbilities relevantActions;
+    for (std::string & actionName : relevantActionsNames)
+    {
+        relevantActions.add(BOSS::ActionTypes::GetActionType(actionName));
+    }
+
+    // how many times each action is allowed
+    std::vector<std::pair<BOSS::ActionType, int>> maxActions;
+    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("CyberneticsCore"), 1));
+    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("FleetBeacon"), 1));
+    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("TwilightCouncil"), 1));
+    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("TemplarArchive"), 1));
+    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("DarkShrine"), 1));
+    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("RoboticsBay"), 1));
+
+    bool sortActions = false;
+
     // set the maxActions
     for (auto & maxActionPair : maxActions)
     {
         m_params.setMaxActions(maxActionPair.first, maxActionPair.second);
     }
-    
+
     // set relevant actions
     m_params.setRelevantActions(relevantActions);
 
     // heuristic used in search
-    m_params.setAlwaysMakeWorkers(alwaysMakeWorkers);
-
-    // the initial build order to follow
-    m_params.setInitialState(m_currentGameState);
-
-    // the enemy data
-    m_params.setEnemyUnits(m_enemyUnits);
-    m_params.setEnemyRace(BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Enemy)));
+    m_params.setAlwaysMakeWorkers(true);
 
     // time limit of the search
-    m_params.setSearchTimeLimit(timeLimit);
+    m_params.setSearchTimeLimit(10000000);
 
     // sort moves as we search
     m_params.setSortActions(sortActions);
-    
+
     //int m_threadsForExperiment;
     m_params.setExplorationValue(BOSS::FracType(0.15));
     m_params.setChangingRoot(true);
-    m_params.setUseMaxValue(false);
+    m_params.setUseMaxValue(true);
     m_params.setNumberOfSimulations(500000);
-    m_params.setSimulationsPerStep(4000);    
-/*
-    m_params.setLevel(1);
-    m_params.setNumPlayouts(250);*/
+    m_params.setSimulationsPerStep(200);
+}
 
-    if (m_largestFrameSearched == 0)
+void BOSSManager::onFrame(SearchMessage message)
+{
+    printDebugInfo();
+    // supply maxed, no reason to search
+    if (m_currentGameState.getCurrentSupply() == 200)
     {
-        std::cout << "first search!" << std::endl;
+        return;
     }
 
+    if (message == SearchMessage::QueueEmpty || message == SearchMessage::UnitDied)
+    {
+        finishSearch(message);
+    }
+
+    if (m_searchState == SearchState::Free)
+    {
+        // supply maxed, no reason to search
+        if (m_currentGameState.getCurrentSupply() == 200)
+        {
+            return;
+        }
+
+        bool reset = false;
+        if (message == SearchMessage::UnitDied)
+        {
+            reset = true;
+        }
+        startSearch(reset);
+    }
+}
+
+void BOSSManager::setParameters(bool reset)
+{
+    setCurrentGameState(reset);
+
     // limit is start frame of the last unit in the build order + framelimit
-    std::cout << "setting frame limit as: " << m_largestFrameSearched + frameLimit << std::endl;
+    const int frameLimit = 6720;
+    //std::cout << "setting frame limit as: " << m_largestFrameSearched + frameLimit << std::endl;
     m_params.setFrameTimeLimit(m_largestFrameSearched + frameLimit);
 }
 
-void BOSSManager::setCurrentGameState()
+void BOSSManager::setCurrentGameState(bool reset)
 {
     //TODO: STATE IS CHANGED IF ANY UNIT DIES.
     // we only set the game state at the very first search
-    if (m_currentGameState.getRace() != BOSS::Races::None)
+    if (m_currentGameState.getRace() != BOSS::Races::None && !reset)
     {
+        m_params.setInitialState(m_currentGameState);
+
+        // the enemy data
+        setEnemyUnits();
+
+        //m_params.setEnemyUnits(m_enemyUnits);
+        //m_params.setEnemyRace(BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Enemy)));
         return;
     }
 
@@ -91,9 +140,12 @@ void BOSSManager::setCurrentGameState()
                         BOSS::NumUnits(m_bot.Workers().getNumRefineries()), BOSS::NumUnits(m_bot.Workers().getNumDepots()));
 
     m_currentGameState = state;
-
-    std::cout << "set opening build order called" << std::endl;
-    setOpeningBuildOrder();
+    // set the initial build order 
+    if (m_currentGameState.getCurrentFrame() <= 1)
+    {
+        setOpeningBuildOrder();
+    }
+    m_params.setInitialState(m_currentGameState);	
 }
 
 // need to transform a vector of CC::Units to BOSS::Units
@@ -234,81 +286,119 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
 
         m_currentUnits.push_back(unit);
     }
+}
 
+void BOSSManager::setEnemyUnits()
+{
     // enemy units
     m_enemyUnits.clear();
-    m_enemyUnits = std::vector<int>(BOSS::ActionTypes::GetAllActionTypes().size());
+    m_enemyUnits = std::vector<int>(BOSS::ActionTypes::GetAllActionTypes().size(), 0);
 
     std::cout << "enemy units:" << std::endl;
     auto enemyUnits = m_bot.UnitInfo().getUnits(Players::Enemy);
-    for (auto & enemyUnit : enemyUnits)
+    for (auto& enemyUnit : enemyUnits)
     {
         m_enemyUnits[BOSS::ActionTypes::GetActionType(enemyUnit.getType().getName()).getID()]++;
         std::cout << enemyUnit.getType().getName() << std::endl;
     }
 }
 
-void BOSSManager::startSearch()
+void BOSSManager::startSearch(bool reset)
 {
-    m_searching = true;
+    setParameters(reset);
 
-    //std::thread ([this] {threadSearch(); });
+    m_searchState = SearchState::Searching;
     m_searchThread = std::thread(&BOSSManager::threadSearch, this);
+    m_searchThread.detach();
 }
 
-void BOSSManager::finishSearch()
+void BOSSManager::finishSearch(SearchMessage message)
 {
+    if (m_searchState != SearchState::Searching)
+    {
+        return;
+    }
+
     m_searcher->finishSearch();
-    m_finishSearching = true;
-    std::cout << "finish search called!" << std::endl;
+    m_searchState = SearchState::ExitSearch;
+
+    // WAIT
+    while (m_searchState != SearchState::Free);
+
+    if (message == SearchMessage::QueueEmpty)
+    {
+        queueEmpty();
+    }
+    else if (message == SearchMessage::UnitDied)
+    {
+        unitDied();
+    }
 }
 
 void BOSSManager::threadSearch()
 {
-    while (!m_finishSearching)
+    while (m_searchState == SearchState::Searching)
     {
-        m_searcher = std::unique_ptr<BOSS::CombatSearch>(new BOSS::CombatSearch_IntegralMCTS(m_params));
-        //m_searcher = std::make_unique<BOSS::NMCS>(m_params);
-
+        m_searcher = std::unique_ptr<BOSS::CombatSearch>(new BOSS::CombatSearch_IntegralMCTS(m_params));        
         m_searcher->search();
-        storeResults();
+        std::cout << "search finished!" << std::endl;
+        m_searchResults.push_back(m_searcher->getResults());
     }
 
-    searchFinished();
-
     // free the class thread variable, indicating we are done
-    m_searchThread.detach();
+    m_searchState = SearchState::Free;
 }
 
-void BOSSManager::storeResults()
+void BOSSManager::getResult()
 {
-    m_searchResults.push_back(m_searcher->getResults());
-}
+    m_searchState = SearchState::GettingResults;
+    m_results = m_searchResults[0];
 
-void BOSSManager::searchFinished()
-{
-    m_results.highestEval = std::numeric_limits<float>::min();
-    
-    for (auto & result : m_searchResults)
+    for (auto& result : m_searchResults)
     {
-        if (result.highestEval > m_results.highestEval)
+        if (result.usefulEval > m_results.usefulEval)
         {
             m_results = result;
         }
     }
+}
 
-    m_results = m_searcher->getResults();
-    if (m_results.solved)
+void BOSSManager::storeUnitStartTime(const BOSS::ActionAbilityPair & action)
+{
+    int frame = m_currentGameState.getCurrentFrame();
+    double time = (frame / 22.4) / 60;
+    double minute, second;
+    second = modf(time, &minute);
+    second *= 60;
+    second = (int)std::ceil(second);
+    if (second == 60)
     {
-        std::cout << "search solved!" << std::endl;
-    }
-    if (m_results.timedOut)
-    {
-        std::cout << "search timed out!" << std::endl;
+        minute++;
+        second = 0;
     }
 
+    std::stringstream ss;
+
+    ss << minute << ":";
+    if (second / 10 == 0)
+    {
+        ss << "0" << second;
+    }
+    else
+    {
+        ss << second;
+    }
+
+    m_unitStartTimes.push_back(std::make_pair(ss.str(), action.first.getName()));
+}
+
+void BOSSManager::queueEmpty()
+{
+    getResult();
+
+    m_unitStartTimes.clear();
     // update GameState with the new build order we found
-    for (auto & action : m_results.usefulBuildOrder)
+    for (auto& action : m_results.usefulBuildOrder)
     {
         if (action.first.isAbility())
         {
@@ -318,6 +408,8 @@ void BOSSManager::searchFinished()
         {
             m_currentGameState.doAction(action.first);
         }
+
+        storeUnitStartTime(action);
     }
 
     // the biggest frame we've searched to is the start time of the last unit
@@ -328,9 +420,95 @@ void BOSSManager::searchFinished()
     //std::cout << "\nSearched " << m_results.nodesExpanded << " nodes in " << m_results.timeElapsed << "ms @ " << (1000.0*m_results.nodesExpanded / m_results.timeElapsed) << " nodes/sec\n\n";
 
     m_searchResults.clear();
-    m_searching = false;
-    m_searchFinished = true;
-    m_finishSearching = false;
+    m_searchState = SearchState::Free;
+}
+
+void BOSSManager::unitDied()
+{
+    m_searchState = SearchState::GettingResults;
+    m_results = m_searchResults[0];
+    double avgSearchTime = 0;
+
+    for (auto& result : m_searchResults)
+    {
+        avgSearchTime += result.timeElapsed;
+        if (result.usefulEval > m_results.usefulEval)
+        {
+            m_results = result;
+        }
+    }
+    avgSearchTime /= (m_searchResults.size() * 1000);
+
+    int gameFrame = m_bot.GetCurrentFrame();
+    int searchFrame = m_currentGameState.getCurrentFrame();
+    // we have enough time to start a new search and have it finish before our current
+    // build order is done
+    if (searchFrame - gameFrame >= avgSearchTime * m_bot.GetFramesPerSecond())
+    {
+        std::cout << "have time to restart!" << std::endl;
+        m_searchResults.clear();
+        m_searchState = SearchState::Free;
+        return;
+    }
+
+    m_unitStartTimes.clear();
+    // update GameState with the new build order we found
+    for (auto& action : m_results.usefulBuildOrder)
+    {
+        if (action.first.isAbility())
+        {
+            m_currentGameState.doAbility(action.first, action.second.targetID);
+        }
+        else
+        {
+            m_currentGameState.doAction(action.first);
+        }
+
+        const int frame = m_currentGameState.getCurrentFrame();
+        double time = (frame / 22.4) / 60;
+        double minute, second;
+        second = modf(time, &minute);
+        second *= 60;
+        second = (int)std::ceil(second);
+        if (second == 60)
+        {
+            minute++;
+            second = 0;
+        }
+
+        std::stringstream ss;
+
+        ss << minute << ":";
+        if (second / 10 == 0)
+        {
+            ss << "0" << second;
+        }
+        else
+        {
+            ss << second;
+        }
+
+        m_unitStartTimes.push_back(std::make_pair(ss.str(), action.first.getName()));
+
+        std::cout << "did action in build order!" << std::endl;
+        // only go to the point where the build order will finish by the time the new search finishes
+        if (frame - gameFrame >= avgSearchTime * m_bot.GetFramesPerSecond())
+        {
+            break;
+        }
+    }
+
+    std::cout << "current supply: " << m_currentGameState.getCurrentSupply() << std::endl;
+
+    // the biggest frame we've searched to is the start time of the last unit
+    // in the build order
+    m_largestFrameSearched = m_currentGameState.getCurrentFrame();
+
+    //m_searcher->printResults();
+    //std::cout << "\nSearched " << m_results.nodesExpanded << " nodes in " << m_results.timeElapsed << "ms @ " << (1000.0*m_results.nodesExpanded / m_results.timeElapsed) << " nodes/sec\n\n";
+
+    m_searchResults.clear();
+    m_searchState = SearchState::Free;
 }
 
 void BOSSManager::setOpeningBuildOrder()
@@ -362,18 +540,76 @@ void BOSSManager::setOpeningBuildOrder()
     m_largestFrameSearched = m_currentGameState.getCurrentFrame();
 }
 
+void BOSSManager::printDebugInfo() const
+{
+    std::stringstream ss;
+    ss << "BOSS Information: ";
+    if (m_searchState == SearchState::Searching)
+    {
+        ss << "Searching";
+    }
+    else if (m_searchState == SearchState::ExitSearch)
+    {
+        ss << "Exitting Search";
+    }
+    else if (m_searchState == SearchState::Free)
+    {
+        ss << "Free";
+    }
+    else if (m_searchState == SearchState::GettingResults)
+    {
+        ss << "Getting Results";
+    }
+    
+    ss << "\n\n";
+
+    if (m_currentGameState.getCurrentFrame() > 1)
+    {
+        for (auto& unit : m_unitStartTimes)
+        {
+            ss << unit.first << " " << unit.second << "\n";
+        }
+
+        ss << "\nNodes visited: " << m_results.nodeVisits << "\n";
+        ss << "Nodes expanded: " << m_results.nodesExpanded << "\n";
+        ss << "Search time: " << m_results.timeElapsed << "\n";
+    }
+
+    if (m_searcher && m_searchState != SearchState::Free)
+    {
+        BOSS::Timer t = m_searcher->getResults().searchTimer;
+        ss << "\nCurrent search\n\n";
+        ss << "Nodes visited: " << m_searcher->getResults().nodeVisits << "\n";
+        ss << "Nodes expanded: " << m_searcher->getResults().nodesExpanded << "\n";
+        ss << "Search time: " << t.getElapsedTimeInSec() << "\n";
+    }
+
+    if (m_searchResults.size() > 0)
+    {
+        double avgTime = 0;
+        BOSS::uint8 nodesExpanded = 0;
+        BOSS::uint8 nodesVisited = 0;
+        for (auto& result : m_searchResults)
+        {
+            avgTime += result.timeElapsed;
+            nodesExpanded += result.nodesExpanded;
+            nodesVisited += result.nodeVisits;
+        }
+        avgTime /= (m_searchResults.size() * 1000);
+        nodesExpanded /= m_searchResults.size();
+        nodesVisited /= m_searchResults.size();
+
+        ss << "\nNext build order search stats\n\n";
+        ss << "Searches completed: " << m_searchResults.size() << "\n";
+        ss << "Average nodes visited: " << nodesVisited << "\n";
+        ss << "Average nodes expanded: " << nodesExpanded << "\n";
+        ss << "Average search length: " << avgTime << "\n";
+    }
+
+    m_bot.Map().drawTextScreen(0.72f, 0.05f, ss.str(), CCColor(255, 255, 0));
+}
+
 const BOSS::BuildOrderAbilities & BOSSManager::getBuildOrder()
 {
-    return m_results.finishedUnitsBuildOrder;
+    return m_results.usefulBuildOrder;
 }
-
-BOSS::RaceID BOSSManager::getBOSSPlayerRace() const
-{
-    return BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Self));
-}
-
-int BOSSManager::numSupplyProviders() const
-{
-    return m_currentGameState.getNumTotal(BOSS::ActionTypes::GetSupplyProvider(getBOSSPlayerRace()));
-}
-

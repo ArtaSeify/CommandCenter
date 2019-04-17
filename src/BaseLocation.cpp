@@ -162,6 +162,12 @@ bool BaseLocation::containsPosition(const CCPosition & pos) const
         return false;
     }
 
+    int distance = getGroundDistance(pos);
+    if (distance == -1)
+    {
+        return false;
+    }
+    
     return getGroundDistance(pos) < NearBaseLocationTileDistance;
 }
 

@@ -68,12 +68,45 @@ bool CombatCommander::shouldWeStartAttacking()
 void CombatCommander::updateIdleSquad()
 {
     Squad & idleSquad = m_squadData.getSquad("Idle");
+
+    // move the unit in between our furthest base and the next expansion spot
+    float maxDist = std::numeric_limits<float>::min();
+    CCPosition startingBase = m_bot.Bases().getPlayerStartingBaseLocation(Players::Self)->getPosition();
+    CCPosition furthestBase(startingBase);
+    for (auto& base : m_bot.Bases().getOccupiedBaseLocations(Players::Self))
+    {
+        float dist = Util::Dist(base->getPosition(), startingBase);
+        if (dist > maxDist)
+        {
+            maxDist = dist;
+            furthestBase = base->getPosition();
+        }
+    }
+
+    CCPosition nextExpPos = Util::GetPosition(m_bot.Bases().getNextExpansion(Players::Self));
+    CCPosition pos(furthestBase);
+    pos.x += (nextExpPos.x - furthestBase.x) / 2;
+    pos.y += (nextExpPos.y - furthestBase.y) / 2;
+
+    // if the spot in between is away from the enemy, just move to the base location
+    if (Util::Dist(pos, m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition())
+                > Util::Dist(furthestBase, m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition()))
+    {
+        pos = furthestBase;
+    }
+
     for (auto & unit : m_combatUnits)
     {
         // if it hasn't been assigned to a squad yet, put it in the low priority idle squad
         if (m_squadData.canAssignUnitToSquad(unit, idleSquad))
         {
             idleSquad.addUnit(unit);
+        }
+
+        // Move units in idle squad. don't spam the move command
+        if (idleSquad.containsUnit(unit) && Util::Dist(unit.getPosition(), pos) > 5)
+        {
+            unit.move(pos);
         }
     }
 }
@@ -243,6 +276,7 @@ void CombatCommander::updateDefenseSquads()
             if (m_squadData.squadExists(squadName.str()))
             {
                 m_squadData.getSquad(squadName.str()).clear();
+                m_squadData.removeSquad(squadName.str());
             }
 
             // and return, nothing to defend here
@@ -262,7 +296,7 @@ void CombatCommander::updateDefenseSquads()
         if (m_squadData.squadExists(squadName.str()))
         {
             Squad & defenseSquad = m_squadData.getSquad(squadName.str());
-
+            
             // figure out how many units we need on defense
             int flyingDefendersNeeded = numDefendersPerEnemyUnit * numEnemyFlyingInRegion;
             int groundDefensersNeeded = numDefendersPerEnemyUnit * numEnemyGroundInRegion;
@@ -308,6 +342,15 @@ void CombatCommander::updateDefenseSquadUnits(Squad & defenseSquad, const size_t
 {
     auto & squadUnits = defenseSquad.getUnits();
 
+    //// remove dead units from the squad
+    //for (auto & unit : defenseSquad.getUnits())
+    //{
+    //    if (!unit.isAlive())
+    //    {
+    //        defenseSquad.removeUnit(unit);
+    //    }
+    //}
+
     // TODO: right now this will assign arbitrary defenders, change this so that we make sure they can attack air/ground
 
     // if there's nothing left to defend, clear the squad
@@ -318,7 +361,7 @@ void CombatCommander::updateDefenseSquadUnits(Squad & defenseSquad, const size_t
     }
 
     size_t defendersNeeded = flyingDefendersNeeded + groundDefendersNeeded;
-    size_t defendersAdded = 0;
+    size_t defendersAdded = squadUnits.size();
 
     while (defendersNeeded > defendersAdded)
     {
@@ -328,8 +371,12 @@ void CombatCommander::updateDefenseSquadUnits(Squad & defenseSquad, const size_t
         {
             if (defenderToAdd.getType().isWorker())
             {
+                // if we have less than half the defenders needed, pull workers to help defend.
+                if (defendersAdded >= defendersNeeded / 4)
+                {
+                    break;
+                }
                 m_bot.Workers().setCombatWorker(defenderToAdd);
-                std::cout << "assigning worker to defend!" << std::endl;
             }
             m_squadData.assignUnitToSquad(defenderToAdd, defenseSquad);
             defendersAdded++;

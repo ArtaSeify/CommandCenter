@@ -117,30 +117,30 @@ const std::vector<Unit> & MicroManager::getUnits() const
 
 void MicroManager::regroup(const CCPosition & regroupPosition) const
 {
-    CCPosition ourBasePosition = m_bot.GetStartLocation();
-    int regroupDistanceFromBase = m_bot.Map().getGroundDistance(regroupPosition, ourBasePosition);
+    //CCPosition ourBasePosition = m_bot.GetStartLocation();
+    //int regroupDistanceFromBase = m_bot.Map().getGroundDistance(regroupPosition, ourBasePosition);
 
     // for each of the units we have
     for (auto unit : m_units)
     {
         BOT_ASSERT(unit.isValid(), "null unit in MicroManager regroup");
 
-        int unitDistanceFromBase = m_bot.Map().getGroundDistance(unit.getPosition(), ourBasePosition);
+        //int unitDistanceFromBase = m_bot.Map().getGroundDistance(unit.getPosition(), ourBasePosition);
 
         // if the unit is outside the regroup area
-        if (unitDistanceFromBase > regroupDistanceFromBase)
-        {
-            unit.move(ourBasePosition);
-        }
-        else if (Util::Dist(unit, regroupPosition) > 4)
-        {
+        //if (unitDistanceFromBase > regroupDistanceFromBase)
+        //{
+        //    unit.move(ourBasePosition);
+        //}
+        //else if (Util::Dist(unit, regroupPosition) > 4)
+        //{
             // regroup it
-            unit.move(regroupPosition);
-        }
-        else
-        {
-            unit.attackMove(unit.getPosition());
-        }
+            unit.attackMove(regroupPosition);
+        //}
+        //else
+        //{
+        //    unit.attackMove(unit.getPosition());
+        //}
     }
 }
 
