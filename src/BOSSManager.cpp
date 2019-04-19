@@ -12,7 +12,6 @@ BOSSManager::BOSSManager(CCBot & bot)
     , m_searcher                ()
     , m_currentGameState        ()
     , m_searchState             (SearchState::Free)
-    , m_largestFrameSearched    (0)
     , m_currentUnits            ()
     , m_searchThread            ()
     , m_unitStartTimes          ()
@@ -72,7 +71,7 @@ void BOSSManager::onStart()
     m_params.setChangingRoot(true);
     m_params.setUseMaxValue(true);
     m_params.setNumberOfSimulations(500000);
-    m_params.setSimulationsPerStep(200);
+    m_params.setSimulationsPerStep(100);
 }
 
 void BOSSManager::onFrame(SearchMessage message)
@@ -118,29 +117,34 @@ void BOSSManager::setParameters(bool reset)
 {
     setCurrentGameState(reset);
 
-    // limit is start frame of the last unit in the build order + framelimit
-    const int frameLimit = 6720;
-    //std::cout << "setting frame limit as: " << m_largestFrameSearched + frameLimit << std::endl;
-    m_params.setFrameTimeLimit(m_largestFrameSearched + frameLimit);
+    int frameLimit = 6720;
+    m_params.setFrameTimeLimit(m_currentGameState.getCurrentFrame() + frameLimit);
 }
 
 void BOSSManager::setCurrentGameState(bool reset)
 {
-    //TODO: STATE IS CHANGED IF ANY UNIT DIES.
-    // we only set the game state at the very first search
+    // if we don't need to reset the game state, just use the previous one we got from BOSS
     if (m_currentGameState.getRace() != BOSS::Races::None && !reset)
     {
         m_params.setInitialState(m_currentGameState);
         return;
     }
 
-    setCurrentUnits(m_bot.UnitInfo().getUnits(Players::Self));
+    // set a new game state using the actual game state
+    setCurrentUnits();
     BOSS::GameState state(m_currentUnits, BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Self)),
                         BOSS::FracType(m_bot.GetMinerals()), BOSS::FracType(m_bot.GetGas()),
                         BOSS::NumUnits(m_bot.GetCurrentSupply()), BOSS::NumUnits(m_bot.GetMaxSupply()),
                         BOSS::NumUnits(m_bot.Workers().getNumMineralWorkers()), BOSS::NumUnits(m_bot.Workers().getNumGasWorkers()),
                         BOSS::NumUnits(m_bot.Workers().getNumBuilderWorkers()), BOSS::TimeType(m_bot.GetCurrentFrame()),
                         BOSS::NumUnits(m_bot.Workers().getNumRefineries()), BOSS::NumUnits(m_bot.Workers().getNumDepots()));
+
+    //std::cout << BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Self)) << "," <<
+    //    BOSS::FracType(m_bot.GetMinerals()) << "," << BOSS::FracType(m_bot.GetGas()) << "," <<
+    //    BOSS::NumUnits(m_bot.GetCurrentSupply()) << "," << BOSS::NumUnits(m_bot.GetMaxSupply()) << "," <<
+    //    BOSS::NumUnits(m_bot.Workers().getNumMineralWorkers()) << "," << BOSS::NumUnits(m_bot.Workers().getNumGasWorkers()) << "," <<
+    //    BOSS::NumUnits(m_bot.Workers().getNumBuilderWorkers()) << "," << BOSS::TimeType(m_bot.GetCurrentFrame()) << "," <<
+    //    BOSS::NumUnits(m_bot.Workers().getNumRefineries()) << "," << BOSS::NumUnits(m_bot.Workers().getNumDepots()) << std::endl;
 
     m_currentGameState = state;
     // set the initial build order 
@@ -152,47 +156,55 @@ void BOSSManager::setCurrentGameState(bool reset)
 }
 
 // need to transform a vector of CC::Units to BOSS::Units
-void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
+void BOSSManager::setCurrentUnits()
 {
     std::vector<std::pair<Unit, int>> unitsBeingTrained;        // <Unit being trained, builderID>
     std::vector<Unit> unitsBeingConstructed;
     std::vector<Unit> unitsFinished;
 
-    for (auto it = CCUnits.begin(); it != CCUnits.end(); ++it)
+    for (const Unit & CCUnit : m_bot.UnitInfo().getUnits(Players::Self))
     {
-        if (!it->isCompleted() && it->isTraining())
+        if (!CCUnit.isCompleted() && CCUnit.isTraining())
         {
             BOT_ASSERT(false, "not completed but training something??");
         }
 
-        if (it->isBeingConstructed() && it->isTraining())
+        if (CCUnit.isBeingConstructed() && CCUnit.isTraining())
         {
             BOT_ASSERT(false, "being constructed and training at the same time???");
         }
 
         // unit is completed
-        if (it->isCompleted())
+        if (CCUnit.isCompleted())
         {
-            unitsFinished.push_back(*it);
+            unitsFinished.push_back(CCUnit);
         }
 
         // unit is training another unit
-        if (it->isTraining())
+        if (CCUnit.isTraining())
         {
-            UnitType type = m_bot.Data(it->getUnitPtr()->orders[0].ability_id);
+            UnitType type = m_bot.Data(CCUnit.getUnitPtr()->orders[0].ability_id);
             if (type.isValid())
             {
-                Unit unit(m_bot.Data(it->getUnitPtr()->orders[0].ability_id), m_bot);
-                unitsBeingTrained.emplace_back(unit, int(unitsFinished.size() - 1));
+                Unit unit(m_bot.Data(CCUnit.getUnitPtr()->orders[0].ability_id), m_bot);
+                unitsBeingTrained.push_back(std::pair<Unit, int>(unit, int(unitsFinished.size() - 1)));
+                //std::cout << CCUnit.getUnitPtr()->orders[0].progress << std::endl;
             }
         }
 
         // unit is being constructed
-        if (it->isBeingConstructed())
+        if (CCUnit.isBeingConstructed())
         {
-            unitsBeingConstructed.push_back(*it);
+            unitsBeingConstructed.push_back(CCUnit);
         }        
     }
+
+    /*std::cout << "before" << std::endl;
+    for (int index = 0; index < m_currentGameState.getNumUnits(); ++index)
+    {
+        const BOSS::Unit& unit = static_cast<const BOSS::GameState>(m_currentGameState).getUnit(index);
+        std::cout << "units.push_back(Unit(ActionTypes::GetActionType(\"" << unit.getType().getName() << "\"), " << unit.getID() << ", " << (unit.getTimeUntilBuilt() == 0 ? -1 : unit.getBuilderID()) << ", " << unit.getStartFrame() << "));" << std::endl;
+    }*/
 
     m_currentUnits.clear();
 
@@ -270,11 +282,21 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
         {
             startFrame = (int)std::floor(m_bot.GetCurrentFrame() -
                                 builderOrders[0].progress * m_bot.Data(ccunit).buildTime);
+
+            /*std::cout << "current frame: " << m_bot.GetCurrentFrame() << std::endl;
+            std::cout << "order progress: " << builderOrders[0].progress << std::endl;
+            std::cout << "build time: " << m_bot.Data(ccunit).buildTime << std::endl;
+
+            std::cout << "all orders" << std::endl;
+            for (auto& order : unitsFinished[it->second].getUnitPtr()->orders)
+            {
+                std::cout << order.ability_id << ", " << order.progress << std::endl;
+            }*/
         }
 
         else
         {
-            BOT_ASSERT(false, "Error in ordering of units!!!");
+            BOT_ASSERT(false, "Error in order of units!!!");
         }
         BOSS::Unit unit(type, id, builderID, startFrame);
 
@@ -287,8 +309,16 @@ void BOSSManager::setCurrentUnits(const std::vector<Unit> & CCUnits)
             builder_unit.setTimeUntilFree(unit.getTimeUntilBuilt());
         }
 
+        //std::cout << unit.toString() << std::endl;
+
         m_currentUnits.push_back(unit);
     }
+
+    /*std::cout << "after" << std::endl;
+    for (const auto& unit : m_currentUnits)
+    {
+        std::cout << "units.push_back(Unit(ActionTypes::GetActionType(\"" << unit.getType().getName() << "\"), " << unit.getID() << ", " << unit.getBuilderID() << ", " << unit.getStartFrame() << "));" << std::endl;
+    }*/
 }
 
 BOSSManager::SearchMessage BOSSManager::setEnemyUnits()
@@ -406,7 +436,7 @@ void BOSSManager::storeUnitStartTime(const BOSS::ActionAbilityPair & action)
     std::stringstream ss;
 
     ss << minute << ":";
-    if (second / 10 == 0)
+    if ((int)second / 10 == 0)
     {
         ss << "0" << second;
     }
@@ -437,10 +467,6 @@ void BOSSManager::queueEmpty()
 
         storeUnitStartTime(action);
     }
-
-    // the biggest frame we've searched to is the start time of the last unit
-    // in the build order
-    m_largestFrameSearched = m_currentGameState.getCurrentFrame();
 
     //m_searcher->printResults();
     //std::cout << "\nSearched " << m_results.nodesExpanded << " nodes in " << m_results.timeElapsed << "ms @ " << (1000.0*m_results.nodesExpanded / m_results.timeElapsed) << " nodes/sec\n\n";
@@ -492,45 +518,10 @@ void BOSSManager::unitDied()
             m_currentGameState.doAction(action.first);
         }
 
-        const int frame = m_currentGameState.getCurrentFrame();
-        double time = (frame / 22.4) / 60;
-        double minute, second;
-        second = modf(time, &minute);
-        second *= 60;
-        second = (int)std::ceil(second);
-        if (second == 60)
-        {
-            minute++;
-            second = 0;
-        }
-
-        std::stringstream ss;
-
-        ss << minute << ":";
-        if (second / 10 == 0)
-        {
-            ss << "0" << second;
-        }
-        else
-        {
-            ss << second;
-        }
-
-        m_unitStartTimes.push_back(std::make_pair(ss.str(), action.first.getName()));
-
-        std::cout << "did action in build order!" << std::endl;
-        // only go to the point where the build order will finish by the time the new search finishes
-        if (frame - gameFrame >= avgSearchTime * m_bot.GetFramesPerSecond())
-        {
-            break;
-        }
+        storeUnitStartTime(action);
     }
 
     std::cout << "current supply: " << m_currentGameState.getCurrentSupply() << std::endl;
-
-    // the biggest frame we've searched to is the start time of the last unit
-    // in the build order
-    m_largestFrameSearched = m_currentGameState.getCurrentFrame();
 
     //m_searcher->printResults();
     //std::cout << "\nSearched " << m_results.nodesExpanded << " nodes in " << m_results.timeElapsed << "ms @ " << (1000.0*m_results.nodesExpanded / m_results.timeElapsed) << " nodes/sec\n\n";
@@ -566,7 +557,6 @@ void BOSSManager::setOpeningBuildOrder()
 
     // do the build order
     BOSS::Tools::DoBuildOrder(m_currentGameState, BOSSBuildOrder);
-    m_largestFrameSearched = m_currentGameState.getCurrentFrame();
 }
 
 void BOSSManager::printDebugInfo() const
@@ -601,7 +591,7 @@ void BOSSManager::printDebugInfo() const
 
         ss << "\nNodes visited: " << m_results.nodeVisits << "\n";
         ss << "Nodes expanded: " << m_results.nodesExpanded << "\n";
-        ss << "Search time: " << m_results.timeElapsed << "\n";
+        ss << "Search time: " << m_results.timeElapsed / 1000 << "\n";
     }
 
     if (m_searcher && m_searchState != SearchState::Free)
@@ -618,21 +608,25 @@ void BOSSManager::printDebugInfo() const
         double avgTime = 0;
         BOSS::uint8 nodesExpanded = 0;
         BOSS::uint8 nodesVisited = 0;
+        size_t avgBuildOrderSize = 0;
         for (auto& result : m_searchResults)
         {
             avgTime += result.timeElapsed;
             nodesExpanded += result.nodesExpanded;
             nodesVisited += result.nodeVisits;
+            avgBuildOrderSize += result.usefulBuildOrder.size();
         }
         avgTime /= (m_searchResults.size() * 1000);
         nodesExpanded /= m_searchResults.size();
         nodesVisited /= m_searchResults.size();
+        avgBuildOrderSize /= m_searchResults.size();
 
         ss << "\nNext build order search stats\n\n";
         ss << "Searches completed: " << m_searchResults.size() << "\n";
         ss << "Average nodes visited: " << nodesVisited << "\n";
         ss << "Average nodes expanded: " << nodesExpanded << "\n";
         ss << "Average search length: " << avgTime << "\n";
+        ss << "Average build order length: " << avgBuildOrderSize << "\n";
     }
 
     m_bot.Map().drawTextScreen(0.72f, 0.05f, ss.str(), CCColor(255, 255, 0));

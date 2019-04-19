@@ -20,7 +20,7 @@
     "SC2API" :
     {
         "BotRace"                   : "Protoss",
-        "EnemyDifficulty"           : 10,
+        "EnemyDifficulty"           : 3,
         "EnemyRace"                 : "Protoss",
         "MapFile"                   : "AbyssalReefLE.SC2Map",
         "StepSize"                  : 1
