@@ -15,7 +15,6 @@ namespace CC
         CCBot &       m_bot;
 
         BuildingManager m_buildingManager;
-        BuildOrderQueue m_queue;
         BOSSManager     m_BOSSManager;
 
         Unit    getClosestUnitToPosition(const std::vector<Unit> & units, CCPosition closestTo);
