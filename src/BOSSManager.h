@@ -2,6 +2,9 @@
 // CC files
 #include "Common.h"
 #include "Unit.h"
+#include "BuildOrder.h"
+#include "BuildingManager.h"
+#include "BuildOrderQueue.h"
 
 // BOSS files
 #include "CombatSearch.h"
@@ -25,52 +28,62 @@ namespace CC
         {
             Free, Searching, GettingResults, ExitSearch
         };
-        enum SearchMessage
-        {
-            None, QueueEmpty, UnitDied, NewEnemyUnit
-        };
+
+        BuildOrderQueue                     m_queue;
 
     private:
         CCBot &                             m_bot;
         std::unique_ptr<BOSS::CombatSearch> m_searcher;
 
-        BOSS::GameState                     m_currentGameState;
-        std::vector<std::pair<std::string, std::string>> m_unitStartTimes;
-        std::vector<BOSS::Unit>             m_currentUnits;
+        std::atomic<int>                    m_searchState;
+
+        BOSS::GameState                     m_futureGameState;
+        BOSS::BuildOrderAbilities           m_currentBuildOrder;
         std::vector<int>                    m_enemyUnits;
 
+        BOSS::GameState                     m_currentGameState;
+        BOSS::BuildOrderAbilities           m_previousBuildOrder;
+
         BOSS::CombatSearchParameters        m_params;
-        BOSS::CombatSearchResults           m_results;
         std::thread                         m_searchThread;
+
+        BOSS::CombatSearchResults           m_results;
         std::vector<BOSS::CombatSearchResults> m_searchResults;
+        std::vector<std::pair<std::string, std::string>> m_unitStartTimes;
 
-        std::atomic<int>                    m_searchState;
-        bool                                m_haveResults;
-
+        void setBuildOrder(const BuildOrder& buildOrder);
         void printDebugInfo() const;
-        void setCurrentUnits();
-        SearchMessage setEnemyUnits();
+
+        std::vector<BOSS::Unit> getCurrentUnits();
+        bool setEnemyUnits();
+
         void getResult();
-        void storeUnitStartTime(const BOSS::ActionAbilityPair& action);
+        void storeUnitStartTime(const BOSS::ActionAbilityPair& action, const BOSS::GameState& state);
+
         void queueEmpty();
-        void unitDied();
+        void newEnemyUnit();
+        void unitsDied(const std::vector<Unit> & deadUnits);
+
+        void addToQueue(const BOSS::BuildOrderAbilities& buildOrder);
+
         void threadSearch();
 
     public:
         BOSSManager(CCBot & bot);
 
         void onStart();
-        void onFrame(SearchMessage message);
+        void onFrame();
 
         void setParameters(bool reset);
         void setCurrentGameState(bool reset);
-        void startSearch(bool reset);
+        void startSearch();
 
-        void finishSearch(SearchMessage message);
+        void finishSearch();
 
         const BOSS::BuildOrderAbilities & getBuildOrder();
-        void setOpeningBuildOrder();
-
-        bool haveResults() const			{ return m_haveResults; }
+        void doBuildOrder(const BuildOrder & inputBuildOrder);
+        void doBuildOrder(BOSS::BuildOrderAbilities& buildOrder);
+        // fixes chronoboost targetting after creating a new GameState from the actual game
+        void fixBuildOrder(const BOSS::GameState& state, BOSS::BuildOrderAbilities& buildOrder, int startingIndex);
     };
 }

@@ -96,7 +96,7 @@ void Squad::setAllUnits()
     {
         if (!unit.isValid()) { continue; }
         if (unit.isBeingConstructed()) { continue; }
-        if (!unit.isAlive()) { std::cout << "removing dead unit from squad!" << std::endl; continue; }
+        if (!unit.isAlive()) { continue; }
         
         goodUnits.insert(unit);
     }

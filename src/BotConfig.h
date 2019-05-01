@@ -46,6 +46,7 @@ namespace CC
         bool DrawLastSeenTileInfo;
         bool DrawUnitTargetInfo;
         bool DrawSquadInfo;
+        bool DrawBOSSInfo;
 
         CCColor ColorLineTarget;
         CCColor ColorLineMineral;

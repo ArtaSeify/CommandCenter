@@ -264,7 +264,7 @@ void WorkerManager::drawWorkerInformation()
         m_bot.Map().drawText(worker.getPosition(), m_workerData.getJobCode(worker));
     }
 
-    m_bot.Map().drawTextScreen(0.75f, 0.2f, ss.str());
+    m_bot.Map().drawTextScreen(0.90f, 0.2f, ss.str());
 }
 
 bool WorkerManager::isFree(Unit worker) const
@@ -295,4 +295,9 @@ int WorkerManager::getNumGasWorkers()
 int WorkerManager::getNumBuilderWorkers()
 {
     return m_workerData.getWorkerJobCount(WorkerJobs::Build);
+}
+
+int WorkerManager::getNumWorkers()
+{
+    return (int)m_workerData.getNumWorkers();
 }

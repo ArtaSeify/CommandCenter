@@ -43,6 +43,7 @@ namespace CC
         Unit    getWorkerDepot(const Unit & unit) const;
         const char * getJobCode(const Unit & unit);
         const std::set<Unit> & getWorkers() const;
+        void printWorkerJobCount() const;
 
         size_t  getNumDepots()      const { return m_depots.size(); }
         size_t  getNumRefineries()  const { return m_refineryWorkerCount.size(); }

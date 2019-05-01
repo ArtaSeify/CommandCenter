@@ -37,19 +37,24 @@ void UnitInfoManager::updateUnitInfo()
         m_units[unit.getPlayer()].push_back(unit);     
     }
 
+    // remove dead units and store them inside the map
     m_unitsDiedLastFrame.clear();
-    // remove bad enemy units
-    size_t unitSizeBefore = m_unitData[Players::Self].getUnitInfoMap().size();
-    m_unitData[Players::Self].removeBadUnits();
-    m_unitsDiedLastFrame[Players::Self] = unitSizeBefore - m_unitData[Players::Self].getUnitInfoMap().size();
 
-    unitSizeBefore = m_unitData[Players::Enemy].getUnitInfoMap().size();
-    m_unitData[Players::Enemy].removeBadUnits();
-    m_unitsDiedLastFrame[Players::Enemy] = unitSizeBefore - m_unitData[Players::Enemy].getUnitInfoMap().size();
+    for (int player : {Players::Self, Players::Enemy, Players::Neutral})
+    {
+        auto mapBefore = m_unitData[player].getUnitInfoMap();
+        m_unitData[player].removeBadUnits();
 
-    unitSizeBefore = m_unitData[Players::Neutral].getUnitInfoMap().size();
-    m_unitData[Players::Neutral].removeBadUnits();
-    m_unitsDiedLastFrame[Players::Neutral] = unitSizeBefore - m_unitData[Players::Neutral].getUnitInfoMap().size();
+        std::vector<Unit> deadUnits;
+        for (const auto& unitInfo : mapBefore)
+        {
+            if (m_unitData[player].getUnitInfoMap().find(unitInfo.first) == m_unitData[player].getUnitInfoMap().end())
+            {
+                deadUnits.push_back(unitInfo.first);
+            }
+        }
+        m_unitsDiedLastFrame[player] = deadUnits;
+    }
 }
 
 const std::map<Unit, UnitInfo> & UnitInfoManager::getUnitInfoMap(CCPlayer player) const
@@ -57,8 +62,10 @@ const std::map<Unit, UnitInfo> & UnitInfoManager::getUnitInfoMap(CCPlayer player
     return getUnitData(player).getUnitInfoMap();
 }
 
-size_t UnitInfoManager::getNumUnitsDied(CCPlayer player) const
+const std::vector<Unit> & UnitInfoManager::getUnitsDied(CCPlayer player) const
 {
+    BOT_ASSERT(m_units.find(player) != m_units.end(), "Couldn't find player units died: %d", player);
+
     return m_unitsDiedLastFrame.at(player);
 }
 
