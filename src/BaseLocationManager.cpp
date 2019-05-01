@@ -32,6 +32,7 @@ void BaseLocationManager::onStart()
             continue;
         }
 
+
 #ifndef SC2API
         // for BWAPI we have to eliminate minerals that have low resource counts
         if (mineral.getUnitPtr()->getResources() < 100) { continue; }
@@ -143,13 +144,14 @@ void BaseLocationManager::onStart()
 
 void BaseLocationManager::onFrame()
 {   
+    // draw the debug information for each base location
     drawBaseLocations();
 
     // reset the player occupation information for each location
     for (auto & baseLocation : m_baseLocationData)
     {
         baseLocation.setPlayerOccupying(Players::Self, false);
-        baseLocation.setPlayerOccupying(Players::Self, false);
+        baseLocation.setPlayerOccupying(Players::Enemy, false);
     }
 
     // for each unit on the map, update which base location it may be occupying
@@ -249,9 +251,6 @@ void BaseLocationManager::onFrame()
             m_occupiedBaseLocations[Players::Enemy].insert(&baseLocation);
         }
     }
-
-    // draw the debug information for each base location
-    
 }
 
 BaseLocation * BaseLocationManager::getBaseLocation(const CCPosition & pos) const
@@ -309,10 +308,10 @@ CCTilePosition BaseLocationManager::getNextExpansion(int player) const
 {
     const BaseLocation * homeBase = getPlayerStartingBaseLocation(player);
     const BaseLocation * closestBase = nullptr;
-    int minDistance = std::numeric_limits<int>::max();
+    float minDistance = std::numeric_limits<float>::max();
 
     CCPosition homeTile = homeBase->getPosition();
-
+    //std::cout << std::endl;
     for (auto & base : getBaseLocations())
     {
         // skip mineral only and starting locations (TODO: fix this)
@@ -331,10 +330,14 @@ CCTilePosition BaseLocationManager::getNextExpansion(int player) const
         }
 
         // the base's distance from our main nexus
-        int distanceFromHome = homeBase->getGroundDistance(tile);
+        //int distanceFromHome = homeBase->getGroundDistance(tile);
+        float distanceFromHome = m_bot.Query()->PathingDistance(homeTile, CCPosition((float)tile.x, (float)tile.y));
+
+        /*std::cout << "pos: " << tile.x << "," << tile.y << std::endl;
+        std::cout << "distance: " << distanceFromHome << std::endl;*/
 
         // if it is not connected, continue
-        if (distanceFromHome < 0)
+        if (distanceFromHome <= 0)
         {
             continue;
         }
@@ -345,7 +348,8 @@ CCTilePosition BaseLocationManager::getNextExpansion(int player) const
             minDistance = distanceFromHome;
         }
     }
-
+    //std::cout << "min distance: " << minDistance << std::endl;
+    //std::cout << std::endl;
     return closestBase ? closestBase->getDepotPosition() : CCTilePosition(0, 0);
 }
 
@@ -376,7 +380,8 @@ CCTilePosition BaseLocationManager::getNextExpansion(int player, const BuildingP
         }
 
         // the base's distance from our main nexus
-        int distanceFromHome = homeBase->getGroundDistance(tile);
+        //int distanceFromHome = homeBase->getGroundDistance(tile);
+        int distanceFromHome = (int)m_bot.Query()->PathingDistance(homeBase->getPosition(), CCPosition((float)tile.x, (float)tile.y));
 
         // if it is not connected, continue
         if (distanceFromHome < 0)

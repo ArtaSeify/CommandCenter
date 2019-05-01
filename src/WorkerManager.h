@@ -39,6 +39,7 @@ namespace CC
         int  getNumMineralWorkers();
         int  getNumGasWorkers();
         int  getNumBuilderWorkers();
+        int  getNumWorkers();
         size_t  getNumDepots() const { return m_workerData.getNumDepots(); }
         size_t  getNumRefineries() const { return m_workerData.getNumRefineries(); }
 
@@ -50,5 +51,7 @@ namespace CC
         Unit getClosestDepot(Unit worker) const;
         Unit getGasWorker(Unit refinery) const;
         Unit getClosestWorkerTo(const CCPosition & pos) const;
+
+        void printWorkerJobCount() const { m_workerData.printWorkerJobCount(); }
     };
 }

@@ -7,26 +7,14 @@ using namespace CC;
 ProductionManager::ProductionManager(CCBot & bot)
     : m_bot             (bot)
     , m_buildingManager (bot)
-    , m_queue           (bot)
     , m_BOSSManager     (bot)
 {
 
 }
 
-void ProductionManager::setBuildOrder(const BuildOrder & buildOrder)
-{
-    m_queue.clearAll();
-
-    for (size_t i(0); i<buildOrder.size(); ++i)
-    {
-        m_queue.queueAsLowestPriority(buildOrder[i], true);
-    }
-}
-
 void ProductionManager::onStart()
 {
     m_buildingManager.onStart();
-    setBuildOrder(m_bot.Strategy().getOpeningBookBuildOrder());
     m_BOSSManager.onStart();
 }
 
@@ -34,7 +22,7 @@ void ProductionManager::onFrame()
 {
     if (m_bot.Config().UseBOSS)
     {
-        searchBuildOrder();
+        m_BOSSManager.onFrame();
     }
     fixBuildOrderDeadlock();
     manageBuildOrderQueue();
@@ -53,79 +41,19 @@ void ProductionManager::onUnitDestroy(const Unit & unit)
     // TODO: might have to re-do build order if a vital unit died
 }
 
-void ProductionManager::searchBuildOrder()
-{
-    if (m_queue.isEmpty() && m_bot.GetCurrentSupply() < 200)
-    {
-        m_BOSSManager.onFrame(m_BOSSManager.SearchMessage::QueueEmpty);
-        searchFinished();
-    }
-    else if (m_bot.UnitInfo().getNumUnitsDied(Players::Self) > 0)
-    {
-        std::cout << "unit died!!!" << std::endl;
-        m_BOSSManager.onFrame(m_BOSSManager.SearchMessage::UnitDied);
-        searchFinished();
-    }
-    else
-    {
-        m_BOSSManager.onFrame(m_BOSSManager.SearchMessage::None);
-    }
-}
-
-void ProductionManager::searchFinished()
-{
-    auto BOSSBuildOrder = m_BOSSManager.getBuildOrder();
-    //std::cout << "build order:" << std::endl;
-    //BOSSBuildOrder.print();
-    //std::cout << std::endl;
-    addToBuildOrder(BOSSBuildOrder);   
-}
-
-void ProductionManager::addToBuildOrder(const BOSS::BuildOrderAbilities & BOSSBuildOrder)
-{
-    for (auto & actionTargetPair : BOSSBuildOrder)
-    {
-        auto & actionType = actionTargetPair.first;
-        auto & target = actionTargetPair.second;
-
-        if (actionType.isAbility())
-        {
-            AbilityAction abilityInfo;
-            abilityInfo.target_type = UnitType::GetUnitTypeFromName(target.targetType.getName(), m_bot);
-            MetaType targetProd = MetaType(target.targetProductionType.getName(), m_bot);
-            if (targetProd.isUpgrade())
-            {
-                abilityInfo.targetProduction_ability = targetProd.getAbility().first;
-            }
-            else if (targetProd.isUnit())
-            {
-                abilityInfo.targetProduction_ability = m_bot.Data(targetProd.getUnitType()).buildAbility;
-            }
-            abilityInfo.targetProduction_name = targetProd.getName();
-            MetaType action("ChronoBoost", abilityInfo, m_bot);
-            m_queue.queueAsLowestPriority(action, true);
-        }
-        else
-        {
-            MetaType action(actionType.getName(), m_bot);
-            m_queue.queueAsLowestPriority(action, true);
-        }
-    }
-}
-
 void ProductionManager::manageBuildOrderQueue()
 {
     // if there is nothing in the queue, oh well
-    if (m_queue.isEmpty())
+    if (m_BOSSManager.m_queue.isEmpty())
     {
         return;
     }
 
     // the current item to be used
-    BuildOrderItem & currentItem = m_queue.getHighestPriorityItem();
+    BuildOrderItem & currentItem = m_BOSSManager.m_queue.getHighestPriorityItem();
 
     // while there is still something left in the queue
-    while (!m_queue.isEmpty())
+    while (!m_BOSSManager.m_queue.isEmpty())
     {
         // this is the unit which can produce the currentItem
         Unit producer = getProducer(currentItem.type);
@@ -140,19 +68,19 @@ void ProductionManager::manageBuildOrderQueue()
         {
             // create it and remove it from the _queue
             create(producer, currentItem);
-            m_queue.removeCurrentHighestPriorityItem();
+            m_BOSSManager.m_queue.removeCurrentHighestPriorityItem();
 
             // don't actually loop around in here
             break;
         }
         // otherwise, if we can skip the current item
-        else if (m_queue.canSkipItem())
+        else if (m_BOSSManager.m_queue.canSkipItem())
         {
             // skip it
-            m_queue.skipItem();
+            m_BOSSManager.m_queue.skipItem();
 
             // and get the next one
-            currentItem = m_queue.getNextHighestPriorityItem();
+            currentItem = m_BOSSManager.m_queue.getNextHighestPriorityItem();
         }
         else
         {
@@ -164,8 +92,8 @@ void ProductionManager::manageBuildOrderQueue()
 
 void ProductionManager::fixBuildOrderDeadlock()
 {
-    if (m_queue.isEmpty()) { return; }
-    BuildOrderItem & currentItem = m_queue.getHighestPriorityItem();
+    if (m_BOSSManager.m_queue.isEmpty()) { return; }
+    BuildOrderItem & currentItem = m_BOSSManager.m_queue.getHighestPriorityItem();
 
     // check to see if we have the prerequisites for the topmost item
     bool hasRequired = m_bot.Data(currentItem.type).requiredUnits.empty();
@@ -181,7 +109,7 @@ void ProductionManager::fixBuildOrderDeadlock()
     if (!hasRequired)
     {
         std::cout << currentItem.type.getName() << " needs " << m_bot.Data(currentItem.type).requiredUnits[0].getName() << "\n";
-        m_queue.queueAsHighestPriority(MetaType(m_bot.Data(currentItem.type).requiredUnits[0], m_bot), true);
+        m_BOSSManager.m_queue.queueAsHighestPriority(MetaType(m_bot.Data(currentItem.type).requiredUnits[0], m_bot), true);
         fixBuildOrderDeadlock();
         return;
     }
@@ -199,7 +127,7 @@ void ProductionManager::fixBuildOrderDeadlock()
 
     if (!hasProducer)
     {
-        m_queue.queueAsHighestPriority(MetaType(m_bot.Data(currentItem.type).whatBuilds[0], m_bot), true);
+        m_BOSSManager.m_queue.queueAsHighestPriority(MetaType(m_bot.Data(currentItem.type).whatBuilds[0], m_bot), true);
         fixBuildOrderDeadlock();
     }
 
@@ -207,14 +135,14 @@ void ProductionManager::fixBuildOrderDeadlock()
     auto refinery = Util::GetRefinery(m_bot.GetPlayerRace(Players::Self), m_bot);
     if (m_bot.Data(currentItem.type).gasCost > 0 && m_bot.UnitInfo().getUnitTypeCount(Players::Self, refinery, false) == 0)
     {
-        m_queue.queueAsHighestPriority(MetaType(refinery, m_bot), true);
+        m_BOSSManager.m_queue.queueAsHighestPriority(MetaType(refinery, m_bot), true);
     } 
 
     // build supply if we need some
     auto supplyProvider = Util::GetSupplyProvider(m_bot.GetPlayerRace(Players::Self), m_bot);
     if (m_bot.Data(currentItem.type).supplyCost > (m_bot.GetMaxSupply() - m_bot.GetCurrentSupply()) && !m_buildingManager.isBeingBuilt(supplyProvider))
     {
-        m_queue.queueAsHighestPriority(MetaType(supplyProvider, m_bot), true);
+        m_BOSSManager.m_queue.queueAsHighestPriority(MetaType(supplyProvider, m_bot), true);
     }
 }
 
@@ -544,7 +472,7 @@ void ProductionManager::drawProductionInformation()
         }
     }
 
-    ss << m_queue.getQueueInformation();
+    ss << m_BOSSManager.m_queue.getQueueInformation();
 
     m_bot.Map().drawTextScreen(0.01f, 0.03f, ss.str(), CCColor(255, 255, 0));
 }

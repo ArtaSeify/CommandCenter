@@ -35,10 +35,19 @@ bool BuildingPlacer::canBuildHere(int bx, int by, const Building & b) const
     int xdelta = (int)std::ceil((width - 1.0) / 2);
     int ydelta = (int)std::ceil((height - 1.0) / 2);
 
-    // check the reserve map
-    for (int x = bx - xdelta; x < bx + width - xdelta; x++)
+    int startx = bx - xdelta;
+    int starty = by;
+    int endx = bx;
+    int endy = by + height - 1;
+    if (width >= 3)
     {
-        for (int y = by - ydelta; y < by + height - ydelta; y++)
+        endx += xdelta;
+    }
+
+    // check the reserve map
+    for (int x = startx; x < endx; x++)
+    {
+        for (int y = starty; y < endy; y++)
         {
             if (!m_bot.Map().isValidTile(x, y) || m_reserveMap[x][y])
             {
@@ -77,14 +86,20 @@ bool BuildingPlacer::canBuildHereWithSpace(int bx, int by, const Building & b, i
 
     // define the rectangle of the building spot
     int startx = bx - (buildDist + xdelta);
-    int starty = by - (buildDist + ydelta);
-    int endx   = bx + width + buildDist - xdelta;
-    int endy   = by + height + buildDist - ydelta;
+    int starty = by - (buildDist);
+    //int endx = bx + width + buildDist -xdelta;
+    //int endy = by + height + buildDist -ydelta;
+    int endx = bx + buildDist;
+    int endy = by + buildDist + height - 1;
+    if (width >= 3)
+    {
+        endx += xdelta;
+    }
 
     // TODO: recalculate start and end positions for addons
 
     // if this rectangle doesn't fit on the map we can't build here
-    if (startx < 0 || starty < 0 || endx > m_bot.Map().width() || endx < bx + width - xdelta || endy > m_bot.Map().height() || endy < by + height - ydelta)
+    if (startx < 0 || starty < 0 || endx > m_bot.Map().width() || endy > m_bot.Map().height())
     {
         return false;
     }
@@ -136,7 +151,8 @@ CCTilePosition BuildingPlacer::getBuildLocationNear(const Building & b, int buil
         {
             double ms = t.getElapsedTimeInMilliSec();
             //printf("Building Placer Took %d iterations, lasting %lf ms @ %lf iterations/ms, %lf setup ms\n", (int)i, ms, (i / ms), ms1);
-
+            //std::cout << "build position: " << pos.x << "," << pos.y << std::endl;
+            //std::cout << "width: " << b.type.tileWidth() << ". height: " << b.type.tileHeight() << std::endl;
             return pos;
         }
     }
@@ -162,9 +178,13 @@ bool BuildingPlacer::tileOverlapsBaseLocation(int x, int y, UnitType type) const
     int ydelta = (int)std::ceil((height - 1.0) / 2);
 
     int tx1 = x - xdelta;
-    int ty1 = y - ydelta;
-    int tx2 = tx1 + width - xdelta;
-    int ty2 = ty1 + height - ydelta;
+    int ty1 = y;
+    int tx2 = x;
+    int ty2 = y + height - 1;
+    if (width >= 3)
+    {
+        tx2 += xdelta;
+    }
 
     // for each base location
     for (const BaseLocation * base : m_bot.Bases().getBaseLocations())
@@ -210,9 +230,18 @@ void BuildingPlacer::reserveTiles(int bx, int by, int width, int height)
     int xdelta = (int)std::ceil((width - 1.0) / 2);
     int ydelta = (int)std::ceil((height - 1.0) / 2);
 
-    for (int x = bx - xdelta; x < bx + width - xdelta && x < rwidth; x++)
+    int startx = bx - xdelta;
+    int starty = by;
+    int endx = bx;
+    int endy = by + height - 1;
+    if (width >= 3)
     {
-        for (int y = by - ydelta; y < by + height - ydelta && y < rheight; y++)
+        endx += xdelta;
+    }
+
+    for (int x = startx; x < endx && x < rwidth; x++)
+    {
+        for (int y = starty; y < endy && y < rheight; y++)
         {
             m_reserveMap[x][y] = true;
         }
@@ -249,9 +278,18 @@ void BuildingPlacer::freeTiles(int bx, int by, int width, int height)
     int xdelta = (int)std::ceil((width - 1.0) / 2);
     int ydelta = (int)std::ceil((height - 1.0) / 2);
 
-    for (int x = bx - xdelta; x < bx + width - xdelta && x < rwidth; x++)
+    int startx = bx - xdelta;
+    int starty = by;
+    int endx = bx;
+    int endy = by + height - 1;
+    if (width >= 3)
     {
-        for (int y = by - ydelta; y < by + height - ydelta && y < rheight; y++)
+        endx += xdelta;
+    }
+
+    for (int x = startx; x < endx && x < rwidth; x++)
+    {
+        for (int y = starty; y < endy && y < rheight; y++)
         {
             m_reserveMap[x][y] = false;
         }

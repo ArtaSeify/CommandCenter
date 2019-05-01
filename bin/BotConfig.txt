@@ -1,6 +1,6 @@
 {
     "ConnectToLadder" : false,
-    "Cheat"           : true,
+    "Cheat"           : false,
 
     "Bot Info" :
     {
@@ -20,7 +20,7 @@
     "SC2API" :
     {
         "BotRace"                   : "Protoss",
-        "EnemyDifficulty"           : 10,
+        "EnemyDifficulty"           : 7,
         "EnemyRace"                 : "Protoss",
         "MapFile"                   : "AbyssalReefLE.SC2Map",
         "StepSize"                  : 1
@@ -45,7 +45,7 @@
         "DrawGameInfo"              : true, 
         "DrawProductionInfo"        : true, 
         "DrawBaseLocationInfo"      : true,
-        "DrawTileInfo"              : true,
+        "DrawTileInfo"              : false,
         "DrawWalkableSectors"       : false,
         "DrawScoutInfo"             : true,
         "DrawEnemyUnitInfo"         : true,
@@ -53,9 +53,10 @@
         "DrawUnitTargetInfo"        : true,
         "DrawLastSeenTileInfo"      : false,
         "DrawSquadInfo"             : true,
-        "DrawWorkerInfo"            : false,
+        "DrawWorkerInfo"            : true,
         "DrawBuildingInfo"          : true,
-        "DrawReservedBuildingTiles" : true
+        "DrawReservedBuildingTiles" : true,
+        "DrawBOSSInfo"              : true
     },
     
     "Modules" :
@@ -117,9 +118,9 @@
             "Protoss_BOSS"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : [ "Probe", "Probe", "Pylon", "Probe", "Probe", "Gateway", "Pylon", "Probe" ],
+                "OpeningBuildOrder" : [ "Probe","Pylon","Probe","Gateway","Probe","Pylon","Probe","Assimilator","Gateway","Probe","CyberneticsCore","Probe","Zealot","Probe","Stalker" ],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
-                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 1 ] ]
+                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 12 ] ]
             },
             "Protoss_Test"          :
             {

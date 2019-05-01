@@ -551,14 +551,16 @@ bool MapTools::canWalk(int tileX, int tileY)
 #ifdef SC2API
     auto & info = m_bot.Observation()->GetGameInfo();
     sc2::Point2DI pointI(tileX, tileY);
-    if (pointI.x < 0 || pointI.x >= info.width || pointI.y < 0 || pointI.y >= info.width)
+    if (pointI.x < 0 || pointI.x >= info.width || pointI.y < 0 || pointI.y >= info.height)
     {
         return false;
     }
-
-    assert(info.pathing_grid.data.size() == info.width * info.height);
-    unsigned char encodedPlacement = info.pathing_grid.data[pointI.x + ((info.height - 1) - pointI.y) * info.width];
-    bool decodedPlacement = encodedPlacement == 255 ? false : true;
+    
+    assert(info.pathing_grid.data.size() == info.width * info.height / 8);
+    //int index = pointI.x + ((info.height - 1) - pointI.y) * info.width;
+    int index = pointI.y * info.width + pointI.x;
+    unsigned char encodedPlacement = (info.pathing_grid.data[index / 8] >> (7 - (index % 8))) & 0x1;
+    bool decodedPlacement = encodedPlacement == 1 ? false : true;
     return decodedPlacement;
 #else
     for (int i=0; i<4; ++i)
@@ -581,14 +583,16 @@ bool MapTools::canBuild(int tileX, int tileY)
 #ifdef SC2API
     auto & info = m_bot.Observation()->GetGameInfo();
     sc2::Point2DI pointI(tileX, tileY);
-    if (pointI.x < 0 || pointI.x >= info.width || pointI.y < 0 || pointI.y >= info.width)
+    if (pointI.x < 0 || pointI.x >= info.width || pointI.y < 0 || pointI.y >= info.height)
     {
         return false;
     }
 
-    assert(info.placement_grid.data.size() == info.width * info.height);
-    unsigned char encodedPlacement = info.placement_grid.data[pointI.x + ((info.height - 1) - pointI.y) * info.width];
-    bool decodedPlacement = encodedPlacement == 255 ? true : false;
+    assert(info.placement_grid.data.size() == info.width * info.height / 8);
+    //int index = pointI.x + ((info.height - 1) - pointI.y) * info.width;
+    int index = pointI.y * info.width + pointI.x;
+    unsigned char encodedPlacement = (info.placement_grid.data[index/8] >> (7 - (index % 8))) & 0x1;
+    bool decodedPlacement = encodedPlacement == 1 ? true : false;
     return decodedPlacement;
 #else
     return BWAPI::Broodwar->isBuildable(BWAPI::TilePosition(tileX, tileY));
@@ -600,14 +604,15 @@ float MapTools::terrainHeight(const CCPosition & point) const
 #ifdef SC2API
     auto & info = m_bot.Observation()->GetGameInfo();
     sc2::Point2DI pointI((int)point.x, (int)point.y);
-    if (pointI.x < 0 || pointI.x >= info.width || pointI.y < 0 || pointI.y >= info.width)
+    if (pointI.x < 0 || pointI.x >= info.width || pointI.y < 0 || pointI.y >= info.height)
     {
         return 0.0f;
     }
 
     assert(info.terrain_height.data.size() == info.width * info.height);
-    unsigned char encodedHeight = info.terrain_height.data[pointI.x + ((info.height - 1) - pointI.y) * info.width];
-    float decodedHeight = -100.0f + 200.0f * float(encodedHeight) / 255.0f;
+    //unsigned char encodedHeight = info.terrain_height.data[pointI.x + ((info.height - 1) - pointI.y) * info.width];
+    unsigned char encodedHeight = info.terrain_height.data[pointI.y * info.width + pointI.x];
+    float decodedHeight = -16.0f + 32.0f * float(encodedHeight) / 255.0f;
     return decodedHeight;
 #else
     return 0;
@@ -634,7 +639,7 @@ void MapTools::draw() const
 
     for (int x = sx; x < ex; ++x)
     {
-        for (int y = sy; y < ey; y++)
+        for (int y = sy; y < ey; ++y)
         {
             if (!isValidTile((int)x, (int)y))
             {
@@ -654,6 +659,7 @@ void MapTools::draw() const
                 if (isWalkable(x, y) && !isBuildable(x, y)) { color = CCColor(255, 255, 0); }
                 if (isBuildable(x, y) && !isDepotBuildableTile(x, y)) { color = CCColor(127, 255, 255); }
                 drawTile(x, y, color);
+                drawText(CCPosition((float)x + 0.1f, (float)y + 0.25f), std::to_string(x) + "," + std::to_string(y), CCColor(255, 0, 0));
             }
         }
     }

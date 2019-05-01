@@ -1,1 +1,9 @@
 Attack in batches
+When a unit dies, leaving time for only one search is gives build orders which are far worse than what were found before
+attacking slows down the game
+smarter micromanagement. get the unit to attack the closest unit it is strong against. eg: immortal attack stalker not zealot
+warpgate chronoboost inside commandcenter doesnt work
+BOSS crashes with invalid chronoboost target
+WarpGate research doesn't work properly. it is added as an action even though its being researched
+adjust build order to opponent
+	continuously scout opponent so we can adjust better?

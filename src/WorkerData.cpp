@@ -43,7 +43,7 @@ void WorkerData::updateAllWorkerData()
     for (auto worker : getWorkers())
     {
         // TODO: for now skip gas workers because they disappear inside refineries, this is annoying
-        if (!worker.isValid() && (getWorkerJob(worker) != WorkerJobs::Gas))
+        if (!worker.isAlive() && (getWorkerJob(worker) != WorkerJobs::Gas))
         {
             workersDestroyed.push_back(worker);
         }
@@ -274,4 +274,12 @@ void WorkerData::drawDepotDebugInfo()
 const std::set<Unit> & WorkerData::getWorkers() const
 {
     return m_workers;
+}
+
+void WorkerData::printWorkerJobCount() const
+{
+    for (const auto& job : m_workerJobCount)
+    {
+        std::cout << job.first << ": " << job.second << std::endl;
+    }
 }

@@ -4,7 +4,7 @@
 	"WorkersPerDepot" : 16,
 	"MineralsPerWorkerPerFrame" : 0.039,
 	"GasPerWorkerPerFrame" : 0.045,
-	"EnergyRegenPerFrame" : 0.031,
+	"EnergyRegenPerFrame" : 0.035,
 	"HealthRegenPerFrame" : 0.0155,
 	"ShieldRegenPerFrame" : 0.027125,
 	"Types" :

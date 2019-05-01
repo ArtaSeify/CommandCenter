@@ -191,6 +191,7 @@ void TechTree::initUnitTypeData()
                 
         kv.second.mineralCost = data.mineral_cost;
         kv.second.gasCost     = data.vespene_cost;
+        kv.second.buildTime   = (int)data.build_time;
     }
 
     // fix the cumulative prices of morphed buildings

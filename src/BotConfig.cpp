@@ -40,6 +40,7 @@ BotConfig::BotConfig()
     DrawLastSeenTileInfo                = false;
     DrawUnitTargetInfo                  = false;
     DrawSquadInfo                       = false;
+    DrawBOSSInfo                        = false;
 
     KiteWithRangedUnits                 = true;
     ScoutHarassEnemy                    = true;
@@ -139,6 +140,7 @@ void BotConfig::readConfigFile()
         JSONTools::ReadBool("DrawLastSeenTileInfo",     debug, DrawLastSeenTileInfo);
         JSONTools::ReadBool("DrawUnitTargetInfo",       debug, DrawUnitTargetInfo);
         JSONTools::ReadBool("DrawReservedBuildingTiles",debug, DrawReservedBuildingTiles);
+        JSONTools::ReadBool("DrawBOSSInfo",             debug, DrawBOSSInfo);
     }
 
     // Parse the Module Options
