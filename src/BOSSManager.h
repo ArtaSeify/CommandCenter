@@ -51,6 +51,8 @@ namespace CC
         std::vector<BOSS::CombatSearchResults> m_searchResults;
         std::vector<std::pair<std::string, std::string>> m_unitStartTimes;
 
+        bool                                m_fastReaction;
+
         void setBuildOrder(const BuildOrder& buildOrder);
         void printDebugInfo() const;
 
@@ -62,7 +64,10 @@ namespace CC
 
         void queueEmpty();
         void newEnemyUnit();
+
         void unitsDied(const std::vector<Unit> & deadUnits);
+        void unitsDiedFastReaction(const std::vector<Unit> & deadUnits);
+        void unitsDiedSlowReaction(const std::vector<Unit> & deadUnits);
 
         void addToQueue(const BOSS::BuildOrderAbilities& buildOrder);
 
