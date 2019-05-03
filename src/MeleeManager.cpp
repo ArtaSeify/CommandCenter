@@ -27,6 +27,7 @@ void MeleeManager::assignTargets(const std::vector<Unit> & targets)
         if (target.isFlying()) { continue; }
         if (target.getType().isEgg()) { continue; }
         if (target.getType().isLarva()) { continue; }
+        if (!m_bot.Map().isVisible(target.getTilePosition().x, target.getTilePosition().y)) { continue; }
 
         meleeUnitTargets.push_back(target);
     }
@@ -61,11 +62,11 @@ void MeleeManager::assignTargets(const std::vector<Unit> & targets)
                 // if we're not near the order position
                 if (Util::Dist(meleeUnit, order.getPosition()) > 4)
                 {
-					// don't spam move command
-					if (meleeUnit.getUnitPtr()->orders.size() > 0 && CCPosition(meleeUnit.getUnitPtr()->orders[0].target_pos) == order.getPosition())
-					{
-						continue;
-					}
+                    // don't spam move command
+                    if (meleeUnit.getUnitPtr()->orders.size() > 0 && CCPosition(meleeUnit.getUnitPtr()->orders[0].target_pos) == order.getPosition())
+                    {
+                        continue;
+                    }
                     // move to it
                     meleeUnit.move(order.getPosition());
                 }
@@ -109,16 +110,31 @@ Unit MeleeManager::getTarget(Unit meleeUnit, const std::vector<Unit> & targets)
 }
 
 // get the attack priority of a type in relation to a zergling
-int MeleeManager::getAttackPriority(Unit attacker, const Unit & unit)
+int MeleeManager::getAttackPriority(const Unit & attacker, const Unit & enemyUnit)
 {
-    BOT_ASSERT(unit.isValid(), "null unit in getAttackPriority");
+    BOT_ASSERT(enemyUnit.isValid(), "null unit in getAttackPriority");
 
-    if (unit.getType().isCombatUnit())
+    if (enemyUnit.getType().isCombatUnit())
     {
+        // if our unit is strong against the enemy unit, we want it to attack that target
+        const auto& unitInfo = m_bot.Observation()->GetUnitTypeData()[attacker.getType().getAPIUnitType()];
+        if (unitInfo.weapons.size() > 0)
+        {
+            const auto& enemyUnitInfo = m_bot.Observation()->GetUnitTypeData()[enemyUnit.getType().getAPIUnitType()];
+            const auto& bonusDamagesInfo = unitInfo.weapons[0].damage_bonus;
+            for (const auto& bonusDamageInfo : bonusDamagesInfo)
+            {
+                if (std::find(enemyUnitInfo.attributes.begin(), enemyUnitInfo.attributes.end(), bonusDamageInfo.attribute) != enemyUnitInfo.attributes.end())
+                {
+                    return 15;
+                }
+            }
+        }
+
         return 10;
     }
 
-    if (unit.getType().isWorker())
+    if (enemyUnit.getType().isWorker())
     {
         return 9;
     }

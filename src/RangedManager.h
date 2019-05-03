@@ -14,7 +14,7 @@ namespace CC
         RangedManager(CCBot & bot);
         void    executeMicro(const std::vector<Unit> & targets);
         void    assignTargets(const std::vector<Unit> & targets);
-        int     getAttackPriority(const Unit & rangedUnit, const Unit & target);
+        int     getAttackPriority(const Unit & attacker, const Unit & enemyUnit);
         Unit    getTarget(const Unit & rangedUnit, const std::vector<Unit> & targets);
     };
 }

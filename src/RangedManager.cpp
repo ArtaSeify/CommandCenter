@@ -26,6 +26,7 @@ void RangedManager::assignTargets(const std::vector<Unit> & targets)
         if (!target.isValid()) { continue; }
         if (target.getType().isEgg()) { continue; }
         if (target.getType().isLarva()) { continue; }
+        if (!m_bot.Map().isVisible(target.getTilePosition().x, target.getTilePosition().y)) { continue; }
 
         rangedUnitTargets.push_back(target);
     }
@@ -60,11 +61,11 @@ void RangedManager::assignTargets(const std::vector<Unit> & targets)
                 // if we're not near the order position
                 if (Util::Dist(rangedUnit, order.getPosition()) > 4)
                 {
-					// don't spam move command
-					if (rangedUnit.getUnitPtr()->orders.size() > 0 && CCPosition(rangedUnit.getUnitPtr()->orders[0].target_pos) == order.getPosition())
-					{
-						continue;
-					}
+                    // don't spam move command
+                    if (rangedUnit.getUnitPtr()->orders.size() > 0 && CCPosition(rangedUnit.getUnitPtr()->orders[0].target_pos) == order.getPosition())
+                    {
+                        continue;
+                    }
                     // move to it
                     rangedUnit.move(order.getPosition());
                 }
@@ -82,7 +83,7 @@ void RangedManager::assignTargets(const std::vector<Unit> & targets)
 // TODO: this is the melee targeting code, replace it with something better for ranged units
 Unit RangedManager::getTarget(const Unit & rangedUnit, const std::vector<Unit> & targets)
 {
-    BOT_ASSERT(rangedUnit.isValid(), "null melee unit in getTarget");
+    BOT_ASSERT(rangedUnit.isValid(), "null ranged unit in getTarget");
 
     int highPriority = 0;
     double closestDist = std::numeric_limits<double>::max();
@@ -109,16 +110,31 @@ Unit RangedManager::getTarget(const Unit & rangedUnit, const std::vector<Unit> &
 }
 
 // get the attack priority of a type in relation to a zergling
-int RangedManager::getAttackPriority(const Unit & attacker, const Unit & target)
+int RangedManager::getAttackPriority(const Unit & attacker, const Unit & enemyUnit)
 {
-    BOT_ASSERT(target.isValid(), "null unit in getAttackPriority");
+    BOT_ASSERT(enemyUnit.isValid(), "null unit in getAttackPriority");
 
-    if (target.getType().isCombatUnit())
+    if (enemyUnit.getType().isCombatUnit())
     {
+        // if our unit is strong against the enemy unit, we want it to attack that target
+        const auto & unitInfo = m_bot.Observation()->GetUnitTypeData()[attacker.getType().getAPIUnitType()];
+        if (unitInfo.weapons.size() > 0)
+        {
+            const auto & enemyUnitInfo = m_bot.Observation()->GetUnitTypeData()[enemyUnit.getType().getAPIUnitType()];
+            const auto & bonusDamagesInfo = unitInfo.weapons[0].damage_bonus;
+            for (const auto & bonusDamageInfo : bonusDamagesInfo)
+            {
+                if (std::find(enemyUnitInfo.attributes.begin(), enemyUnitInfo.attributes.end(), bonusDamageInfo.attribute) != enemyUnitInfo.attributes.end())
+                {
+                    return 15;
+                }
+            }
+        }
+        
         return 10;
     }
 
-    if (target.getType().isWorker())
+    if (enemyUnit.getType().isWorker())
     {
         return 9;
     }

@@ -7,7 +7,7 @@ using namespace CC;
 ProductionManager::ProductionManager(CCBot & bot)
     : m_bot             (bot)
     , m_buildingManager (bot)
-    , m_BOSSManager     (bot)
+    , m_BOSSManager     (bot, m_buildingManager)
 {
 
 }
@@ -24,7 +24,7 @@ void ProductionManager::onFrame()
     {
         m_BOSSManager.onFrame();
     }
-    fixBuildOrderDeadlock();
+    //fixBuildOrderDeadlock();
     manageBuildOrderQueue();
 
     // TODO: if nothing is currently building, get a new goal from the strategy manager
@@ -133,7 +133,7 @@ void ProductionManager::fixBuildOrderDeadlock()
 
     // build a refinery if we don't have one and the thing costs gas
     auto refinery = Util::GetRefinery(m_bot.GetPlayerRace(Players::Self), m_bot);
-    if (m_bot.Data(currentItem.type).gasCost > 0 && m_bot.UnitInfo().getUnitTypeCount(Players::Self, refinery, false) == 0)
+    if (m_bot.Data(currentItem.type).gasCost > m_bot.GetGas() && m_bot.UnitInfo().getUnitTypeCount(Players::Self, refinery, false) == 0)
     {
         m_BOSSManager.m_queue.queueAsHighestPriority(MetaType(refinery, m_bot), true);
     } 

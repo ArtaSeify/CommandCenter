@@ -125,14 +125,14 @@
             "Protoss_Test"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : [ "Nexus", "Pylon", "Gateway", "Zealot", "Zealot", "Pylon", "Pylon", "Pylon", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot"],
+                "OpeningBuildOrder" : [ "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Gateway", "Gateway", "Gateway", "Gateway", "CyberneticsCore", "RoboticsFacility", "RoboticsFacility", "Zealot", "Zealot", "Zealot", "Immortal", "Immortal", "Immortal", "Immortal", "Immortal", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot"],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
                 "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 10 ] ]
             },
             "Protoss_ZealotRush"    : 
             { 
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : ["Probe", "Probe", "Pylon", "Probe", "Probe", "Gateway", "Pylon", "Probe", "Gateway", "Probe", "Gateway", "Pylon", "Probe", "Zealot", "Zealot", "Pylon", "Zealot", "Zealot", "Pylon", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot"],
+                "OpeningBuildOrder" : ["Probe", "Probe", "Pylon", "Probe", "Probe", "Gateway", "Pylon", "Probe", "Gateway", "Probe", "Gateway", "Pylon", "Probe", "Zealot", "Zealot", "Pylon", "Zealot", "Zealot", "Pylon", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot"],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
                 "AttackCondition"   : [ ["Self", "Zealot"], ">=", [ 8 ] ]
             },

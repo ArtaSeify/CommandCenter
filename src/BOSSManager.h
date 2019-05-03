@@ -34,6 +34,7 @@ namespace CC
     private:
         CCBot &                             m_bot;
         std::unique_ptr<BOSS::CombatSearch> m_searcher;
+        BuildingManager &                   m_buildingManager;
 
         std::atomic<int>                    m_searchState;
 
@@ -49,9 +50,10 @@ namespace CC
 
         BOSS::CombatSearchResults           m_results;
         std::vector<BOSS::CombatSearchResults> m_searchResults;
-        std::vector<std::pair<std::string, std::string>> m_unitStartTimes;
+        std::string                         m_unitInfo;
 
         bool                                m_fastReaction;
+        bool                                m_deadUnit;
 
         void setBuildOrder(const BuildOrder& buildOrder);
         void printDebugInfo() const;
@@ -60,21 +62,24 @@ namespace CC
         bool setEnemyUnits();
 
         void getResult();
-        void storeUnitStartTime(const BOSS::ActionAbilityPair& action, const BOSS::GameState& state);
+        void storeBuildOrderInfo(const BOSS::ActionAbilityPair& action, const BOSS::GameState& state);
 
         void queueEmpty();
+
         void newEnemyUnit();
+        void newEnemyUnitFastReaction();
+        void newEnemyUnitSlowReaction();
 
         void unitsDied(const std::vector<Unit> & deadUnits);
         void unitsDiedFastReaction(const std::vector<Unit> & deadUnits);
-        void unitsDiedSlowReaction(const std::vector<Unit> & deadUnits);
+        void unitsDiedSlowReaction(const std::vector<Unit>& deadUnits);
 
         void addToQueue(const BOSS::BuildOrderAbilities& buildOrder);
 
         void threadSearch();
 
     public:
-        BOSSManager(CCBot & bot);
+        BOSSManager(CCBot & bot, BuildingManager& buildingManager);
 
         void onStart();
         void onFrame();
@@ -85,10 +90,10 @@ namespace CC
 
         void finishSearch();
 
-        const BOSS::BuildOrderAbilities & getBuildOrder();
         void doBuildOrder(const BuildOrder & inputBuildOrder);
         void doBuildOrder(BOSS::BuildOrderAbilities& buildOrder);
         // fixes chronoboost targetting after creating a new GameState from the actual game
-        void fixBuildOrder(const BOSS::GameState& state, BOSS::BuildOrderAbilities& buildOrder, int startingIndex);
+        void fixBuildOrder(const BOSS::GameState & state, BOSS::BuildOrderAbilities & buildOrder, int startingIndex) const;
+        bool fixBuildOrderRecurse(const BOSS::GameState & state, BOSS::BuildOrderAbilities & buildOrder, int index) const;
     };
 }
