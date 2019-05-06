@@ -40,10 +40,12 @@ namespace CC
         void setScoutUnits();
         void setCombatUnits();
 
+        Unit getFastestCombatUnit() const;
+
         void drawDebugInterface();
         void drawGameInformation(int x, int y);
 
-        bool shouldSendInitialScout();
+        bool shouldSendInitialScout() const;
 
         void onUnitCreate(const Unit & unit);
         void onUnitDestroy(const Unit & unit);

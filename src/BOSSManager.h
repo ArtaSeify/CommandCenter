@@ -54,6 +54,11 @@ namespace CC
 
         bool                                m_fastReaction;
         bool                                m_deadUnit;
+        bool                                m_needFastReaction;
+
+        const static int enemyArmyBeforeReact = 5;
+        const static int frameLimit = 6720;
+        const static int frameLimitFastReaction = frameLimit / 2;
 
         void setBuildOrder(const BuildOrder& buildOrder);
         void printDebugInfo() const;
@@ -67,11 +72,12 @@ namespace CC
         void queueEmpty();
 
         void newEnemyUnit();
-        void newEnemyUnitFastReaction();
+        void newEnemyUnitFastReaction(int startingIndex);
+        void newEnemyUnitsMediumReaction();
         void newEnemyUnitSlowReaction();
 
         void unitsDied(const std::vector<Unit> & deadUnits);
-        void unitsDiedFastReaction(const std::vector<Unit> & deadUnits);
+        void unitsDiedFastReaction(const std::vector<Unit> & deadUnits, int startingIndex);
         void unitsDiedSlowReaction(const std::vector<Unit>& deadUnits);
 
         void addToQueue(const BOSS::BuildOrderAbilities& buildOrder);
@@ -92,6 +98,7 @@ namespace CC
 
         void doBuildOrder(const BuildOrder & inputBuildOrder);
         void doBuildOrder(BOSS::BuildOrderAbilities& buildOrder);
+        void doBuildingsInQueue(BOSS::GameState& state) const;
         // fixes chronoboost targetting after creating a new GameState from the actual game
         void fixBuildOrder(const BOSS::GameState & state, BOSS::BuildOrderAbilities & buildOrder, int startingIndex) const;
         bool fixBuildOrderRecurse(const BOSS::GameState & state, BOSS::BuildOrderAbilities & buildOrder, int index) const;

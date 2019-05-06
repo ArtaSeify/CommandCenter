@@ -1,6 +1,7 @@
 {
     "ConnectToLadder" : false,
-    "Cheat"           : false,
+    "Cheat"           : true,
+    "RemoveFog"       : true,
 
     "Bot Info" :
     {
@@ -119,15 +120,15 @@
             {
                 "Race"              : "Protoss", 
                 "OpeningBuildOrder" : [ "Probe","Pylon","Probe","Gateway","Probe","Pylon","Probe","Assimilator","Gateway","Probe","CyberneticsCore","Probe","Zealot","Probe","Stalker" ],
-                "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
-                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 12 ] ]
+                "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 200 ] ],
+                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 20 ] ]
             },
             "Protoss_Test"          :
             {
                 "Race"              : "Protoss", 
-                "OpeningBuildOrder" : [ "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Gateway", "Gateway", "Gateway", "Gateway", "CyberneticsCore", "RoboticsFacility", "RoboticsFacility", "Zealot", "Zealot", "Zealot", "Immortal", "Immortal", "Immortal", "Immortal", "Immortal", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot"],
+                "OpeningBuildOrder" : [ "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Pylon", "Gateway", "Gateway", "Gateway", "Gateway", "CyberneticsCore", "Stalker", "Stalker", "RoboticsFacility", "RoboticsFacility", "Zealot", "Zealot", "Zealot", "Immortal", "Immortal", "Immortal", "Immortal", "Immortal", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot", "Zealot"],
                 "ScoutCondition"    : [ ["Self", "Pylon"], ">", [ 0 ] ],
-                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 10 ] ]
+                "AttackCondition"   : [ ["Self", "ArmyCount"], ">=", [ 50 ] ]
             },
             "Protoss_ZealotRush"    : 
             { 

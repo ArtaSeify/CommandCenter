@@ -58,8 +58,8 @@ void GameCommander::handleUnitAssignments()
     setValidUnits();
 
     // set each type of unit
-    setScoutUnits();
     setCombatUnits();
+    setScoutUnits();
 }
 
 bool GameCommander::isAssigned(const Unit & unit) const
@@ -80,6 +80,19 @@ void GameCommander::setValidUnits()
 
 void GameCommander::setScoutUnits()
 {
+    // remove dead units
+    for (auto it = m_scoutUnits.begin(); it != m_scoutUnits.end(); )
+    {
+        if (!it->isAlive())
+        {
+            it = m_scoutUnits.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
     // if we haven't set a scout unit, do it
     if (m_scoutUnits.empty() && !m_initialScoutSet)
     {
@@ -98,9 +111,43 @@ void GameCommander::setScoutUnits()
             }
         }
     }
+
+    // keep resending the fastest combat unit as a scout so we have as much information as possible
+    else if (m_scoutUnits.empty() && m_initialScoutSet)
+    {
+        Unit combatUnitScout = getFastestCombatUnit();
+
+        // if we find a combat unit
+        if (combatUnitScout.isValid())
+        {
+            m_scoutManager.setCombatUnitScout(combatUnitScout);
+            assignUnit(combatUnitScout, m_scoutUnits);
+        }
+    }
 }
 
-bool GameCommander::shouldSendInitialScout()
+Unit GameCommander::getFastestCombatUnit() const
+{
+    float fastestSpeed = 0;
+    Unit fastestUnit;
+
+    for (auto& unit : m_combatUnits)
+    {
+        BOT_ASSERT(unit.isValid(), "Have a null unit in our combat units");
+
+        float unitSpeed = m_bot.Observation()->GetUnitTypeData()[unit.getUnitPtr()->unit_type].movement_speed;
+
+        if (unitSpeed > fastestSpeed)
+        {
+            fastestUnit = unit;
+            fastestSpeed = unitSpeed;
+        }
+    }
+
+    return fastestUnit;
+}
+
+bool GameCommander::shouldSendInitialScout() const
 {
     return m_bot.Strategy().scoutConditionIsMet();
 }

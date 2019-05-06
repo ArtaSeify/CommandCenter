@@ -96,6 +96,11 @@ int main(int argc, char* argv[])
         bot.Debug()->DebugFastBuild();
     }
 
+    if (j["RemoveFog"].get<bool>())
+    {
+        bot.Debug()->DebugShowMap();
+    }
+
     // Step forward the game simulation.
     while (true) 
     {

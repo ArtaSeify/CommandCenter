@@ -11,13 +11,14 @@ namespace CC
     {
         CCBot &   m_bot;
 
-        Unit m_scoutUnit;
+        Unit            m_scoutUnit;
         std::string     m_scoutStatus;
         int             m_numScouts;
         bool            m_scoutUnderAttack;
         CCHealth        m_previousScoutHP;
 
         bool            enemyWorkerInRadiusOf(const CCPosition & pos) const;
+        bool            enemyCombatUnitInRadiusOf(const CCPosition & pos) const;
         CCPosition      getFleePosition() const;
         Unit            closestEnemyWorkerTo(const CCPosition & pos) const;
         void            moveScouts();
@@ -31,5 +32,6 @@ namespace CC
         void onStart();
         void onFrame();
         void setWorkerScout(const Unit & unit);
+        void setCombatUnitScout(const Unit& unit);
     };
 }

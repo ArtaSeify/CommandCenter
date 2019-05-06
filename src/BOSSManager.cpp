@@ -22,6 +22,7 @@ BOSSManager::BOSSManager(CCBot & bot, BuildingManager & buildingManager)
     , m_unitInfo                ()
     , m_fastReaction            (true)
     , m_deadUnit                (false)
+    , m_needFastReaction        (false)
 {
     // Initialize all the BOSS internal data
     BOSS::Init("../bin/SC2Data.json");
@@ -173,16 +174,17 @@ void BOSSManager::addToQueue(const BOSS::BuildOrderAbilities & buildOrder)
 void BOSSManager::setParameters(bool reset)
 {
     setCurrentGameState(reset);
-
-    // set the workers. We assume that 
-    /*m_futureGameState.setNumMineralWorkers(m_bot.Workers().getNumMineralWorkers() + m_bot.Workers().getNumBuilderWorkers());
-    m_futureGameState.setNumGasWorkers(m_bot.Workers().getNumGasWorkers());
-    m_futureGameState.setNumBuilderWorkers(m_bot.Workers().getNumWorkers() - (m_bot.Workers().getNumMineralWorkers() + m_bot.Workers().getNumBuilderWorkers() + m_bot.Workers().getNumGasWorkers()));
-*/
     m_params.setInitialState(m_futureGameState);
 
-    int frameLimit = 6720;
-    m_params.setFrameTimeLimit(m_futureGameState.getCurrentFrame() + frameLimit);
+    if (m_needFastReaction)
+    {
+        m_params.setFrameTimeLimit(m_futureGameState.getCurrentFrame() + frameLimitFastReaction);
+        m_needFastReaction = false;
+    }
+    else
+    {
+        m_params.setFrameTimeLimit(m_futureGameState.getCurrentFrame() + frameLimit);
+    }
 
     m_params.setEnemyUnits(m_enemyUnits);
     m_params.setEnemyRace(BOSS::Races::GetRaceID(m_bot.GetPlayerRaceName(Players::Enemy)));
@@ -217,7 +219,7 @@ void BOSSManager::setCurrentGameState(bool reset)
     }
     else
     {
-        fixBuildOrder(m_currentGameState, m_currentBuildOrder, int(m_currentBuildOrder.size() - (m_queue.size() + m_buildingManager.buildingsQueued().size())));
+        fixBuildOrder(m_currentGameState, m_currentBuildOrder, int(m_currentBuildOrder.size() - m_queue.size()));
     }
 }
 
@@ -442,7 +444,7 @@ bool BOSSManager::setEnemyUnits()
     }
 
     // set the new enemy unit vector
-    if (enemyCombatUnits.size() >= 10)
+    if (enemyCombatUnits.size() >= enemyArmyBeforeReact)
     {
         for (auto& enemyUnit : enemyCombatUnits)
         {
@@ -603,7 +605,7 @@ void BOSSManager::queueEmpty()
     m_searchState = SearchState::Free;
 }
 
-void BOSSManager::newEnemyUnitFastReaction()
+void BOSSManager::newEnemyUnitFastReaction(int startingIndex)
 {
     getResult();
     double avgSearchTime = 0;
@@ -616,10 +618,10 @@ void BOSSManager::newEnemyUnitFastReaction()
     int gameFrame = m_bot.GetCurrentFrame();
     int searchFrameTime = (int)std::ceil(avgSearchTime * m_bot.GetFramesPerSecond()) * 2;
 
-    BOT_ASSERT(m_previousBuildOrder.size() >= (m_queue.size() + m_buildingManager.buildingsQueued().size()), "Previous build order size %i smaller than queue size %i", m_previousBuildOrder.size(), m_queue.size());
-    int startingIndex = int(m_previousBuildOrder.size() - (m_queue.size() + m_buildingManager.buildingsQueued().size()));
+    BOT_ASSERT(m_previousBuildOrder.size() >= m_queue.size(), "Previous build order size %i smaller than queue size %i", m_previousBuildOrder.size(), m_queue.size());
     int endIndex = startingIndex;
 
+    doBuildingsInQueue(m_futureGameState);
     // keep going until the frame we do an action is after the frame we estimate a search will finish
     while (endIndex < m_previousBuildOrder.size())
     {
@@ -630,9 +632,7 @@ void BOSSManager::newEnemyUnitFastReaction()
 
         if (action.first.isAbility())
         {
-            //std::cout << "adding ability previous build order!" << std::endl;
             m_futureGameState.doAbility(action.first, action.second.targetID);
-            //std::cout << "ability successful!" << std::endl;
         }
         else
         {
@@ -663,12 +663,6 @@ void BOSSManager::newEnemyUnitFastReaction()
         {
             catchUpBuildOrder.add(m_previousBuildOrder[int(m_previousBuildOrder.size() - m_queue.size())]);
         }
-
-        /*std::cout << "starting new search from already searched point!" << std::endl;
-        std::cout << "action: " << catchUpBuildOrder.back().first.getName() << std::endl;
-        std::cout << "frame: " << prevGameState.getCurrentFrame() << std::endl;
-        std::cout << "current game frame: " << m_bot.GetCurrentFrame() << std::endl;
-        std::cout << "clock: " << prevGameState.getCurrentFrame() / 22.4 << std::endl;*/
     }
 
     else
@@ -681,16 +675,13 @@ void BOSSManager::newEnemyUnitFastReaction()
             std::cout << "adding extra action: " << action.first.getName() << std::endl;
             if (action.first.isAbility())
             {
-                //std::cout << "adding ability current build order!" << std::endl;
                 m_futureGameState.doAbility(action.first, action.second.targetID);
-                //std::cout << "ability successful!" << std::endl;
             }
             else
             {
                 m_futureGameState.doAction(action.first);
             }
             catchUpBuildOrder.add(action);
-            //std::cout << "added action: " <<  << " to build order" << std::endl;
             storeBuildOrderInfo(action, m_futureGameState);
 
             if (m_futureGameState.getCurrentFrame() > gameFrame + searchFrameTime)
@@ -706,12 +697,78 @@ void BOSSManager::newEnemyUnitFastReaction()
     m_searchState = SearchState::Free;
 }
 
+void BOSSManager::newEnemyUnitsMediumReaction()
+{
+    int gameFrame = m_bot.GetCurrentFrame();
+    int finishFrame = gameFrame + frameLimitFastReaction;
+
+    BOT_ASSERT(m_currentBuildOrder.size() >= m_queue.size(), "current build order size %i smaller than queue size %i", m_currentBuildOrder.size(), m_queue.size());
+    
+    BOSS::BuildOrderAbilities newBuildOrder;
+    doBuildingsInQueue(m_futureGameState);
+    m_unitInfo.clear();
+    // keep going until the frame we do an action is after the frame we estimate a search will finish
+    for (int index = int(m_currentBuildOrder.size() - m_queue.size()); index < m_currentBuildOrder.size(); ++index)
+    {
+        const auto& action = m_currentBuildOrder[index];
+        std::cout << "adding action: " << action.first.getName() << std::endl;
+
+        if (action.first.isAbility())
+        {
+            m_futureGameState.doAbility(action.first, action.second.targetID);
+        }
+        else
+        {
+            m_futureGameState.doAction(action.first);
+        }
+        newBuildOrder.add(action);
+        storeBuildOrderInfo(action, m_futureGameState);
+
+        // we are passed the point
+        if (m_futureGameState.getCurrentFrame() > gameFrame + frameLimitFastReaction)
+        {
+            break;
+        }
+    }
+
+    // we need extra actions from the build orders we have been searching
+    if (gameFrame + frameLimitFastReaction > m_futureGameState.getCurrentFrame())
+    {
+        getResult();
+        fixBuildOrder(m_futureGameState, m_results.usefulBuildOrder, 0);
+
+        for (auto& action : m_results.usefulBuildOrder)
+        {
+            std::cout << "adding extra action: " << action.first.getName() << std::endl;
+            if (action.first.isAbility())
+            {
+                m_futureGameState.doAbility(action.first, action.second.targetID);
+            }
+            else
+            {
+                m_futureGameState.doAction(action.first);
+            }
+            newBuildOrder.add(action);
+            storeBuildOrderInfo(action, m_futureGameState);
+
+            if (m_futureGameState.getCurrentFrame() > gameFrame + frameLimitFastReaction)
+            {
+                break;
+            }
+        }
+    }
+
+    m_currentBuildOrder = newBuildOrder;
+    m_searchResults.clear();
+    m_searchState = SearchState::Free;
+}
+
 void BOSSManager::newEnemyUnitSlowReaction()
 {
     int gameFrame = m_bot.GetCurrentFrame();
-    BOT_ASSERT(m_params.getFrameTimeLimit() - m_futureGameState.getCurrentFrame() == 6720, "Wrong calculation");
-    int halfwayPoint = (m_params.getFrameTimeLimit() + m_futureGameState.getCurrentFrame()) / 2;
-    
+    BOT_ASSERT(m_params.getFrameTimeLimit() - m_futureGameState.getCurrentFrame() == frameLimit, "Wrong calculation");
+    int halfwayPoint = int(m_futureGameState.getCurrentFrame() - (frameLimit / 2.f));
+
     // we do nothing if we are past the halfway point
     if (gameFrame > halfwayPoint)
     {
@@ -732,21 +789,32 @@ void BOSSManager::newEnemyUnit()
     if (m_fastReaction)
     {
         finishSearch();
+
+        int startingIndexBeforeCleanUp = int(m_currentBuildOrder.size() - m_queue.size());
         setCurrentGameState(true);
         std::cout << "reacting fast to new enemy unit" << std::endl;
-        newEnemyUnitFastReaction();
+        newEnemyUnitFastReaction(startingIndexBeforeCleanUp);
 
         m_queue.clearAll();
         addToQueue(m_currentBuildOrder);
     }
     else
     {
-        std::cout << "reacting slow to new enemy unit" << std::endl;
-        newEnemyUnitSlowReaction();
+        finishSearch();
+        setCurrentGameState(true);
+        std::cout << "reacting at medium speed to new enemy unit" << std::endl;
+        newEnemyUnitsMediumReaction();
+
+        m_queue.clearAll();
+        addToQueue(m_currentBuildOrder);
+
+
+        /*std::cout << "reacting slow to new enemy unit" << std::endl;
+        newEnemyUnitSlowReaction();*/
     }
 }
 
-void BOSSManager::unitsDiedFastReaction(const std::vector<Unit>& deadUnits)
+void BOSSManager::unitsDiedFastReaction(const std::vector<Unit>& deadUnits, int startingIndex)
 {
     getResult();
     double avgSearchTime = 0;
@@ -759,10 +827,10 @@ void BOSSManager::unitsDiedFastReaction(const std::vector<Unit>& deadUnits)
     int gameFrame = m_bot.GetCurrentFrame();
     int searchFrameTime = (int)std::ceil(avgSearchTime * m_bot.GetFramesPerSecond()) * 2;
 
-    BOT_ASSERT(m_previousBuildOrder.size() >= (m_queue.size() + m_buildingManager.buildingsQueued().size()), "Previous build order size %i smaller than queue size %i", m_previousBuildOrder.size(), m_queue.size());
-    int startingIndex = int(m_previousBuildOrder.size() - (m_queue.size() + m_buildingManager.buildingsQueued().size()));
+    BOT_ASSERT(m_previousBuildOrder.size() >= m_queue.size(), "Previous build order size %i smaller than queue size %i", m_previousBuildOrder.size(), m_queue.size());
     int endIndex = startingIndex;
 
+    doBuildingsInQueue(m_futureGameState);
     // keep going until the frame we do an action is after the frame we estimate a search will finish
     while (endIndex < m_previousBuildOrder.size())
     {
@@ -773,9 +841,7 @@ void BOSSManager::unitsDiedFastReaction(const std::vector<Unit>& deadUnits)
 
         if (action.first.isAbility())
         {
-            //std::cout << "adding ability previous build order!" << std::endl;
             m_futureGameState.doAbility(action.first, action.second.targetID);
-            //std::cout << "ability successful!" << std::endl;
         }
         else
         {
@@ -804,14 +870,8 @@ void BOSSManager::unitsDiedFastReaction(const std::vector<Unit>& deadUnits)
         BOT_ASSERT(catchUpBuildOrder.size() > 0, "Size of build order must be greater than 0 %i", catchUpBuildOrder.size());
         if (catchUpBuildOrder.size() == 0)
         {
-            catchUpBuildOrder.add(m_previousBuildOrder[int(m_previousBuildOrder.size() - (m_queue.size() + m_buildingManager.buildingsQueued().size()))]);
+            catchUpBuildOrder.add(m_previousBuildOrder[int(m_previousBuildOrder.size() - m_queue.size())]);
         }
-
-        /*std::cout << "starting new search from already searched point!" << std::endl;
-        std::cout << "action: " << catchUpBuildOrder.back().first.getName() << std::endl;
-        std::cout << "frame: " << prevGameState.getCurrentFrame() << std::endl;
-        std::cout << "current game frame: " << m_bot.GetCurrentFrame() << std::endl;
-        std::cout << "clock: " << prevGameState.getCurrentFrame() / 22.4 << std::endl;*/
     }
 
     else
@@ -823,16 +883,13 @@ void BOSSManager::unitsDiedFastReaction(const std::vector<Unit>& deadUnits)
             std::cout << "adding extra action: " << action.first.getName() << std::endl;
             if (action.first.isAbility())
             {
-                //std::cout << "adding ability current build order!" << std::endl;
                 m_futureGameState.doAbility(action.first, action.second.targetID);
-                //std::cout << "ability successful!" << std::endl;
             }
             else
             {
                 m_futureGameState.doAction(action.first);
             }
             catchUpBuildOrder.add(action);
-            //std::cout << "added action: " <<  << " to build order" << std::endl;
             storeBuildOrderInfo(action, m_futureGameState);
 
             if (m_futureGameState.getCurrentFrame() > gameFrame + searchFrameTime)
@@ -841,7 +898,7 @@ void BOSSManager::unitsDiedFastReaction(const std::vector<Unit>& deadUnits)
             }
         }
     }
-    //std::cout << "num workers in future game state: " << m_futureGameState.getNumTotal(BOSS::ActionTypes::GetWorker(BOSS::Races::Protoss)) << std::endl;
+
     m_currentBuildOrder = catchUpBuildOrder;
     m_searchResults.clear();
     m_searchState = SearchState::Free;
@@ -850,8 +907,8 @@ void BOSSManager::unitsDiedFastReaction(const std::vector<Unit>& deadUnits)
 void BOSSManager::unitsDiedSlowReaction(const std::vector<Unit>& deadUnits)
 {
     int gameFrame = m_bot.GetCurrentFrame();
-    BOT_ASSERT(m_params.getFrameTimeLimit() - m_futureGameState.getCurrentFrame() == 6720, "Wrong calculation");
-    int halfwayPoint = (m_params.getFrameTimeLimit() + m_futureGameState.getCurrentFrame()) / 2;
+    BOT_ASSERT(m_params.getFrameTimeLimit() - m_futureGameState.getCurrentFrame() == frameLimit, "Wrong calculation");
+    int halfwayPoint = int(m_futureGameState.getCurrentFrame() - (frameLimit / 2.f));
 
     // we do nothing if we are past the halfway point
     if (gameFrame > halfwayPoint)
@@ -869,7 +926,7 @@ void BOSSManager::unitsDiedSlowReaction(const std::vector<Unit>& deadUnits)
     setCurrentGameState(true);
     // fast forward to the end of the build order
     BOSS::BuildOrderAbilities buildOrder;
-    for (int index = int(m_currentBuildOrder.size() - (m_queue.size() + m_buildingManager.buildingsQueued().size())); index < m_currentBuildOrder.size(); ++index)
+    for (int index = int(m_currentBuildOrder.size() - m_queue.size()); index < m_currentBuildOrder.size(); ++index)
     {
         buildOrder.add(m_currentBuildOrder[index]);
     }
@@ -894,19 +951,23 @@ void BOSSManager::unitsDied(const std::vector<Unit> & deadUnits)
     if (m_fastReaction || needFastReaction)
     {
         finishSearch();
+
+        int startingIndexBeforeCleanUp = int(m_currentBuildOrder.size() - m_queue.size());
         setCurrentGameState(true);
 
         std::cout << "reacting fast to dead unit" << std::endl;
-        unitsDiedFastReaction(deadUnits);
+        unitsDiedFastReaction(deadUnits, startingIndexBeforeCleanUp);
 
         m_queue.clearAll();
         addToQueue(m_currentBuildOrder);
+
+        m_needFastReaction = true;
     }
     else
     {
         std::cout << "reacting slow to dead unit" << std::endl;
         unitsDiedSlowReaction(deadUnits);
-    }
+    }    
 }
 
 void BOSSManager::doBuildOrder(const BuildOrder & inputBuildOrder)
@@ -942,7 +1003,19 @@ void BOSSManager::doBuildOrder(const BuildOrder & inputBuildOrder)
 void BOSSManager::doBuildOrder(BOSS::BuildOrderAbilities & buildOrder)
 {
     //std::cout << "BOSS DoBuildOrder called" << std::endl;
+    doBuildingsInQueue(m_futureGameState);
     BOSS::Tools::DoBuildOrder(m_futureGameState, buildOrder);
+}
+
+void BOSSManager::doBuildingsInQueue(BOSS::GameState& state) const
+{
+    auto queuedBuildings = m_buildingManager.buildingsQueued();
+    for (int index = 0; index < queuedBuildings.size(); ++index)
+    {
+        const auto& action = BOSS::ActionTypes::GetActionType(queuedBuildings[index].getName());
+        BOT_ASSERT(!action.isAbility(), "Abilities should not be in queue");
+        state.doAction(action);
+    }
 }
 
 void BOSSManager::fixBuildOrder(const BOSS::GameState & state, BOSS::BuildOrderAbilities & buildOrder, int startingIndex) const
@@ -954,12 +1027,7 @@ void BOSSManager::fixBuildOrder(const BOSS::GameState & state, BOSS::BuildOrderA
     
     // adds in buildings currently in production queue
     BOSS::GameState tempState(state);
-    for (int index = m_previousBuildOrder.size() + startingIndex; index < m_previousBuildOrder.size(); ++index)
-    {
-        const auto& action = m_previousBuildOrder[index];
-        BOT_ASSERT(!action.first.isAbility(), "Abilities should not be in queue");
-        tempState.doAction(action.first);
-    }
+    doBuildingsInQueue(tempState);
 
     BOT_ASSERT(fixBuildOrderRecurse(tempState, buildOrder, startingIndex), "fixing build order failed");
     std::cout << "finished fixing build order" << std::endl;
@@ -978,37 +1046,58 @@ bool BOSSManager::fixBuildOrderRecurse(const BOSS::GameState & state, BOSS::Buil
 
     if (actionType.isAbility())
     {
-        auto targets = currentState.getAbilityTargetUnit(buildOrder[index]);
-
-        // no valid target. we have chosen a wrong target somewhere before
-        if (targets.size() == 0)
+        // target of this action no longer exists, so we remove it from the build order
+        if (!currentState.haveType(buildOrder[index].second.targetType))
         {
+            buildOrder.remove(index);
+            std::cout << "removed action: " << actionType.getName() << " cause we don't have builder or prereqs" << std::endl;
+            return fixBuildOrderRecurse(currentState, buildOrder, index);
+        }
+        
+        else
+        {
+            auto targets = currentState.getAbilityTargetUnit(buildOrder[index]);
+
+            // no valid target. we have chosen a wrong target somewhere before
+            if (targets.size() == 0)
+            {
+                return false;
+            }
+
+            // try out all possible combinations of targets
+            for (const auto& target : targets)
+            {
+                currentState.doAbility(actionType, target.first);
+                buildOrder[index].second.targetID = target.first;
+                buildOrder[index].second.targetProductionID = target.second;
+                buildOrder[index].second.frameCast = currentState.getCurrentFrame();
+
+                // we found a good target
+                if (fixBuildOrderRecurse(currentState, buildOrder, index + 1))
+                {
+                    return true;
+                }
+            }
+
+            // no valid targets found. we messed up a target somewhere before
             return false;
         }
-
-        // try out all possible combinations of targets
-        for (const auto& target : targets)
-        {
-            currentState.doAbility(actionType, target.first);
-            buildOrder[index].second.targetID = target.first;
-            buildOrder[index].second.targetProductionID = target.second;
-            buildOrder[index].second.frameCast = currentState.getCurrentFrame();
-
-            // we found a good target
-            if (fixBuildOrderRecurse(currentState, buildOrder, index + 1))
-            {
-                return true;
-            }
-        }
-
-        // no valid targets found. we messed up a target somewhere before
-        return false;
     }
     else
     {
-        // normal actions are easy; there is nothing to fix
-        currentState.doAction(actionType);
-        fixBuildOrderRecurse(currentState, buildOrder, index + 1);
+        // if a builder or prereq no longer exists then we remove the action
+        if (currentState.haveBuilder(actionType) && currentState.havePrerequisites(actionType))
+        {
+            currentState.doAction(actionType);
+            fixBuildOrderRecurse(currentState, buildOrder, index + 1);
+        }
+        else
+        {
+            buildOrder.remove(index);
+            std::cout << "removed action: " << actionType.getName() << " cause we don't have builder or prereqs" << std::endl;
+            fixBuildOrderRecurse(currentState, buildOrder, index);
+        }
+        
     }
 
     return true;
@@ -1094,4 +1183,15 @@ void BOSSManager::printDebugInfo() const
     }
 
     m_bot.Map().drawTextScreen(0.72f, 0.05f, ss.str(), CCColor(255, 255, 0));
+
+    std::stringstream weights_ss;
+    weights_ss << "Unit Weights\n\n";
+    auto unitWeights = BOSS::Eval::GetUnitWeightVector();
+    for (int index = 0; index < unitWeights.size(); ++index)
+    {
+        BOSS::FracType weight = unitWeights[index];
+        weights_ss << BOSS::ActionTypes::GetActionType(index + 1).getName() << ": " << weight << "\n";
+    }
+
+    m_bot.Map().drawTextScreen(0.10, 0.05, weights_ss.str(), CCColor(255, 255, 0));
 }
