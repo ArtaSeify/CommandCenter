@@ -164,6 +164,15 @@ bool Squad::needsToRegroup() const
         return false;
     }
 
+    // one of our units is near the enemy, so don't regroup
+    for (const auto& unit : m_units)
+    {
+        if (unit.getType().isCombatUnit() && m_nearEnemy.at(unit))
+        {
+            return false;
+        }
+    }
+
     float minDist = std::numeric_limits<float>::max();
     Unit minDistUnit;
 

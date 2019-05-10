@@ -56,9 +56,10 @@ namespace CC
         bool                                m_deadUnit;
         bool                                m_needFastReaction;
 
-        const static int enemyArmyBeforeReact = 5;
+        const static int enemyArmyBeforeReact = 1;
         const static int frameLimit = 6720;
-        const static int frameLimitFastReaction = frameLimit / 2;
+        const static int frameBuildOrderUse = frameLimit / 2;
+        const static int frameLimitFastReaction = frameBuildOrderUse / 2;
 
         void setBuildOrder(const BuildOrder& buildOrder);
         void printDebugInfo() const;
@@ -100,7 +101,7 @@ namespace CC
         void doBuildOrder(BOSS::BuildOrderAbilities& buildOrder);
         void doBuildingsInQueue(BOSS::GameState& state) const;
         // fixes chronoboost targetting after creating a new GameState from the actual game
-        void fixBuildOrder(const BOSS::GameState & state, BOSS::BuildOrderAbilities & buildOrder, int startingIndex) const;
+        void fixBuildOrder(const BOSS::GameState & state, BOSS::BuildOrderAbilities & buildOrder, int startingIndex, bool doTheBuildingsInQueue = true);
         bool fixBuildOrderRecurse(const BOSS::GameState & state, BOSS::BuildOrderAbilities & buildOrder, int index) const;
     };
 }

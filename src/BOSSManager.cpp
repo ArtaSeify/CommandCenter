@@ -20,15 +20,13 @@ BOSSManager::BOSSManager(CCBot & bot, BuildingManager & buildingManager)
     , m_searchState             (SearchState::Free)
     , m_searchThread            ()
     , m_unitInfo                ()
-    , m_fastReaction            (true)
+    , m_fastReaction            (false)
     , m_deadUnit                (false)
     , m_needFastReaction        (false)
 {
     // Initialize all the BOSS internal data
     BOSS::Init("../bin/SC2Data.json");
     m_params = BOSS::CombatSearchParameters();
-
-    m_fastReaction = false;
 }
 
 void BOSSManager::setBuildOrder(const BuildOrder& buildOrder)
@@ -47,11 +45,12 @@ void BOSSManager::onStart()
 
     std::vector<std::string> relevantActionsNames =
     { "ChronoBoost", "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker",
-        "Zealot", "Colossus", "Forge", "FleetBeacon", "TwilightCouncil", "Stargate", "TemplarArchive",
-        "DarkShrine", "RoboticsBay", "RoboticsFacility", "ZealotWarped", "Zealot", "StalkerWarped", "Stalker",
-        "DarkTemplarWarped", "DarkTemplar", "Carrier", "VoidRay", "Immortal", "Probe", "AdeptWarped",
-        "Adept", "Tempest", /*"WarpGateResearch"*/ };
+        "Zealot", "Colossus", "FleetBeacon", "TwilightCouncil", "Stargate", "TemplarArchive",
+        "DarkShrine", "RoboticsBay", "RoboticsFacility", "DarkTemplar", "Carrier", "VoidRay", "Immortal", "Probe", "Adept", "Tempest" };
     //, "WarpGateResearch" 
+    /*std::vector<std::string> relevantActionsNames =
+    { "ChronoBoost", "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker",
+        "Zealot", "Forge", "FleetBeacon", "Stargate", "Carrier", "VoidRay", "Adept", "Tempest" };*/
     BOSS::ActionSetAbilities relevantActions;
     for (std::string & actionName : relevantActionsNames)
     {
@@ -137,6 +136,11 @@ void BOSSManager::onFrame()
     }    
 
     printDebugInfo();
+
+    if (m_queue.isEmpty() && m_bot.GetCurrentSupply() < 200)
+    {
+        system("pause");
+    }
 }
 
 void BOSSManager::addToQueue(const BOSS::BuildOrderAbilities & buildOrder)
@@ -211,6 +215,8 @@ void BOSSManager::setCurrentGameState(bool reset)
 
     m_currentGameState = state;
     m_futureGameState = state;
+    
+    doBuildingsInQueue(m_futureGameState);
 
     // do the initial build order so the state is in the proper spot
     if (m_futureGameState.getCurrentFrame() == 1)
@@ -219,11 +225,10 @@ void BOSSManager::setCurrentGameState(bool reset)
     }
     else
     {
-        fixBuildOrder(m_currentGameState, m_currentBuildOrder, int(m_currentBuildOrder.size() - m_queue.size()));
+        fixBuildOrder(m_futureGameState, m_currentBuildOrder, int(m_currentBuildOrder.size() - m_queue.size()), false);
     }
 }
 
-// need to transform a vector of CC::Units to BOSS::Units
 std::vector<BOSS::Unit> BOSSManager::getCurrentUnits()
 {
     std::vector<std::pair<Unit, int>> unitsBeingTrained;        // <Unit being trained, builderID>
@@ -257,7 +262,7 @@ std::vector<BOSS::Unit> BOSSManager::getCurrentUnits()
             {
                 Unit unit(m_bot.Data(CCUnit.getUnitPtr()->orders[0].ability_id), m_bot);
                 unitsBeingTrained.push_back(std::pair<Unit, int>(unit, int(unitsFinished.size() - 1)));
-                //std::cout << CCUnit.getUnitPtr()->orders[0].progress << std::endl;
+                std::cout << m_bot.Data(CCUnit.getUnitPtr()->orders[0].ability_id).getName() << std::endl;
             }
         }
 
@@ -276,7 +281,6 @@ std::vector<BOSS::Unit> BOSSManager::getCurrentUnits()
     }*/
 
     currentUnits.clear();
-
     // the units that are finished. easiest case
     for (auto it = unitsFinished.begin(); it != unitsFinished.end(); ++it)
     {
@@ -431,12 +435,11 @@ bool BOSSManager::setEnemyUnits()
 {
     auto enemyUnitTypes = std::vector<int>(BOSS::ActionTypes::GetAllActionTypes().size(), 0);
     auto allEnemyUnits = m_bot.UnitInfo().getUnits(Players::Enemy);
-    bool change = false;
 
     std::vector<Unit> enemyCombatUnits;
     for (const auto& unit : allEnemyUnits)
     {
-        if (unit.getType().isCombatUnit())
+        if (unit.getType().isCombatUnit() && !unit.getType().isVariation())
         {
             enemyCombatUnits.push_back(unit);
             //std::cout << "enemy combat unit: " << unit.getType().getName() << std::endl;
@@ -450,29 +453,24 @@ bool BOSSManager::setEnemyUnits()
         {
             const int index = BOSS::ActionTypes::GetActionType(enemyUnit.getType().getName()).getID();
             enemyUnitTypes[index]++;
-            if (m_enemyUnits.size() == 0 || m_enemyUnits[index] == 0)
-            {
-                change = true;
-            }
-            //std::cout << enemyUnit.getType().getName() << std::endl;
         }
-    }
 
-    if (change)
-    {
-        m_enemyUnits = enemyUnitTypes;
-
-        const auto & unitWeightsBefore = BOSS::Eval::GetUnitWeightVector();
-        const auto & unitWeightsNow = BOSS::Eval::CalculateUnitWeightVector(m_futureGameState, m_enemyUnits);
-
-        if (unitWeightsBefore == unitWeightsNow)
+        if (enemyUnitTypes != m_enemyUnits)
         {
-            std::cout << "new unit, but weight vector doesn't change" << std::endl;
-            return false;
-        }
+            m_enemyUnits = enemyUnitTypes;
 
-        std::cout << "weight vector changed because of new unit" << std::endl;
-        return true;
+            const auto& unitWeightsBefore = BOSS::Eval::GetUnitWeightVector();
+            const auto& unitWeightsNow = BOSS::Eval::CalculateUnitWeightVector(m_futureGameState, m_enemyUnits);
+
+            if (unitWeightsBefore == unitWeightsNow)
+            {
+                std::cout << "new unit, but weight vector doesn't change" << std::endl;
+                return false;
+            }
+
+            std::cout << "weight vector changed because of new unit" << std::endl;
+            return true;
+        }
     }
 
     return false;
@@ -565,7 +563,6 @@ void BOSSManager::queueEmpty()
 {
     getResult();
     m_currentBuildOrder = m_results.usefulBuildOrder;
-
     m_currentGameState = m_futureGameState;
 
     // a worker or combat unit died. we need to reset the game state
@@ -583,24 +580,45 @@ void BOSSManager::queueEmpty()
     //m_futureGameState.setMinerals(BOSS::FracType(m_bot.GetMinerals()));
 
     m_unitInfo.clear();
+    BOSS::GameState state(m_futureGameState);
+    BOSS::BuildOrderAbilities buildOrder;
     // update GameState with the new build order we found
     for (auto& action : m_currentBuildOrder)
     {
         if (action.first.isAbility())
         {
+            state.doAbility(action.first, action.second.targetID);
+            //std::cout << "ability successful!" << std::endl;
+        }
+        else
+        {
+            state.doAction(action.first);
+        }
+
+        // only add actions up to the frame dictated by frameBuildOrderUse
+        if (state.getCurrentFrame() > m_bot.GetCurrentFrame() + frameBuildOrderUse)
+        {
+            break;
+        }
+
+        if (action.first.isAbility())
+        {
             //std::cout << "adding ability queue empty!" << std::endl;
+            std::cout << "adding chronoboost to queue!" << std::endl;
             m_futureGameState.doAbility(action.first, action.second.targetID);
             //std::cout << "ability successful!" << std::endl;
         }
         else
         {
+            std::cout << "adding " << action.first.getName() << " to queue!" << std::endl;
             m_futureGameState.doAction(action.first);
         }
 
-        storeBuildOrderInfo(action, m_futureGameState);
+        storeBuildOrderInfo(action, state);
+        buildOrder.add(action);
     }
 
-    //std::cout << "num workers in future game state: " << m_futureGameState.getNumTotal(BOSS::ActionTypes::GetWorker(BOSS::Races::Protoss)) << std::endl;
+    m_currentBuildOrder = buildOrder;
     m_searchResults.clear();
     m_searchState = SearchState::Free;
 }
@@ -621,7 +639,6 @@ void BOSSManager::newEnemyUnitFastReaction(int startingIndex)
     BOT_ASSERT(m_previousBuildOrder.size() >= m_queue.size(), "Previous build order size %i smaller than queue size %i", m_previousBuildOrder.size(), m_queue.size());
     int endIndex = startingIndex;
 
-    doBuildingsInQueue(m_futureGameState);
     // keep going until the frame we do an action is after the frame we estimate a search will finish
     while (endIndex < m_previousBuildOrder.size())
     {
@@ -667,7 +684,7 @@ void BOSSManager::newEnemyUnitFastReaction(int startingIndex)
 
     else
     {
-        fixBuildOrder(m_futureGameState, m_results.usefulBuildOrder, 0);
+        fixBuildOrder(m_futureGameState, m_results.usefulBuildOrder, 0, false);
 
         // update GameState with the new build order we found
         for (auto& action : m_results.usefulBuildOrder)
@@ -705,9 +722,8 @@ void BOSSManager::newEnemyUnitsMediumReaction()
     BOT_ASSERT(m_currentBuildOrder.size() >= m_queue.size(), "current build order size %i smaller than queue size %i", m_currentBuildOrder.size(), m_queue.size());
     
     BOSS::BuildOrderAbilities newBuildOrder;
-    doBuildingsInQueue(m_futureGameState);
     m_unitInfo.clear();
-    // keep going until the frame we do an action is after the frame we estimate a search will finish
+    // keep going until the frame we do an action is after the reaction frame
     for (int index = int(m_currentBuildOrder.size() - m_queue.size()); index < m_currentBuildOrder.size(); ++index)
     {
         const auto& action = m_currentBuildOrder[index];
@@ -725,19 +741,20 @@ void BOSSManager::newEnemyUnitsMediumReaction()
         storeBuildOrderInfo(action, m_futureGameState);
 
         // we are passed the point
-        if (m_futureGameState.getCurrentFrame() > gameFrame + frameLimitFastReaction)
+        if (m_futureGameState.getCurrentFrame() > finishFrame)
         {
             break;
         }
     }
 
     // we need extra actions from the build orders we have been searching
-    if (gameFrame + frameLimitFastReaction > m_futureGameState.getCurrentFrame())
+    if (m_futureGameState.getCurrentFrame() < finishFrame)
     {
         getResult();
-        fixBuildOrder(m_futureGameState, m_results.usefulBuildOrder, 0);
+        m_currentBuildOrder = m_results.usefulBuildOrder;
+        fixBuildOrder(m_futureGameState, m_currentBuildOrder, 0, false);
 
-        for (auto& action : m_results.usefulBuildOrder)
+        for (auto& action : m_currentBuildOrder)
         {
             std::cout << "adding extra action: " << action.first.getName() << std::endl;
             if (action.first.isAbility())
@@ -751,7 +768,7 @@ void BOSSManager::newEnemyUnitsMediumReaction()
             newBuildOrder.add(action);
             storeBuildOrderInfo(action, m_futureGameState);
 
-            if (m_futureGameState.getCurrentFrame() > gameFrame + frameLimitFastReaction)
+            if (m_futureGameState.getCurrentFrame() > finishFrame)
             {
                 break;
             }
@@ -802,6 +819,7 @@ void BOSSManager::newEnemyUnit()
     {
         finishSearch();
         setCurrentGameState(true);
+
         std::cout << "reacting at medium speed to new enemy unit" << std::endl;
         newEnemyUnitsMediumReaction();
 
@@ -830,7 +848,6 @@ void BOSSManager::unitsDiedFastReaction(const std::vector<Unit>& deadUnits, int 
     BOT_ASSERT(m_previousBuildOrder.size() >= m_queue.size(), "Previous build order size %i smaller than queue size %i", m_previousBuildOrder.size(), m_queue.size());
     int endIndex = startingIndex;
 
-    doBuildingsInQueue(m_futureGameState);
     // keep going until the frame we do an action is after the frame we estimate a search will finish
     while (endIndex < m_previousBuildOrder.size())
     {
@@ -876,7 +893,7 @@ void BOSSManager::unitsDiedFastReaction(const std::vector<Unit>& deadUnits, int 
 
     else
     {
-        fixBuildOrder(m_futureGameState, m_results.usefulBuildOrder, 0);
+        fixBuildOrder(m_futureGameState, m_results.usefulBuildOrder, 0, false);
         // update GameState with the new build order we found
         for (auto& action : m_results.usefulBuildOrder)
         {
@@ -922,7 +939,6 @@ void BOSSManager::unitsDiedSlowReaction(const std::vector<Unit>& deadUnits)
     std::cout << "units died: before halfway point. reacting" << std::endl;
 
     finishSearch();
-
     setCurrentGameState(true);
     // fast forward to the end of the build order
     BOSS::BuildOrderAbilities buildOrder;
@@ -1003,22 +1019,24 @@ void BOSSManager::doBuildOrder(const BuildOrder & inputBuildOrder)
 void BOSSManager::doBuildOrder(BOSS::BuildOrderAbilities & buildOrder)
 {
     //std::cout << "BOSS DoBuildOrder called" << std::endl;
-    doBuildingsInQueue(m_futureGameState);
+    //doBuildingsInQueue(m_futureGameState);
     BOSS::Tools::DoBuildOrder(m_futureGameState, buildOrder);
 }
 
 void BOSSManager::doBuildingsInQueue(BOSS::GameState& state) const
 {
-    auto queuedBuildings = m_buildingManager.buildingsQueued();
+    auto queuedBuildings = m_buildingManager.getUnassignedQueued();
     for (int index = 0; index < queuedBuildings.size(); ++index)
     {
         const auto& action = BOSS::ActionTypes::GetActionType(queuedBuildings[index].getName());
+        std::cout << "doing queued action: " << action.getName() << std::endl;
         BOT_ASSERT(!action.isAbility(), "Abilities should not be in queue");
         state.doAction(action);
+        system("pause");
     }
 }
 
-void BOSSManager::fixBuildOrder(const BOSS::GameState & state, BOSS::BuildOrderAbilities & buildOrder, int startingIndex) const
+void BOSSManager::fixBuildOrder(const BOSS::GameState & state, BOSS::BuildOrderAbilities & buildOrder, int startingIndex, bool doTheBuildingsInQueue)
 {
     std::cout << "fixing build order" << std::endl;
     buildOrder.print();
@@ -1027,10 +1045,36 @@ void BOSSManager::fixBuildOrder(const BOSS::GameState & state, BOSS::BuildOrderA
     
     // adds in buildings currently in production queue
     BOSS::GameState tempState(state);
-    doBuildingsInQueue(tempState);
+    if (doTheBuildingsInQueue)
+    {
+        doBuildingsInQueue(tempState);
+    }
 
-    BOT_ASSERT(fixBuildOrderRecurse(tempState, buildOrder, startingIndex), "fixing build order failed");
-    std::cout << "finished fixing build order" << std::endl;
+    if (fixBuildOrderRecurse(tempState, buildOrder, startingIndex))
+    {
+        std::cout << "finished fixing build order" << std::endl;
+    }
+    else
+    {
+        BOSS::BuildOrderAbilities newBuildOrder;
+        std::cout << "fixing build order failed. taking actions until the first chronoboost" << std::endl;
+        int index = startingIndex;
+        while (index < buildOrder.size())
+        {
+            if (buildOrder[index].first.isAbility())
+            {
+                break;
+            }
+            else
+            {
+                newBuildOrder.add(buildOrder[index]);
+            }
+            ++index;
+        }
+        m_queue.clearAll();
+        addToQueue(newBuildOrder);
+        buildOrder = newBuildOrder;
+    }    
 }
 
 bool BOSSManager::fixBuildOrderRecurse(const BOSS::GameState & state, BOSS::BuildOrderAbilities & buildOrder, int index) const
@@ -1089,18 +1133,16 @@ bool BOSSManager::fixBuildOrderRecurse(const BOSS::GameState & state, BOSS::Buil
         if (currentState.haveBuilder(actionType) && currentState.havePrerequisites(actionType))
         {
             currentState.doAction(actionType);
-            fixBuildOrderRecurse(currentState, buildOrder, index + 1);
+            return fixBuildOrderRecurse(currentState, buildOrder, index + 1);
         }
         else
         {
             buildOrder.remove(index);
             std::cout << "removed action: " << actionType.getName() << " cause we don't have builder or prereqs" << std::endl;
-            fixBuildOrderRecurse(currentState, buildOrder, index);
+            return fixBuildOrderRecurse(currentState, buildOrder, index);
         }
         
     }
-
-    return true;
 }
 
 void BOSSManager::printDebugInfo() const
@@ -1193,5 +1235,5 @@ void BOSSManager::printDebugInfo() const
         weights_ss << BOSS::ActionTypes::GetActionType(index + 1).getName() << ": " << weight << "\n";
     }
 
-    m_bot.Map().drawTextScreen(0.10, 0.05, weights_ss.str(), CCColor(255, 255, 0));
+    m_bot.Map().drawTextScreen(0.10f, 0.02f, weights_ss.str(), CCColor(255, 255, 0));
 }

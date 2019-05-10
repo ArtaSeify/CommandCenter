@@ -27,7 +27,8 @@ void MeleeManager::assignTargets(const std::vector<Unit> & targets)
         if (target.isFlying()) { continue; }
         if (target.getType().isEgg()) { continue; }
         if (target.getType().isLarva()) { continue; }
-        if (!m_bot.Map().isVisible(target.getTilePosition().x, target.getTilePosition().y)) { continue; }
+        //if (!m_bot.Map().isVisible(target.getTilePosition().x, target.getTilePosition().y)) { continue; }
+        if (target.getUnitPtr()->display_type == sc2::Unit::DisplayType::Snapshot) { continue; }
 
         meleeUnitTargets.push_back(target);
     }
@@ -122,11 +123,26 @@ int MeleeManager::getAttackPriority(const Unit & attacker, const Unit & enemyUni
         {
             const auto& enemyUnitInfo = m_bot.Observation()->GetUnitTypeData()[enemyUnit.getType().getAPIUnitType()];
             const auto& bonusDamagesInfo = unitInfo.weapons[0].damage_bonus;
+
+            // only attack a unit you're stronger against if the bonus damage is greater than or equal to 10
+            float maxBonus = 0;
             for (const auto& bonusDamageInfo : bonusDamagesInfo)
             {
-                if (std::find(enemyUnitInfo.attributes.begin(), enemyUnitInfo.attributes.end(), bonusDamageInfo.attribute) != enemyUnitInfo.attributes.end())
+                maxBonus = std::max(bonusDamageInfo.bonus, maxBonus);
+                if (maxBonus >= 10)
                 {
-                    return 15;
+                    break;
+                }
+            }
+
+            if (maxBonus >= 10)
+            {
+                for (const auto& bonusDamageInfo : bonusDamagesInfo)
+                {
+                    if (std::find(enemyUnitInfo.attributes.begin(), enemyUnitInfo.attributes.end(), bonusDamageInfo.attribute) != enemyUnitInfo.attributes.end())
+                    {
+                        return 15;
+                    }
                 }
             }
         }
@@ -134,9 +150,14 @@ int MeleeManager::getAttackPriority(const Unit & attacker, const Unit & enemyUni
         return 10;
     }
 
-    if (enemyUnit.getType().isWorker())
+    if (enemyUnit.getType().isStaticDefense())
     {
         return 9;
+    }
+
+    if (enemyUnit.getType().isWorker())
+    {
+        return 8;
     }
 
     return 1;

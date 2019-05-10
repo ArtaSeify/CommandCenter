@@ -80,6 +80,45 @@ CCRace UnitType::getRace() const
 #endif
 }
 
+bool UnitType::isVariation() const
+{
+    switch (m_type.ToType())
+    {
+        case sc2::UNIT_TYPEID::PROTOSS_WARPPRISMPHASING: return true;
+        case sc2::UNIT_TYPEID::PROTOSS_DISRUPTORPHASED: return true;
+        case sc2::UNIT_TYPEID::PROTOSS_ADEPTPHASESHIFT: return true;
+
+        case sc2::UNIT_TYPEID::TERRAN_SUPPLYDEPOTLOWERED: return true;
+        case sc2::UNIT_TYPEID::TERRAN_BARRACKSFLYING: return true;
+        case sc2::UNIT_TYPEID::TERRAN_COMMANDCENTERFLYING: return true;
+        case sc2::UNIT_TYPEID::TERRAN_FACTORYFLYING: return true;
+        case sc2::UNIT_TYPEID::TERRAN_ORBITALCOMMANDFLYING: return true;
+        case sc2::UNIT_TYPEID::TERRAN_STARPORTFLYING: return true;
+        case sc2::UNIT_TYPEID::TERRAN_SIEGETANKSIEGED: return true;
+        case sc2::UNIT_TYPEID::TERRAN_VIKINGASSAULT: return true;
+        case sc2::UNIT_TYPEID::TERRAN_HELLIONTANK: return true;
+        case sc2::UNIT_TYPEID::TERRAN_WIDOWMINEBURROWED: return true;
+        case sc2::UNIT_TYPEID::TERRAN_LIBERATORAG: return true;
+
+        case sc2::UNIT_TYPEID::ZERG_BANELINGBURROWED: return true;
+        case sc2::UNIT_TYPEID::ZERG_DRONEBURROWED: return true;
+        case sc2::UNIT_TYPEID::ZERG_INFESTORBURROWED: return true;
+        case sc2::UNIT_TYPEID::ZERG_HYDRALISKBURROWED: return true;
+        case sc2::UNIT_TYPEID::ZERG_ROACHBURROWED: return true;
+        case sc2::UNIT_TYPEID::ZERG_SWARMHOSTBURROWEDMP: return true;
+        case sc2::UNIT_TYPEID::ZERG_ZERGLINGBURROWED: return true;
+        case sc2::UNIT_TYPEID::ZERG_QUEENBURROWED: return true;
+        case sc2::UNIT_TYPEID::ZERG_INFESTEDTERRANSEGG: return true;
+        case sc2::UNIT_TYPEID::ZERG_INFESTORTERRAN: return true;
+        case sc2::UNIT_TYPEID::ZERG_BROODLING: return true;
+        case sc2::UNIT_TYPEID::ZERG_BANELINGCOCOON: return true;
+        case sc2::UNIT_TYPEID::ZERG_BROODLORDCOCOON: return true;
+        case sc2::UNIT_TYPEID::ZERG_OVERLORDCOCOON: return true;
+        case sc2::UNIT_TYPEID::ZERG_RAVAGERCOCOON: return true;
+        case sc2::UNIT_TYPEID::ZERG_TRANSPORTOVERLORDCOCOON: return true;
+    }
+}
+
 bool UnitType::isCombatUnit() const
 {
 #ifdef SC2API
@@ -110,6 +149,16 @@ bool UnitType::isCombatUnit() const
 
     return false;
 #endif
+}
+
+bool UnitType::isStaticDefense() const
+{
+    if (isBuilding() && m_bot->Observation()->GetUnitTypeData()[m_type].weapons.size() > 0) 
+    { 
+        return true; 
+    }
+
+    return false;
 }
 
 bool UnitType::isSupplyProvider() const

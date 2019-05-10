@@ -180,8 +180,14 @@ void TechTree::initUnitTypeData()
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_ROACHBURROWED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_ROACH, m_bot)];
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_SWARMHOSTBURROWEDMP, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_SWARMHOSTMP, m_bot)];
     m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_ZERGLINGBURROWED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_ZERGLING, m_bot)];
-    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_QUEENBURROWED, m_bot)] = m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_QUEEN, m_bot)];
-
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_QUEENBURROWED, m_bot)] = { sc2::Race::Zerg, 0, 0, 0, 0, true, false, false, false, false, false, false, 0, 0, { UnitType() }, { UnitType() }, {} };
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_INFESTEDTERRANSEGG, m_bot)] = { sc2::Race::Zerg, 0, 0, 0, 0, true, false, false, false, false, false, false, 0, 0, { UnitType() }, { UnitType() }, {} };
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_INFESTORTERRAN, m_bot)] = { sc2::Race::Zerg, 0, 0, 0, 0, true, false, false, false, false, false, false, 0, 0, { UnitType() }, { UnitType() }, {} };
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_BANELINGCOCOON, m_bot)] = { sc2::Race::Zerg, 0, 0, 0, 0, true, false, false, false, false, false, false, 0, 0, { UnitType() }, { UnitType() }, {} };
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_BROODLORDCOCOON, m_bot)] = { sc2::Race::Zerg, 0, 0, 0, 0, true, false, false, false, false, false, false, 0, 0, { UnitType() }, { UnitType() }, {} };
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_OVERLORDCOCOON, m_bot)] = { sc2::Race::Zerg, 0, 0, 0, 0, true, false, false, false, false, false, false, 0, 0, { UnitType() }, { UnitType() }, {} };
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_RAVAGERCOCOON, m_bot)] = { sc2::Race::Zerg, 0, 0, 0, 0, true, false, false, false, false, false, false, 0, 0, { UnitType() }, { UnitType() }, {} };
+    m_unitTypeData[UnitType(sc2::UNIT_TYPEID::ZERG_TRANSPORTOVERLORDCOCOON, m_bot)] = { sc2::Race::Zerg, 0, 0, 0, 0, true, false, false, false, false, false, false, 0, 0, { UnitType() }, { UnitType() }, {} };
 
     // Set the Mineral / Gas cost of each unit
     for (auto & kv : m_unitTypeData)

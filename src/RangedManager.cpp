@@ -7,7 +7,7 @@ using namespace CC;
 RangedManager::RangedManager(CCBot & bot)
     : MicroManager(bot)
 {
-
+    
 }
 
 void RangedManager::executeMicro(const std::vector<Unit> & targets)
@@ -26,7 +26,8 @@ void RangedManager::assignTargets(const std::vector<Unit> & targets)
         if (!target.isValid()) { continue; }
         if (target.getType().isEgg()) { continue; }
         if (target.getType().isLarva()) { continue; }
-        if (!m_bot.Map().isVisible(target.getTilePosition().x, target.getTilePosition().y)) { continue; }
+        //if (!m_bot.Map().isVisible(target.getTilePosition().x, target.getTilePosition().y)) { continue; }
+        if (target.getUnitPtr()->display_type == sc2::Unit::DisplayType::Snapshot) { continue; }
 
         rangedUnitTargets.push_back(target);
     }
@@ -53,6 +54,16 @@ void RangedManager::assignTargets(const std::vector<Unit> & targets)
                 else
                 {
                     rangedUnit.attackUnit(target);
+                }
+
+                if (rangedUnit.getType().getAPIUnitType() == sc2::UNIT_TYPEID::PROTOSS_VOIDRAY)
+                {
+                    float attackRange = m_bot.Observation()->GetUnitTypeData()[rangedUnit.getType().getAPIUnitType()].weapons[0].range
+                        + rangedUnit.getUnitPtr()->radius + target.getUnitPtr()->radius;
+                    if (Util::Dist(target, rangedUnit) <= attackRange)
+                    {
+                        m_bot.Actions()->UnitCommand(rangedUnit.getUnitPtr(), sc2::ABILITY_ID::EFFECT_VOIDRAYPRISMATICALIGNMENT);
+                    }
                 }
             }
             // if there are no targets
@@ -97,6 +108,13 @@ Unit RangedManager::getTarget(const Unit & rangedUnit, const std::vector<Unit> &
         int priority = getAttackPriority(rangedUnit, targetUnit);
         float distance = Util::Dist(rangedUnit, targetUnit);
 
+        // don't chase units or go out of the way to attack them
+        /*float attackRange = m_bot.Observation()->GetUnitTypeData()[rangedUnit.getType().getAPIUnitType()].weapons[0].range;
+        if (closestTarget.isValid() && distance > (3 / 2) * attackRange)
+        {
+            continue;
+        }*/
+
         // if it's a higher priority, or it's closer, set it
         if (!closestTarget.isValid() || (priority > highPriority) || (priority == highPriority && distance < closestDist))
         {
@@ -117,26 +135,52 @@ int RangedManager::getAttackPriority(const Unit & attacker, const Unit & enemyUn
     if (enemyUnit.getType().isCombatUnit())
     {
         // if our unit is strong against the enemy unit, we want it to attack that target
-        const auto & unitInfo = m_bot.Observation()->GetUnitTypeData()[attacker.getType().getAPIUnitType()];
+        const auto & unitInfo = m_bot.Observation()->GetUnitTypeData()[attacker.getAPIUnitType()];
         if (unitInfo.weapons.size() > 0)
         {
             const auto & enemyUnitInfo = m_bot.Observation()->GetUnitTypeData()[enemyUnit.getType().getAPIUnitType()];
             const auto & bonusDamagesInfo = unitInfo.weapons[0].damage_bonus;
-            for (const auto & bonusDamageInfo : bonusDamagesInfo)
+
+            for (const auto& bonusDamageInfo : bonusDamagesInfo)
             {
                 if (std::find(enemyUnitInfo.attributes.begin(), enemyUnitInfo.attributes.end(), bonusDamageInfo.attribute) != enemyUnitInfo.attributes.end())
                 {
-                    return 15;
+                    float attackRange = m_bot.Observation()->GetUnitTypeData()[attacker.getType().getAPIUnitType()].weapons[0].range 
+                                + attacker.getUnitPtr()->radius + enemyUnit.getUnitPtr()->radius;
+                    float distance = Util::Dist(attacker, enemyUnit);
+
+                    // close enough or need to move a small amount to attack
+                    if (distance <= attackRange + 1)
+                    {
+                        const auto& enemyWeapons = m_bot.Observation()->GetUnitTypeData()[enemyUnit.getAPIUnitType()].weapons;
+                        if (attacker.isFlying() && enemyWeapons.size() > 0 && (enemyWeapons[0].type == sc2::Weapon::TargetType::Air || enemyWeapons[0].type == sc2::Weapon::TargetType::Any))
+                        {
+                            return 15;
+                        }
+                        return 14;
+                    }
                 }
             }
         }
         
-        return 10;
+        // air vs unit that can attack it
+        const auto& enemyWeapons = m_bot.Observation()->GetUnitTypeData()[enemyUnit.getAPIUnitType()].weapons;
+        if (attacker.isFlying() && enemyWeapons.size() > 0 && (enemyWeapons[0].type == sc2::Weapon::TargetType::Air || enemyWeapons[0].type == sc2::Weapon::TargetType::Any))
+        {
+            return 10;
+        }
+
+        return 9;
+    }
+
+    if (enemyUnit.getType().isStaticDefense())
+    {
+        return 8;
     }
 
     if (enemyUnit.getType().isWorker())
     {
-        return 9;
+        return 7;
     }
 
     return 1;

@@ -33,8 +33,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["RoboticsFacility", "1", "Busy"], 
 			"required" : ["RoboticsBay"], 
-			"strong"   : [["Marine"], ["Zergling"], ["Zealot"]], 
-			"weak"   : [["VikingFighter"], ["Corruptor"], ["Immortal"]]
+			"strong"   : [["Marine"], ["Zergling"], ["Zealot", "Sentry", "Stalker", "Adept", "DarkTemplar", "HighTemplar", "Archon"]], 
+			"weak"   : [["VikingFighter"], ["Corruptor"], ["Phoenix", "VoidRay", "Tempest", "Carrier", "Mothership"]]
 		},
 		{
 			"name" : "Baneling", 
@@ -86,9 +86,9 @@
 			"isAddon" : false, 
 			"equivalent" : [], 
 			"whatBuilds" : ["Nexus", "1", "Busy"], 
-			"required" : [], 
-			"strong"   : [[], [], []], 
-			"weak"   : [["VikingFighter"], ["Corruptor"], ["VoidRay"]]
+			"required" : ["FleetBeacon"], 
+			"strong"   : [[], [], ["Sentry", "Adept", "DarkTemplar", "WarpPrism", "Immortal", "Colossus", "Disruptor"]], 
+			"weak"   : [["VikingFighter"], ["Corruptor"], ["Stalker", "Archon", "Observer", "VoidRay", "Tempest", "Carrier"]]
 		},
 		{
 			"name" : "CommandCenter", 
@@ -1383,8 +1383,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["WarpGate", "1", "Busy"], 
 			"required" : [], 
-			"strong"   : [["Marauder"], ["Zergling"], ["Immortal"]], 
-			"weak"   : [["Hellion"], ["Roach"], ["Colossus"]]
+			"strong"   : [["Marauder"], ["Zergling"], ["HighTemplar", "Immortal", "Stalker", "DarkTemplar"]], 
+			"weak"   : [["Hellion"], ["Roach"], ["Sentry", "Adept", "Archon", "Colossus", "VoidRay", "Carrier"]]
 		},
 		{
 			"name" : "Zealot", 
@@ -1410,8 +1410,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["Gateway", "1", "Busy"], 
 			"required" : [], 
-			"strong"   : [["Marauder"], ["Zergling"], ["Immortal"]], 
-			"weak"   : [["Hellion"], ["Roach"], ["Colossus"]]
+			"strong"   : [["Marauder"], ["Zergling"], ["HighTemplar", "Immortal", "Stalker", "DarkTemplar"]], 
+			"weak"   : [["Hellion"], ["Roach"], ["Sentry", "Adept", "Archon", "Colossus", "VoidRay", "Carrier"]]
 		},
 		{
 			"name" : "StalkerWarped", 
@@ -1437,8 +1437,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["WarpGate", "1", "Busy"], 
 			"required" : ["CyberneticsCore"], 
-			"strong"   : [["Reaper"], ["Mutalisk"], ["VoidRay"]], 
-			"weak"   : [["Marauder"], ["Zergling"], ["Immortal"]]
+			"strong"   : [["Reaper"], ["Mutalisk"], ["Sentry", "Adept", "Tempest", "Mothership", "Observer", "WarpPrism"]], 
+			"weak"   : [["Marauder"], ["Zergling"], ["Zealot", "DarkTemplar", "Immortal", "Colossus", "Disruptor"]]
 		},
 		{
 			"name" : "Stalker", 
@@ -1464,8 +1464,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["Gateway", "1", "Busy"], 
 			"required" : ["CyberneticsCore"], 
-			"strong"   : [["Reaper"], ["Mutalisk"], ["VoidRay"]], 
-			"weak"   : [["Marauder"], ["Zergling"], ["Immortal"]]
+			"strong"   : [["Reaper"], ["Mutalisk"], ["Sentry", "Adept", "Tempest", "Mothership", "Observer", "WarpPrism"]], 
+			"weak"   : [["Marauder"], ["Zergling"], ["Zealot", "DarkTemplar", "Immortal", "Colossus", "Disruptor"]]
 		},
 		{
 			"name" : "HighTemplarWarped", 
@@ -1491,8 +1491,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["WarpGate", "1", "Busy"], 
 			"required" : ["TemplarArchive"], 
-			"strong"   : [["Marine"], ["Hydralisk"], ["Sentry"]], 
-			"weak"   : [["Ghost"], ["Roach"], ["Colossus"]]
+			"strong"   : [["Marine"], ["Hydralisk"], ["Observer"]], 
+			"weak"   : [["Ghost"], ["Roach"], ["Zealot", "Adept", "DarkTemplar", "Archon", "Immortal", "Colossus", "Disruptor", "Tempest", "VoidRay"]]
 		},
 		{
 			"name" : "HighTemplar", 
@@ -1518,8 +1518,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["Gateway", "1", "Busy"], 
 			"required" : ["TemplarArchive"], 
-			"strong"   : [["Marine"], ["Hydralisk"], ["Sentry"]], 
-			"weak"   : [["Ghost"], ["Roach"], ["Colossus"]]
+			"strong"   : [["Marine"], ["Hydralisk"], ["Observer"]], 
+			"weak"   : [["Ghost"], ["Roach"], ["Zealot", "Adept", "DarkTemplar", "Archon", "Immortal", "Colossus", "Disruptor", "Tempest", "VoidRay"]]
 		},
 		{
 			"name" : "DarkTemplarWarped", 
@@ -1545,8 +1545,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["WarpGate", "1", "Busy"], 
 			"required" : ["DarkShrine"], 
-			"strong"   : [["SCV"], ["Drone"], ["Probe"]], 
-			"weak"   : [["Raven"], ["Overseer"], ["Observer"]]
+			"strong"   : [["SCV"], ["Drone"], ["Stalker", "HighTemplar", "Immortal"]], 
+			"weak"   : [["Raven"], ["Overseer"], ["Zealot", "Sentry", "Adept", "Archon", "Observer", "Colossus", "Phoenix", "Oracle", "VoidRay", "Carrier", "Mothership"]]
 		},
 		{
 			"name" : "DarkTemplar", 
@@ -1572,8 +1572,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["Gateway", "1", "Busy"], 
 			"required" : ["DarkShrine"], 
-			"strong"   : [["SCV"], ["Drone"], ["Probe"]], 
-			"weak"   : [["Raven"], ["Overseer"], ["Observer"]]
+			"strong"   : [["SCV"], ["Drone"], ["Stalker", "HighTemplar", "Immortal"]], 
+			"weak"   : [["Raven"], ["Overseer"], ["Zealot", "Sentry", "Adept", "Archon", "Observer", "Colossus", "Phoenix", "Oracle", "VoidRay", "Carrier", "Mothership"]]
 		},
 		{
 			"name" : "SentryWarped", 
@@ -1599,8 +1599,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["WarpGate", "1", "Busy"], 
 			"required" : ["CyberneticsCore"], 
-			"strong"   : [[], ["Zergling"], ["Zealot"]], 
-			"weak"   : [["Reaper"], ["Hydralisk"], ["Stalker"]]
+			"strong"   : [[], ["Zergling"], ["Zealot", "DarkTemplar"]], 
+			"weak"   : [["Reaper"], ["Hydralisk"], ["Archon", "Colossus", "Disruptor", "Phoenix", "VoidRay", "Tempest", "Carrier", "Mothership"]]
 		},
 		{
 			"name" : "Sentry", 
@@ -1626,8 +1626,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["Gateway", "1", "Busy"], 
 			"required" : ["CyberneticsCore"], 
-			"strong"   : [[], ["Zergling"], ["Zealot"]], 
-			"weak"   : [["Reaper"], ["Hydralisk"], ["Stalker"]]
+			"strong"   : [[], ["Zergling"], ["Zealot", "DarkTemplar"]], 
+			"weak"   : [["Reaper"], ["Hydralisk"], ["Archon", "Colossus", "Disruptor", "Phoenix", "VoidRay", "Tempest", "Carrier", "Mothership"]]
 		},
 		{
 			"name" : "Phoenix", 
@@ -1653,8 +1653,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["Stargate", "1", "Busy"], 
 			"required" : [], 
-			"strong"   : [["Banshee"], ["Mutalisk"], ["VoidRay"]], 
-			"weak"   : [["Battlecruiser"], ["Corruptor"], ["Carrier"]]
+			"strong"   : [["Banshee"], ["Mutalisk"], ["Sentry", "Adept", "DarkTemplar", "Observer", "WarpPrism", "Immortal", "Colossus", "Disruptor", "Oracle"]], 
+			"weak"   : [["Battlecruiser"], ["Corruptor"], ["Stalker", "Archon", "Carrier"]]
 		},
 		{
 			"name" : "Carrier", 
@@ -1680,8 +1680,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["Stargate", "1", "Busy"], 
 			"required" : ["FleetBeacon"], 
-			"strong"   : [["Thor"], ["Mutalisk"], ["Phoenix"]], 
-			"weak"   : [["VikingFighter"], ["Corruptor"], ["Tempest"]]
+			"strong"   : [["Thor"], ["Mutalisk"], ["Zealot", "Sentry", "Adept", "DarkTemplar", "HighTemplar", "Archon", "Observer", "WarpPrism", "Immortal", "Colossus", "Disruptor", "Phoenix", "Oracle", "Mothership"]], 
+			"weak"   : [["VikingFighter"], ["Corruptor"], ["VoidRay", "Tempest"]]
 		},
 		{
 			"name" : "VoidRay", 
@@ -1707,8 +1707,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["Stargate", "1", "Busy"], 
 			"required" : [], 
-			"strong"   : [["Battlecruiser"], ["Corruptor"], ["Tempest"]], 
-			"weak"   : [["VikingFighter"], ["Mutalisk"], ["Phoenix"]]
+			"strong"   : [["Battlecruiser"], ["Corruptor"], ["Sentry", "Adept", "DarkTemplar", "Observer", "WarpPrism", "Immortal", "Colossus", "Disruptor", "Phoenix", "Tempest", "Carrier", "Mothership"]], 
+			"weak"   : [["VikingFighter"], ["Mutalisk"], ["Stalker"]]
 		},
 		{
 			"name" : "WarpPrism", 
@@ -1735,7 +1735,7 @@
 			"whatBuilds" : ["RoboticsFacility", "1", "Busy"], 
 			"required" : [], 
 			"strong"   : [[], [], []], 
-			"weak"   : [[], [], []]
+			"weak"   : [[], [], ["Stalker", "Archon", "Phoenix", "VoidRay", "Tempest", "Carrier", "Mothership"]]
 		},
 		{
 			"name" : "Observer", 
@@ -1761,8 +1761,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["RoboticsFacility", "1", "Busy"], 
 			"required" : [], 
-			"strong"   : [["Banshee"], ["Roach"], ["DarkTemplar"]], 
-			"weak"   : [["MissileTurret"], ["SporeCrawler"], ["PhotonCannon"]]
+			"strong"   : [["Banshee"], ["Roach"], ["DarkTemplar", "Mothership"]], 
+			"weak"   : [["MissileTurret"], ["SporeCrawler"], ["PhotonCannon", "Observer"]]
 		},
 		{
 			"name" : "Immortal", 
@@ -1788,8 +1788,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["RoboticsFacility", "1", "Busy"], 
 			"required" : [], 
-			"strong"   : [["SiegeTank"], ["Roach"], ["Stalker"]], 
-			"weak"   : [["Marine"], ["Zergling"], ["Zealot"]]
+			"strong"   : [["SiegeTank"], ["Roach"], ["Stalker", "HighTemplar", "Archon"]], 
+			"weak"   : [["Marine"], ["Zergling"], ["Zealot", "DarkTemplar", "Disruptor", "Phoenix", "VoidRay", "Tempest", "Carrier", "Mothership"]]
 		},
 		{
 			"name" : "Probe", 
@@ -1841,7 +1841,9 @@
 			"isAddon" : false, 
 			"equivalent" : [], 
 			"whatBuilds" : ["Carrier", "1", "Busy"], 
-			"required" : []
+			"required" : [], 
+			"strong"   : [[], [], []], 
+			"weak"   : [[], [], []]
 		},
 		{
 			"name" : "Hatchery", 
@@ -2704,8 +2706,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["", "1", "Morphed"], 
 			"required" : [], 
-			"strong"   : [[], ["Mutalisk"], []], 
-			"weak"   : [["Thor"], ["Ultralisk"], ["Immortal"]]
+			"strong"   : [[], ["Mutalisk"], ["Zealot", "Sentry", "Adept", "DarkTemplar", "HighTemplar", "Observer", "WarpPrism", "Phoenix", "Oracle", "VoidRay", "Mothership"]], 
+			"weak"   : [["Thor"], ["Ultralisk"], ["Immortal", "Tempest", "Carrier"]]
 		},
 		{
 			"name" : "NydusCanal", 
@@ -2812,8 +2814,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["WarpGate", "1", "Busy"], 
 			"required" : ["CyberneticsCore"], 
-			"strong"   : [["Marine"], ["Zergling"], ["Zealot"]], 
-			"weak"   : [["Marauder"], ["Roach"], ["Stalker"]]
+			"strong"   : [["Marine"], ["Zergling"], ["Zealot", "DarkTemplar", "HighTemplar"]], 
+			"weak"   : [["Marauder"], ["Roach"], ["Stalker", "Archon", "Colossus", "Disruptor", "Phoenix", "Carrier", "Mothership"]]
 		},
 		{
 			"name" : "Adept", 
@@ -2839,8 +2841,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["Gateway", "1", "Busy"], 
 			"required" : ["CyberneticsCore"], 
-			"strong"   : [["Marine"], ["Zergling"], ["Zealot"]], 
-			"weak"   : [["Marauder"], ["Roach"], ["Stalker"]]
+			"strong"   : [["Marine"], ["Zergling"], ["Zealot", "DarkTemplar", "HighTemplar"]], 
+			"weak"   : [["Marauder"], ["Roach"], ["Stalker", "Archon", "Colossus", "Disruptor", "Phoenix", "Carrier", "Mothership"]]
 		},
 		{
 			"name" : "SwarmHostMP", 
@@ -2893,8 +2895,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["Stargate", "1", "Busy"], 
 			"required" : [], 
-			"strong"   : [["SCV"], ["Drone"], ["Probe"]], 
-			"weak"   : [["VikingFighter"], ["Mutalisk"], ["Phoenix"]]
+			"strong"   : [["SCV"], ["Drone"], ["DarkTemplar"]], 
+			"weak"   : [["VikingFighter"], ["Mutalisk"], ["Stalker", "Archon", "Phoenix", "VoidRay", "Tempest", "Carrier"]]
 		},
 		{
 			"name" : "Tempest", 
@@ -2920,8 +2922,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["Stargate", "1", "Busy"], 
 			"required" : ["FleetBeacon"], 
-			"strong"   : [["Liberator"], ["BroodLord"], ["Colossus"]], 
-			"weak"   : [["VikingFighter"], ["Corruptor"], ["VoidRay"]]
+			"strong"   : [["Liberator"], ["BroodLord"], ["Sentry", "HighTemplar", "Archon", "Observer", "WarpPrism", "Immortal", "Colossus", "Disruptor", "Oracle", "Carrier", "Mothership"]], 
+			"weak"   : [["VikingFighter"], ["Corruptor"], ["Stalker", "VoidRay", "Mothership"]]
 		},
 		{
 			"name" : "WidowMine", 
@@ -3109,8 +3111,8 @@
 			"equivalent" : [], 
 			"whatBuilds" : ["RoboticsFacility", "1", "Busy"], 
 			"required" : ["RoboticsBay"], 
-			"strong"   : [["Marauder"], ["Hydralisk"], ["Probe"]], 
-			"weak"   : [["Thor"], ["Ultralisk"], ["Immortal"]]
+			"strong"   : [["Marauder"], ["Hydralisk"], ["Sentry", "Stalker", "Adept", "HighTemplar", "Immortal"]], 
+			"weak"   : [["Thor"], ["Ultralisk"], ["Phoenix", "VoidRay", "Tempest", "Carrier", "Mothership"]]
 		},
 		{
 			"name" : "LurkerDen", 

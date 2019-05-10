@@ -451,7 +451,7 @@ bool ProductionManager::meetsReservedResources(const MetaType & type)
     int minerals = m_bot.Data(type).mineralCost;
     int gas = m_bot.Data(type).gasCost;
 
-    return (m_bot.Data(type).mineralCost <= getFreeMinerals()) && (m_bot.Data(type).gasCost <= getFreeGas());
+    return (m_bot.Data(type).mineralCost <= getFreeMinerals()) && (m_bot.Data(type).gasCost <= getFreeGas()) && (m_bot.Data(type).supplyCost <= (m_bot.GetMaxSupply() - m_bot.GetCurrentSupply()));
 }
 
 void ProductionManager::drawProductionInformation()

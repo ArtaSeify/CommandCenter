@@ -46,5 +46,6 @@ namespace CC
         bool                isBeingBuilt(UnitType type);
 
         std::vector<UnitType> buildingsQueued() const;
+        std::vector<UnitType> getUnassignedQueued() const;
     };
 }

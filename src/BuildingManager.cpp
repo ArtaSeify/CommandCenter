@@ -193,6 +193,7 @@ void BuildingManager::constructAssignedBuildings()
             {
                 // TODO: in here is where we would check to see if the builder died on the way
                 //       or if things are taking too long, or the build location is no longer valid
+                b.builderUnit.build(b.type, b.finalPosition);
             }
             else
             {
@@ -321,6 +322,38 @@ void BuildingManager::checkForCompletedBuildings()
                 m_bot.Workers().finishedWithWorker(b.builderUnit);
             }
 
+            // set waypoint in between our furthest base and the next expansion spot
+            if (b.buildingUnit.getType().isBuilding())
+            {
+                
+                float maxDist = std::numeric_limits<float>::min();
+                CCPosition startingBase = m_bot.Bases().getPlayerStartingBaseLocation(Players::Self)->getPosition();
+                CCPosition furthestBase(startingBase);
+                for (auto& base : m_bot.Bases().getOccupiedBaseLocations(Players::Self))
+                {
+                    float dist = Util::Dist(base->getPosition(), startingBase);
+                    if (dist > maxDist)
+                    {
+                        maxDist = dist;
+                        furthestBase = base->getPosition();
+                    }
+                }
+
+                CCPosition nextExpPos = Util::GetPosition(m_bot.Bases().getNextExpansion(Players::Self));
+                CCPosition pos(furthestBase);
+                pos.x += (nextExpPos.x - furthestBase.x) / 2;
+                pos.y += (nextExpPos.y - furthestBase.y) / 2;
+
+                // if the spot in between is away from the enemy, just move to the base location
+                if (Util::Dist(pos, m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition())
+                > Util::Dist(furthestBase, m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition()))
+                {
+                    pos = furthestBase;
+                }
+
+                m_bot.Actions()->UnitCommand(b.buildingUnit.getUnitPtr(), sc2::ABILITY_ID::RALLY_BUILDING, pos);
+            }
+
             // remove this unit from the under construction vector
             toRemove.push_back(b);
         }
@@ -426,6 +459,21 @@ std::vector<UnitType> BuildingManager::buildingsQueued() const
     for (const auto & b : m_buildings)
     {
         if (b.status == BuildingStatus::Unassigned || b.status == BuildingStatus::Assigned)
+        {
+            buildingsQueued.push_back(b.type);
+        }
+    }
+
+    return buildingsQueued;
+}
+
+std::vector<UnitType> BuildingManager::getUnassignedQueued() const
+{
+    std::vector<UnitType> buildingsQueued;
+
+    for (const auto& b : m_buildings)
+    {
+        if (b.status == BuildingStatus::Unassigned)
         {
             buildingsQueued.push_back(b.type);
         }

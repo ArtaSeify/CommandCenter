@@ -38,7 +38,9 @@ namespace CC
 
         bool isValid() const;
         bool isBuilding() const;
+        bool isVariation() const;
         bool isCombatUnit() const;
+        bool isStaticDefense() const;
         bool isSupplyProvider() const;
         bool isResourceDepot() const;
         bool isRefinery() const;
