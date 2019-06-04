@@ -116,6 +116,8 @@ bool UnitType::isVariation() const
         case sc2::UNIT_TYPEID::ZERG_OVERLORDCOCOON: return true;
         case sc2::UNIT_TYPEID::ZERG_RAVAGERCOCOON: return true;
         case sc2::UNIT_TYPEID::ZERG_TRANSPORTOVERLORDCOCOON: return true;
+
+        default: return false;
     }
 }
 

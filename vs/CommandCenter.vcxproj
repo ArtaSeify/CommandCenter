@@ -165,8 +165,8 @@
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>C:\School Work\s2client-api\build\bin;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\School Work\s2client-api\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\School Work\s2client-api\build\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\School Work\s2client-api\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LibraryPath>C:\Libraries\BWAPI_420\lib;$(LibraryPath)</LibraryPath>
@@ -175,8 +175,8 @@
     <OutDir>$(ProjectDir)/../bin/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>C:\School Work\s2client-api\build\bin;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\School Work\s2client-api\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\School Work\s2client-api\build\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\School Work\s2client-api\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LibraryPath>C:\Libraries\BWAPI_420\lib;$(LibraryPath)</LibraryPath>
@@ -198,7 +198,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <AdditionalOptions>-DNOMINMAX -DSC2API %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-DNOMINMAX -DSC2API /DHAVE_SNPRINTF %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4099; 4996</DisableSpecificWarnings>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion)_SC2API.pdb</ProgramDataBaseFileName>
@@ -300,7 +300,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalOptions>-DNOMINMAX -DSC2API %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-DNOMINMAX -DSC2API /DHAVE_SNPRINTF %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
