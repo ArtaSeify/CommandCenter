@@ -1,0 +1,8 @@
+{
+      "SearchType"        : [ "IntegralMCTS" ],
+      "SearchParameters"  : { "ExplorationConstant" : 1.25, "UseMax" : true },
+      "ChangingRoot"      : { "Active": true, "Simulations": 2000, "Reset": false },
+      "RelevantActions"   : ["Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker", "Zealot", "Colossus", "FleetBeacon", "TwilightCouncil", "Stargate", "TemplarArchive", "DarkShrine", "RoboticsBay", "RoboticsFacility", "Zealot", "DarkTemplar", "Carrier", "VoidRay", "Immortal", "Adept", "Tempest", "Mothership"], 
+      "MaxActions"        : [ ["CyberneticsCore", 1], ["FleetBeacon", 1], ["TwilightCouncil", 1], ["TemplarArchive", 1], ["DarkShrine", 1], ["RoboticsBay", 1] ],
+      "AlwaysMakeWorkers" : false
+}

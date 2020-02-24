@@ -27,6 +27,88 @@ BOSSManager::BOSSManager(CCBot & bot, BuildingManager & buildingManager)
     // Initialize all the BOSS internal data
     BOSS::Init("../bin/SC2Data.json");
     m_params = BOSS::CombatSearchParameters();
+    initializeParameters();
+}
+
+void BOSSManager::initializeParameters()
+{
+    std::ifstream file("../bin/BOSSParams.json");
+    json exp;
+    file >> exp;
+
+    BOT_ASSERT(exp.count("RelevantActions") && exp["RelevantActions"].is_array(), "RelevantActions must be included as an array");
+
+    const json& relevantActions = exp["RelevantActions"];
+    BOSS::ActionSetAbilities relevantActionSet;
+    for (size_t i(0); i < relevantActions.size(); ++i)
+    {
+        BOT_ASSERT(relevantActions[i].is_string(), "RelvantActions element must be action type string");
+        std::string element = relevantActions[i];
+        BOT_ASSERT(BOSS::ActionTypes::TypeExists(relevantActions[i]), "Action Type doesn't exist: %s", element.c_str());
+
+        relevantActionSet.add(BOSS::ActionTypes::GetActionType(element));
+    }
+    m_params.setRelevantActions(relevantActionSet);
+
+    if (exp.count("AlwaysMakeWorkers"))
+    {
+        BOT_ASSERT(exp["AlwaysMakeWorkers"].is_boolean(), "AlwaysMakeWorkers should be a bool");
+
+        m_params.setAlwaysMakeWorkers(exp["AlwaysMakeWorkers"]);
+    }
+
+    if (exp.count("MaxActions"))
+    {
+        const json& maxActions = exp["MaxActions"];
+        BOT_ASSERT(maxActions.is_array(), "MaxActions is not an array");
+
+        for (size_t i(0); i < maxActions.size(); ++i)
+        {
+            BOT_ASSERT(maxActions[i].is_array(), "MaxActions element must be array of size 2");
+
+            BOT_ASSERT(maxActions[i].size() == 2 && maxActions[i][0u].is_string() && maxActions[i][1u].is_number_integer(), "MaxActions element must be [\"Action\", Count]");
+
+            const std::string& typeName = maxActions[i][0u];
+
+            BOT_ASSERT(BOSS::ActionTypes::TypeExists(typeName), "Action Type doesn't exist: %s", typeName.c_str());
+
+            m_params.setMaxActions(BOSS::ActionTypes::GetActionType(typeName), maxActions[i][1]);
+        }
+    }
+
+    const std::string& searchType = exp["SearchType"][0].get<std::string>();
+    if (searchType == "IntegralMCTS")
+    {
+        auto& searchParameters = exp["SearchParameters"];
+        BOT_ASSERT(searchParameters.count("ExplorationConstant") && searchParameters["ExplorationConstant"].is_number_float(),
+            "SearchParameters must include a float ExplorationConstant");
+        m_params.setExplorationValue(searchParameters["ExplorationConstant"]);
+
+        BOT_ASSERT(searchParameters.count("UseMax") && searchParameters["UseMax"].is_boolean(),
+            "SearchParameters must include a bool UseMax");
+        m_params.setUseMaxValue(searchParameters["UseMax"]);
+    }
+
+    if (exp.count("ChangingRoot"))
+    {
+        //BOSS_ASSERT(exp["ChangingRoot"].is_array() && exp["ChangingRoot"].size() > 0, "ChangingRoot must be an array");
+        auto& params = exp["ChangingRoot"];
+        BOT_ASSERT(params.count("Active") && params["Active"].is_boolean(), "Must have a boolean 'Active' member inside ChangingRoot");
+        BOT_ASSERT(params.count("Simulations") && params["Simulations"].is_number_integer(), "Must have an integer 'Simulations' member inside of SimulationsPerStep");
+        if (params.count("Reset"))
+        {
+            BOT_ASSERT(params["Reset"].is_boolean(), "Reset value inside of ChangingRoot must be a boolean");
+            m_params.setChangingRootReset(params["Reset"]);
+        }
+        m_params.setChangingRoot(params["Active"]);
+        m_params.setSimulationsPerStep(params["Simulations"]);
+
+        std::cout << m_params.getChangingRoot() << std::endl;
+        std::cout << m_params.getSimulationsPerStep() << std::endl;
+    }
+
+    // time limit of the search
+    m_params.setSearchTimeLimit(10000000);
 }
 
 void BOSSManager::setBuildOrder(const BuildOrder& buildOrder)
@@ -42,56 +124,6 @@ void BOSSManager::setBuildOrder(const BuildOrder& buildOrder)
 void BOSSManager::onStart()
 {
     setBuildOrder(m_bot.Strategy().getOpeningBookBuildOrder());
-
-    std::vector<std::string> relevantActionsNames =
-    { "ChronoBoost", "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker",
-        "Zealot", "Colossus", "FleetBeacon", "TwilightCouncil", "Stargate", "TemplarArchive",
-        "DarkShrine", "RoboticsBay", "RoboticsFacility", "DarkTemplar", "Carrier", "VoidRay", "Immortal", "Probe", "Adept", "Tempest" };
-    //, "WarpGateResearch" 
-    /*std::vector<std::string> relevantActionsNames =
-    { "ChronoBoost", "Probe", "Pylon", "Nexus", "Assimilator", "Gateway", "CyberneticsCore", "Stalker",
-        "Zealot", "Forge", "FleetBeacon", "Stargate", "Carrier", "VoidRay", "Adept", "Tempest" };*/
-    BOSS::ActionSetAbilities relevantActions;
-    for (std::string & actionName : relevantActionsNames)
-    {
-        relevantActions.add(BOSS::ActionTypes::GetActionType(actionName));
-    }
-
-    // how many times each action is allowed
-    std::vector<std::pair<BOSS::ActionType, int>> maxActions;
-    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("CyberneticsCore"), 1));
-    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("FleetBeacon"), 1));
-    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("TwilightCouncil"), 1));
-    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("TemplarArchive"), 1));
-    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("DarkShrine"), 1));
-    maxActions.push_back(std::make_pair(BOSS::ActionTypes::GetActionType("RoboticsBay"), 1));
-
-    bool sortActions = false;
-
-    // set the maxActions
-    for (auto & maxActionPair : maxActions)
-    {
-        m_params.setMaxActions(maxActionPair.first, maxActionPair.second);
-    }
-
-    // set relevant actions
-    m_params.setRelevantActions(relevantActions);
-
-    // heuristic used in search
-    m_params.setAlwaysMakeWorkers(true);
-
-    // time limit of the search
-    m_params.setSearchTimeLimit(10000000);
-
-    // sort moves as we search
-    m_params.setSortActions(sortActions);
-
-    //int m_threadsForExperiment;
-    m_params.setExplorationValue(BOSS::FracType(0.15));
-    m_params.setChangingRoot(true);
-    m_params.setUseMaxValue(true);
-    m_params.setNumberOfSimulations(10000000);
-    m_params.setSimulationsPerStep(1000);
 }
 
 void BOSSManager::onFrame()
@@ -501,7 +533,7 @@ void BOSSManager::threadSearch()
 {
     while (m_searchState == SearchState::Searching)
     {
-        m_searcher = std::unique_ptr<BOSS::CombatSearch>(new BOSS::CombatSearch_IntegralMCTS(m_params));        
+        m_searcher = std::unique_ptr<BOSS::CombatSearch>(new BOSS::CombatSearch_IntegralMCTS(m_params));
         m_searcher->search();
         m_searchResults.push_back(m_searcher->getResults());
     }

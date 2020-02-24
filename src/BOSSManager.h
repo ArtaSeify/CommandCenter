@@ -61,6 +61,8 @@ namespace CC
         const static int frameBuildOrderUse = frameLimit / 2;
         const static int frameLimitFastReaction = frameBuildOrderUse / 2;
 
+        void initializeParameters();
+
         void setBuildOrder(const BuildOrder& buildOrder);
         void printDebugInfo() const;
 
