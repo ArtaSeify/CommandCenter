@@ -20,6 +20,8 @@ bin/*.ilk
 bin/TechTree.json
 bin/*.lib
 bin/*.bsc
+bin/*.iobj
+bin/*.ipdb
 
 *.tlog
 *.obj
