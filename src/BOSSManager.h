@@ -13,7 +13,6 @@
 #include "CombatSearchParameters.h"
 #include "CombatSearch_Integral.h"
 #include "CombatSearch_IntegralMCTS.h"
-#include "NMCS.h"
 
 #include <atomic>
 

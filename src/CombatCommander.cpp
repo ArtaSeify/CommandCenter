@@ -89,8 +89,9 @@ void CombatCommander::updateIdleSquad()
     pos.y += (nextExpPos.y - furthestBase.y) / 2;
 
     // if the spot in between is away from the enemy, just move to the base location
-    if (Util::Dist(pos, m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition())
-                > Util::Dist(furthestBase, m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition()))
+    if (m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy) != nullptr &&
+            Util::Dist(pos, m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition())
+            > Util::Dist(furthestBase, m_bot.Bases().getPlayerStartingBaseLocation(Players::Enemy)->getPosition()))
     {
         pos = furthestBase;
     }
